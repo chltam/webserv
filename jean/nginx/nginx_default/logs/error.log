@@ -1,0 +1,5 @@
+2023/06/30 13:39:24 [emerg] 59117#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2023/06/30 13:39:35 [emerg] 59134#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2023/06/30 13:41:42 [emerg] 59609#0: bind() to 0.0.0.0:80 failed (13: Permission denied)
+2023/06/30 13:42:19 [emerg] 59692#0: bind() to 0.0.0.80:80 failed (99: Cannot assign requested address)
+2023/06/30 13:42:43 [error] 59724#0: *1 open() "/nfs/homes/jisserst/nginx/html/favicon.ico" failed (2: No such file or directory), client: 127.0.0.1, server: localhost, request: "GET /favicon.ico HTTP/1.1", host: "localhost:8080", referrer: "http://localhost:8080/"
