@@ -16,6 +16,13 @@ Server::Server(int domain, int service, int protocol, int port, u_long interface
         m_data[i].m_sock = socket(domain,service,protocol);
         test_connection(m_data[i].m_sock);
 
+        // Enable SO_REUSEADDR option, this solves the annoying reuse issue when a server hangs on a port
+        int optval = 1;
+        if (setsockopt(m_data[i].m_sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) < 0) {
+            std::cerr << "Failed to set SO_REUSEADDR option." << std::endl;
+        }
+
+
         //establish network connection
         m_data[i].m_connection = bind(m_data[i].m_sock,(struct sockaddr *)&m_data[i].m_address,m_data[i].m_adressLen);
         test_connection(m_data[i].m_connection);
