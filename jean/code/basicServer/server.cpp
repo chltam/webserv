@@ -26,46 +26,6 @@ Server::Server(int domain, int service, int protocol, int port, u_long interface
 
     }
 
-
-
-    // //define address structure
-    // m_address.sin_family = domain;
-    // m_address.sin_port = htons(port);
-    // m_address.sin_addr.s_addr = htonl(interface);
-    // m_adressLen = sizeof( m_address );
-
-    // //establish socket
-    // m_sock = socket(domain,service,protocol);
-    // test_connection(m_sock);
-
-    // //establish network connection
-    // m_connection = bind(m_sock,(struct sockaddr *)&m_address,m_adressLen);
-    // test_connection(m_connection);
-
-    // m_backlog = backlog;
-
-    // bzero(m_buffer,sizeof(m_buffer));
-
-
-
-
-    //     //define address structure
-    // m_address2.sin_family = domain;
-    // m_address2.sin_port = htons(8081);
-    // m_address2.sin_addr.s_addr = htonl(interface);
-    // m_adressLen2 = sizeof( m_address2 );
-
-    // //establish socket
-    // m_sock2 = socket(domain,service,protocol);
-    // test_connection(m_sock2);
-
-    // //establish network connection
-    // m_connection2 = bind(m_sock2,(struct sockaddr *)&m_address2,m_adressLen2);
-    // test_connection(m_connection2);
-
-    // m_backlog2 = backlog;
-
-    // bzero(m_buffer2,sizeof(m_buffer2));
 }
 
 void Server::test_connection(int item)
@@ -87,55 +47,61 @@ void Server::startListening( void )
         test_connection(m_data[i].m_listening);
     }
 
-
-    // m_listening2 = listen(m_sock2, m_backlog2);
-    // test_connection(m_listening2);
+    std::vector<pollfd> fds(m_data.size());
+    std::transform(m_data.begin(), m_data.end(), fds.begin(), [](const Data& d) {
+        return pollfd{d.m_sock, POLLIN, 0};
+    });
 
     while (true)
     {
         std::cout << "========= WAITING ========" << std::endl;
-        accepter();
-        handle();
-        respond();
+        int result = poll(fds.data(), fds.size(), 1000);
+        std::cout << "right after poll()" << std::endl;
+
+        if (result < 0) {
+            perror("poll() failed");
+            exit(EXIT_FAILURE);
+        }
+        std::cerr << "RESULT = " << result << std::endl;
+        for (int i = 0; i < fds.size(); i++)
+        {
+            if (fds[i].revents & POLLIN)
+            {
+                std::cout << "Found proper fd at: " << i << std::endl;
+                accepter(i);
+                handle(i);
+                respond(i);
+            }
+        }
+
         std::cout << "======== DONE =====" << std::endl;
     }
 }
 
 
-void Server::accepter()
+void Server::accepter(int index)
 {
 
-    for (int i = 0; i < m_data.size(); i++)
-    {
-         std::cout << "accepting: " << i << std::endl;
-         m_data[i].m_newSocket = accept( m_data[i].m_sock,(struct sockaddr *)& m_data[i].m_address,(socklen_t *)& m_data[i].m_adressLen);
-         read( m_data[i].m_newSocket,  m_data[i].m_buffer, BUFFER_SIZE );
+    m_data[index].m_newSocket = accept(m_data[index].m_sock, (struct sockaddr *)&m_data[index].m_address, (socklen_t *)&m_data[index].m_adressLen);
+    read( m_data[index].m_newSocket,  m_data[index].m_buffer, BUFFER_SIZE );
+
+}
+
+void Server::respond(int index)
+{
+    if(index){
+        char l[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n<!DOCTYPE html>\n<html>\n<head>\n<title>Example Page</title>\n</head>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>";
+        write(m_data[index].m_newSocket,l,sizeof(l));
     }
+    else
+        write(m_data[index].m_newSocket,"wtf\n",4);
 
+    close(m_data[index].m_newSocket);
 
-    // m_newSocket = accept(m_sock,(struct sockaddr *)&m_address,(socklen_t *)&m_adressLen);
-    // read( m_newSocket, m_buffer, BUFFER_SIZE );
-
-    // m_newSocket2 = accept(m_sock2,(struct sockaddr *)&m_address2,(socklen_t *)&m_adressLen2);
-    // read( m_newSocket2, m_buffer2, BUFFER_SIZE );
 }
 
-void Server::respond()
+void Server::handle(int index)
 {
-    write(m_data[0].m_newSocket,"wowowowoowow\n",13);
-    close(m_data[0].m_newSocket);
+    std::cout << m_data[index].m_buffer << std::endl;
 
-    write(m_data[1].m_newSocket,"help\n",5);
-    close(m_data[1].m_newSocket);
-}
-
-void Server::handle()
-{
-    //handler
-    for (int i = 0; i < m_data.size(); i++)
-        std::cout << m_data[i].m_buffer << std::endl;
-
-
-
-    // std::cout << m_buffer2 << std::endl;
 }
