@@ -11,7 +11,10 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <poll.h>
+
 #include <vector>
+#include <algorithm>
 
 #define BUFFER_SIZE 1024
 
@@ -62,8 +65,8 @@ private:
 
     void test_connection(int);
 
-    void accepter();
-    void handle();
-    void respond();
+    void accepter(int index);
+    void handle(int index);
+    void respond(int index);
 
 };
