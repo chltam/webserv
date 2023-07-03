@@ -1,16 +1,17 @@
 #include "server.hpp"
+#include "RequestParser.hpp"
 
 Server::Server(int domain, int service, int protocol, int port, u_long interface, int backlog)
 {
     m_data.emplace_back(Data());
     m_data.emplace_back(Data());
 
-    for (int i = 0; i < m_data.size(); i++)
+    for (int i = 0; i < (int)m_data.size(); i++)
     {
         m_data[i].m_address.sin_family = domain;
         m_data[i].m_address.sin_port = htons(port++);
         m_data[i].m_address.sin_addr.s_addr = htonl(interface);
-        m_data[i].m_adressLen = sizeof( m_address );
+        m_data[i].m_adressLen = sizeof( m_data[i].m_address );
 
         //establish socket
         m_data[i].m_sock = socket(domain,service,protocol);
@@ -29,7 +30,6 @@ Server::Server(int domain, int service, int protocol, int port, u_long interface
         m_data[i].m_backlog = backlog;
 
         bzero(m_data[i].m_buffer,sizeof(m_data[i].m_buffer));
-
     }
 
 }
@@ -42,12 +42,10 @@ void Server::test_connection(int item)
     }
 }
 
-
-
 void Server::startListening( void )
 {
 
-    for (int i = 0; i < m_data.size(); i++)
+    for (int i = 0; i < (int)m_data.size(); i++)
     {
         m_data[i].m_listening = listen(m_data[i].m_sock, m_data[i].m_backlog);
         test_connection(m_data[i].m_listening);
@@ -69,7 +67,7 @@ void Server::startListening( void )
             exit(EXIT_FAILURE);
         }
         std::cerr << "RESULT = " << result << std::endl;
-        for (int i = 0; i < fds.size(); i++)
+        for (int i = 0; i < (int)fds.size(); i++)
         {
             if (fds[i].revents & POLLIN)
             {
@@ -79,7 +77,6 @@ void Server::startListening( void )
                 respond(i);
             }
         }
-
         std::cout << "======== DONE =====" << std::endl;
     }
 }
@@ -94,7 +91,7 @@ void Server::accepter(int index)
 
 void Server::respond(int index)
 {
-    if(index){
+    if (index){
         char l[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n<!DOCTYPE html>\n<html>\n<head>\n<title>Example Page</title>\n</head>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>";
         write(m_data[index].m_newSocket,l,sizeof(l));
     }
@@ -102,48 +99,14 @@ void Server::respond(int index)
         write(m_data[index].m_newSocket,"wtf\n",4);
 
     close(m_data[index].m_newSocket);
-
 }
 
 void Server::handle(int index)
 {
+    RequestParser parser( m_data[index].m_buffer, m_data[index].m_newSocket );
+    parser.tokenizeRequest();
+
     std::cout << m_data[index].m_buffer << std::endl;
 
-    // split the request line 
-    std::istringstream iss(m_data[index].m_buffer); 
-    std::vector<std::string> tokens;
-    std::string temp;
-    std::stringstream buffer;
-
-    while (std::getline(iss, temp, ' ')) {
-        tokens.push_back(temp);
-    }
-
-    if (tokens[0] == "GET") {
-
-        std::cout << "GET received" << std::endl;
-
-        std::cout << tokens[1] << std::endl;
-        std::ifstream file("." + tokens[1]);
-
-        if (file.is_open()) { 
-            
-            buffer << file.rdbuf();
-        } else {
-            std::cout << "Unable to open file\n";
-        }
-        file.close();
-
-        std::string buffStr = buffer.str();
-        std::cout << buffStr << std::endl;
-        std::string header("HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n");
-        std::string full(header + buffStr);
-        // write(m_data[index].m_newSocket,l,sizeof(l));
-        write(m_data[index].m_newSocket, (full.c_str()) ,full.length());
-    }
-    else if (tokens[0] == "POST") {
-
-
-        std::cout << "POST received" << std::endl;
-    }
+    
 }

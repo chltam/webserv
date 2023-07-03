@@ -43,25 +43,25 @@ public:
 
 private:
 
-    int m_sock;
-    struct sockaddr_in m_address;
-    int m_adressLen;
-    int m_connection;
-    int m_backlog;
-    int m_listening;
+    // int m_sock;
+    // struct sockaddr_in m_address;
+    // int m_adressLen;
+    // int m_connection;
+    // int m_backlog;
+    // int m_listening;
 
-    int m_newSocket;
-    char m_buffer[BUFFER_SIZE];
+    // int m_newSocket;
+    // char m_buffer[BUFFER_SIZE];
 
-    int m_sock2;
-    struct sockaddr_in m_address2;
-    int m_adressLen2;
-    int m_connection2;
-    int m_backlog2;
-    int m_listening2;
+    // int m_sock2;
+    // struct sockaddr_in m_address2;
+    // int m_adressLen2;
+    // int m_connection2;
+    // int m_backlog2;
+    // int m_listening2;
 
-    int m_newSocket2;
-    char m_buffer2[BUFFER_SIZE];
+    // int m_newSocket2;
+    // char m_buffer2[BUFFER_SIZE];
 
 
     void test_connection(int);
