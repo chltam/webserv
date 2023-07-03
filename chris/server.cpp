@@ -61,7 +61,7 @@ int Server::startListening( void ) {
 
         acceptConnection( _newSocket );
 
-        char buffer[BUFFER_SIZE] = {0};
+        char buffer[BUFFER_SIZE] = { 0 };
         readBytes = read( _newSocket, buffer, BUFFER_SIZE );
         if ( readBytes < 0) {
 
