@@ -14,21 +14,13 @@ class RequestParser {
 
         RequestParser( std::string buffer, int socket );
         void tokenizeRequest( void );
+        // std::vector<std::pair<std::string, std::string>> getReqInfo( void );
 
     private:
 
         std::string _buffer;
         int _socket;
 
-        template <typename Key, typename Value>
-        struct Node {
-            Key key;
-            Value value;
-            Node<Key, Value>* next;
-
-            Node( Key key, Value value, Node<Key, Value>* next = nullptr )
-                : key(key), value(value), next(next) {}
-        };
-
+        std::vector<std::pair<std::string, std::string>> _reqPairs;
 
 };

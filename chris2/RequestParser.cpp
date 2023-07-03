@@ -8,17 +8,50 @@ RequestParser::RequestParser( std::string buffer, int socket ) {
 
 void RequestParser::tokenizeRequest( void ) {
 
-    // tokenize the request line 
-    std::istringstream iss( _buffer ); 
-    std::vector<std::string> tokens;
-    std::string temp;
+    // split whole request into lines 
+    std::istringstream line_iss( _buffer ); 
+    std::vector<std::string> lines;
+    std::string tmp_line;
     std::stringstream buffer;
 
-    while (std::getline(iss, temp, ' ')) {
-        tokens.push_back(temp);
+    while ( std::getline( line_iss, tmp_line, '\n' )) {
+        lines.push_back( tmp_line );
     }
 
-    if (tokens[0] == "GET") {
+    std::vector<std::string>::const_iterator it = lines.begin();
+    std::istringstream token_iss( *it );
+    it++;
+    std::vector<std::string> tokens;
+    std::string tmp_token;    
+
+    // handle first request line
+    while ( std::getline( token_iss, tmp_token, ' ' )) {
+        tokens.push_back( tmp_token );
+    }
+    _reqPairs.push_back(std::make_pair("request type", tokens[0]));
+    _reqPairs.push_back(std::make_pair("path", tokens[1]));
+
+    // for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _reqPairs.begin(); it != _reqPairs.end(); ++it) {
+    //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
+    // }
+
+    while ( it != lines.end() ) {
+        std::istringstream token_iss( *it );
+        while ( std::getline( token_iss, tmp_token, ' ' )) {
+            tokens.push_back( tmp_token );
+        }
+        for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
+            std::cout << "TOKEN: " << *it << std::endl;
+        }
+        _reqPairs.push_back(std::make_pair( tokens[0], tokens[1]));
+        it++;
+    }
+
+    // for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _reqPairs.begin(); it != _reqPairs.end(); ++it) {
+    //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
+    // }
+
+ /*    if (tokens[0] == "GET") {
 
         std::cout << "GET received" << std::endl;
 
@@ -45,5 +78,5 @@ void RequestParser::tokenizeRequest( void ) {
 
 
         std::cout << "POST received" << std::endl;
-    }
+    } */
 }

@@ -81,7 +81,6 @@ void Server::startListening( void )
     }
 }
 
-
 void Server::accepter(int index)
 {
 
@@ -108,5 +107,4 @@ void Server::handle(int index)
 
     std::cout << m_data[index].m_buffer << std::endl;
 
-    
 }
