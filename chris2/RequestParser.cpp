@@ -1,9 +1,8 @@
 #include "RequestParser.hpp"
 
-RequestParser::RequestParser( std::string buffer, int socket ) {
+RequestParser::RequestParser( std::string buffer ) {
 
     _buffer = buffer;
-    _socket = socket;
 };
 
 void RequestParser::tokenizeRequest( void ) {
@@ -18,6 +17,7 @@ void RequestParser::tokenizeRequest( void ) {
         lines.push_back( tmp_line );
     }
 
+    // get key-value pairs from lines
     std::vector<std::string>::const_iterator it = lines.begin();
     std::istringstream token_iss( *it );
     it++;
@@ -28,28 +28,35 @@ void RequestParser::tokenizeRequest( void ) {
     while ( std::getline( token_iss, tmp_token, ' ' )) {
         tokens.push_back( tmp_token );
     }
-    _reqPairs.push_back(std::make_pair("request type", tokens[0]));
-    _reqPairs.push_back(std::make_pair("path", tokens[1]));
+    _headerPairs.push_back(std::make_pair("request type", tokens[0]));
+    _headerPairs.push_back(std::make_pair("path", tokens[1]));
+    tokens.clear();
 
-    // for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _reqPairs.begin(); it != _reqPairs.end(); ++it) {
-    //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
-    // }
-
+    // handle remaining lines
     while ( it != lines.end() ) {
-        std::istringstream token_iss( *it );
-        while ( std::getline( token_iss, tmp_token, ' ' )) {
-            tokens.push_back( tmp_token );
+
+        // after the header, save the body
+        if (it->empty()) {
+            ++it;  // skip the empty line
+            while (it != lines.end()) {
+                _body += *it + '\n';
+                ++it;
+            }
+            break; // we are done
         }
-        for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it) {
-            std::cout << "TOKEN: " << *it << std::endl;
+        // save the header info
+        size_t split_position = it->find(": ");
+        if (split_position != std::string::npos) {
+            std::string key = it->substr(0, split_position);
+            std::string value = it->substr(split_position + 2); // +2 to skip over ': '
+            _headerPairs.push_back(std::make_pair(key, value));
         }
-        _reqPairs.push_back(std::make_pair( tokens[0], tokens[1]));
+        tokens.clear();
         it++;
     }
 
-    // for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _reqPairs.begin(); it != _reqPairs.end(); ++it) {
-    //     std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
-    // }
+    this->printHeaderPairs();
+    this->printBody();
 
  /*    if (tokens[0] == "GET") {
 
@@ -80,3 +87,25 @@ void RequestParser::tokenizeRequest( void ) {
         std::cout << "POST received" << std::endl;
     } */
 }
+
+void RequestParser::printHeaderPairs( void ) {
+
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _headerPairs.begin(); it != _headerPairs.end(); ++it) {
+        std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
+    }
+}
+
+void RequestParser::printBody( void ) {
+
+    std::cout << "BODY: " << this->_body << std::endl;
+}
+
+std::vector<std::pair<std::string, std::string>> RequestParser::getHeaderPairs( void ) {
+
+    return ( this->_headerPairs );
+};
+
+std::string RequestParser::getBody( void ) {
+
+    return ( this->_body );
+};

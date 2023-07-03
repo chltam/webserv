@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <string>
 #include <unistd.h>
@@ -12,15 +11,17 @@ class RequestParser {
 
     public:
 
-        RequestParser( std::string buffer, int socket );
+        RequestParser( std::string buffer );
         void tokenizeRequest( void );
-        // std::vector<std::pair<std::string, std::string>> getReqInfo( void );
-
+        std::vector<std::pair<std::string, std::string>> getHeaderPairs( void );
+        std::string getBody( void );
+                
     private:
 
         std::string _buffer;
-        int _socket;
+        std::string _body;
+        std::vector<std::pair<std::string, std::string>> _headerPairs;
 
-        std::vector<std::pair<std::string, std::string>> _reqPairs;
-
+        void printHeaderPairs( void );
+        void printBody( void );
 };

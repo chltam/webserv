@@ -102,7 +102,7 @@ void Server::respond(int index)
 
 void Server::handle(int index)
 {
-    RequestParser parser( m_data[index].m_buffer, m_data[index].m_newSocket );
+    RequestParser parser( m_data[index].m_buffer );
     parser.tokenizeRequest();
 
     std::cout << m_data[index].m_buffer << std::endl;
