@@ -1,8 +1,122 @@
 #include "ResponseBuilder.hpp"
 
-ResponseBuilder::ResponseBuilder( std::vector<std::pair<std::string, std::string>> headerPairs,
-    std::string body ) {
+ResponseBuilder::ResponseBuilder( int socket, std::vector<std::pair<std::string,
+    std::string>> headerPairs, std::string body ) {
 
-    _requestHeaderPairs = headerPairs;
-    _requestBody = body;
+    _socket = socket;
+    _reqHeaderPairs = headerPairs;
+    _reqBody = body;
+};
+
+void ResponseBuilder::buildResponse( void ) {
+
+    buildHeader();
+    buildBody();
+
+    // CONTENT TYPE is hard coded because Firefox sends too much info (more parsing needed)
+    _respHeader = ( "HTTP/1.1 " + _status + _statusMsg + "\nContent-Type: " + "text/html" + "\nContent-Length: "\
+      + "1234" + "\nDate: " + _dateTime + "\nServer: " + _serverName + "\n\n" );
+};
+
+void ResponseBuilder::buildHeader( void ) {
+
+    std::string header;
+    
+    for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _reqHeaderPairs.begin();
+        it != _reqHeaderPairs.end(); ++it) {
+        
+        if ( it->first == "request type" ) {
+            _reqType = it->second;
+        }
+        else if ( it->first == "path" ) {
+            _path = it->second;
+        }
+        else if ( it->first == "Host" ) {
+            _serverName = it->second;
+        }
+        else if ( it->first == "Accept" ) {
+            _contType = it->second;
+        }
+        else if ( it->first == "Host" ) {
+            _serverName = it->second;
+        }
+    };
+
+    saveDateTime();
+    determineStatus();
+}
+
+void ResponseBuilder::determineStatus( void ) {
+
+    // how is it determined?
+    _status = "200";
+    _statusMsg = " OK";
+};
+
+void ResponseBuilder::saveDateTime( void ) {
+    
+    std::time_t rawtime;
+    std::tm* timeinfo;
+    char buffer[ 80 ];
+
+    std::time( &rawtime );
+    timeinfo = std::localtime( &rawtime );
+
+    // Format time as string
+    std::strftime( buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo );
+    std::string str( buffer );
+    _dateTime = str;
+};
+
+void ResponseBuilder::buildBody( void ) {
+
+    std::stringstream buffer;
+    std::string filename;
+    if ( _reqType == "GET") {
+
+        filename = "." + _path;
+        std::ifstream file( filename );
+
+        if (file.is_open()) {
+            buffer << file.rdbuf();
+        } else {
+            std::cout << "Unable to open file\n";
+        }
+        file.close();
+
+        _respBody = buffer.str();
+    }
+    
+    /* else if ( _reqType == "POST") {
+
+
+        std::cout << "POST received" << std::endl;
+    } */
+    
+    std::stringstream ss;
+    ss << _respBody.length();
+    _contLen = ss.str();
+};
+
+void ResponseBuilder::writeToSocket( void ) {
+
+    std::string full( _respHeader + _respBody );
+    write( _socket, (full.c_str()), full.length() );    
+};
+
+void ResponseBuilder::printHeaderInfo( void ) {
+
+    // std::cout << "_reqType: " << _reqType << std::endl;
+    // std::cout << "requested path: " << _path << std::endl;
+    // std::cout << "server: " << _serverName << std::endl;
+    // std::cout << "content type: " << _contType << std::endl;
+    // std::cout << "content len: " << _contLen << std::endl;
+    // std::cout << "_time: " << _dateTime << std::endl;
+    // complete header
+    std::cout << _respHeader;
+};
+
+void ResponseBuilder::printBody( void ) {
+
+    std::cout << "BODY: " << _respBody << std::endl;
 };

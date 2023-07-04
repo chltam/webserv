@@ -11,7 +11,7 @@ class RequestParser {
 
     public:
 
-        RequestParser( std::string buffer );
+        RequestParser( std::string sockBuffer );
         void tokenizeRequest( void );
         std::vector<std::pair<std::string, std::string>> getHeaderPairs( void );
         std::string getBody( void );

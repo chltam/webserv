@@ -1,5 +1,6 @@
 #include "server.hpp"
 #include "RequestParser.hpp"
+#include "ResponseBuilder.hpp"
 
 Server::Server(int domain, int service, int protocol, int port, u_long interface, int backlog)
 {
@@ -73,8 +74,8 @@ void Server::startListening( void )
             {
                 std::cout << "Found proper fd at: " << i << std::endl;
                 accepter(i);
+                respond(i); // just our basic responses
                 handle(i);
-                respond(i);
             }
         }
         std::cout << "======== DONE =====" << std::endl;
@@ -90,21 +91,25 @@ void Server::accepter(int index)
 
 void Server::respond(int index)
 {
-    if (index){
-        char l[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n<!DOCTYPE html>\n<html>\n<head>\n<title>Example Page</title>\n</head>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>";
-        write(m_data[index].m_newSocket,l,sizeof(l));
-    }
-    else
-        write(m_data[index].m_newSocket,"wtf\n",4);
-
-    close(m_data[index].m_newSocket);
+    // if (index) { // port 8081
+    //     char l[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n<!DOCTYPE html>\n<html>\n<head>\n<title>Example Page</title>\n</head>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>";
+    //     write(m_data[index].m_newSocket,l,sizeof(l));
+    // }
+    /* else // port 8080
+        write(m_data[index].m_newSocket,"wtf\n",4); */
 }
 
-void Server::handle(int index)
+void Server::handle( int index )
 {
     RequestParser parser( m_data[index].m_buffer );
     parser.tokenizeRequest();
 
-    std::cout << m_data[index].m_buffer << std::endl;
+    // std::cout << m_data[index].m_buffer << std::endl;
 
+    ResponseBuilder builder( m_data[index].m_newSocket, parser.getHeaderPairs(), parser.getBody() );
+
+    builder.buildResponse();
+    builder.writeToSocket();
+    
+    close(m_data[index].m_newSocket);
 }
