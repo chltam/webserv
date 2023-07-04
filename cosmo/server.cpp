@@ -61,9 +61,10 @@ void Server::startListening( void )
 		fds[n].events = POLLIN;
 		fds[n].revents = 0;
 	}
-    // std::transform(m_data.begin(), m_data.end(), fds.begin(), [](const Data& d) {
-    //     return pollfd{d.m_sock, POLLIN, 0};
-    // });
+
+	int	epoll_fd;
+	epoll_event	event;
+	epoll_fd = epoll_create(1);
 
     while (true)
     {
