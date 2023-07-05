@@ -24,6 +24,14 @@ Server::Server(int domain, int service, int protocol, int port, u_long interface
             std::cerr << "Failed to set SO_REUSEADDR option." << std::endl;
         }
 
+        // int yes = 1;
+        // setsockopt(m_data[i].m_sock, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(int));
+
+        // For changing the keepalive interval, you need to check the specific system documentation,
+        // as the socket option name can change. Here is an example for Linux:
+        // int interval = 10;  // 10 seconds
+        // setsockopt(m_data[i].m_sock, IPPROTO_TCP, TCP_KEEPINTVL, &interval, sizeof(int));
+
         //establish network connection
         m_data[i].m_connection = bind(m_data[i].m_sock,(struct sockaddr *)&m_data[i].m_address,m_data[i].m_adressLen);
         test_connection(m_data[i].m_connection);
@@ -90,13 +98,13 @@ void Server::accepter(int index)
 
 void Server::respond(int index)
 {
-    // (void)index;
-    if (index) { // port 8081
-        char l[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n<!DOCTYPE html>\n<html>\n<head>\n<title>Example Page</title>\n</head>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>";
-        write(m_data[index].m_newSocket,l,sizeof(l));
-    }
-    else // port 8080
-        write(m_data[index].m_newSocket,"wtf\n",4);
+    (void)index;
+    // if (index) { // port 8081
+    //     char l[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n<!DOCTYPE html>\n<html>\n<head>\n<title>Example Page</title>\n</head>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>";
+    //     write(m_data[index].m_newSocket,l,sizeof(l));
+    // }
+    // else // port 8080
+    //     write(m_data[index].m_newSocket,"wtf\n",4);
 }
 
 void Server::handle( int index )

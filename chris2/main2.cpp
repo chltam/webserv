@@ -4,7 +4,7 @@
 int main() {
 
     int socket = 1;
-    std::string request = "GET /simple.html HTTP/1.1\n\
+    std::string request = "POST /simple.html HTTP/1.1\n\
 Host: www.example.com\n\
 User-Agent: Mozilla\n\
 Accept: text/html\n\

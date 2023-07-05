@@ -14,7 +14,7 @@ void ResponseBuilder::buildResponse( void ) {
     buildBody();
 
     // CONTENT TYPE is hard coded because Firefox sends too much info (more parsing needed)
-    _respHeader = "HTTP/1.1 " + _status + _statusMsg + "\r\nConnection: keep-alive" + "\r\nContent-Type: text/html"\
+    _respHeader = "HTTP/1.1 " + _status + _statusMsg + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: text/html"\
         + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
 }
 
@@ -37,11 +37,7 @@ void ResponseBuilder::buildHeader( void ) {
         else if ( it->first == "Accept" ) {
             _contType = it->second;
         }
-        else if ( it->first == "Host" ) {
-            _serverName = it->second;
-        }
     };
-
     saveDateTime();
     determineStatus();
 }
@@ -49,8 +45,14 @@ void ResponseBuilder::buildHeader( void ) {
 void ResponseBuilder::determineStatus( void ) {
 
     // how is it determined?
-    _status = "200";
-    _statusMsg = " OK";
+    if ( _reqType == "POST" ) {
+        _status = "200";
+        _statusMsg = " OK";
+    }
+    else if ( _reqType == "POST" ) {
+        _status = "204";
+        _statusMsg = " No Content";        
+    }
 };
 
 void ResponseBuilder::saveDateTime( void ) {
@@ -93,10 +95,15 @@ void ResponseBuilder::buildBody( void ) {
             _respBody = "EMPTY\n";
         }
     }
-    else if ( _reqType == "POST") {
-
+    else if ( _reqType == "POST" ) {
 
         std::cout << "POST received" << std::endl;
+        _respBody = "DATA POSTED";
+    }
+    else if ( _reqType == "DELETE" ) {
+
+        std::cout << "DELETE received" << std::endl;
+        _respBody = "DATA DELETED";
     }
     
     std::stringstream ss;
