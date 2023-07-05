@@ -4,7 +4,7 @@
 int main() {
 
     int socket = 1;
-    std::string request = "GET /simple.html HTTP/1.1\n\
+    std::string request = "POST /simple.html HTTP/1.1\n\
 Host: www.example.com\n\
 User-Agent: Mozilla\n\
 Accept: text/html\n\
@@ -17,6 +17,7 @@ body is here for POST requests";
     parser.tokenizeRequest();
 
     ResponseBuilder builder( socket, parser.getHeaderPairs(), parser.getBody() );
+    builder.buildResponse();
     builder.printHeaderInfo();
     builder.printBody();
 
