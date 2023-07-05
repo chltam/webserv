@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <poll.h>
+#include <sys/epoll.h>
 
 #include <vector>
 #include <algorithm>
