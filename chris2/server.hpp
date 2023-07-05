@@ -12,6 +12,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <poll.h>
 
 #include <vector>

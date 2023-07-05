@@ -14,9 +14,9 @@ void ResponseBuilder::buildResponse( void ) {
     buildBody();
 
     // CONTENT TYPE is hard coded because Firefox sends too much info (more parsing needed)
-    _respHeader = ( "HTTP/1.1 " + _status + _statusMsg + "\nContent-Type: " + "text/html" + "\nContent-Length: "\
-      + "1234" + "\nDate: " + _dateTime + "\nServer: " + _serverName + "\n\n" );
-};
+    _respHeader = "HTTP/1.1 " + _status + _statusMsg + "\r\nConnection: keep-alive" + "\r\nContent-Type: text/html"\
+        + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
+}
 
 void ResponseBuilder::buildHeader( void ) {
 
@@ -72,6 +72,7 @@ void ResponseBuilder::buildBody( void ) {
 
     std::stringstream buffer;
     std::string filename;
+
     if ( _reqType == "GET") {
 
         filename = "." + _path;
@@ -84,14 +85,19 @@ void ResponseBuilder::buildBody( void ) {
         }
         file.close();
 
-        _respBody = buffer.str();
+        std::string bufString = buffer.str();
+        if ( bufString.size() ) {
+            _respBody = bufString;
+        }
+        else {
+            _respBody = "EMPTY\n";
+        }
     }
-    
-    /* else if ( _reqType == "POST") {
+    else if ( _reqType == "POST") {
 
 
         std::cout << "POST received" << std::endl;
-    } */
+    }
     
     std::stringstream ss;
     ss << _respBody.length();
@@ -112,6 +118,7 @@ void ResponseBuilder::printHeaderInfo( void ) {
     // std::cout << "content type: " << _contType << std::endl;
     // std::cout << "content len: " << _contLen << std::endl;
     // std::cout << "_time: " << _dateTime << std::endl;
+    
     // complete header
     std::cout << _respHeader;
 };

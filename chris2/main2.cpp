@@ -17,6 +17,7 @@ body is here for POST requests";
     parser.tokenizeRequest();
 
     ResponseBuilder builder( socket, parser.getHeaderPairs(), parser.getBody() );
+    builder.buildResponse();
     builder.printHeaderInfo();
     builder.printBody();
 
