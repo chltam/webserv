@@ -14,9 +14,9 @@ class RequestParser {
     public:
 
         RequestParser( std::string sockBuffer );
-        void tokenizeRequest( void );
-        std::vector<std::pair<std::string, std::string>> getHeaderPairs( void );
-        std::string getBody( void );
+        void tokenizeRequest();
+        std::vector<std::pair<std::string, std::string>> getHeaderPairs();
+        std::string getBody();
                 
     private:
 
@@ -24,6 +24,6 @@ class RequestParser {
         std::string _body;
         std::vector<std::pair<std::string, std::string>> _headerPairs;
 
-        void printHeaderPairs( void );
-        void printBody( void );
+        void printHeaderPairs();
+        void printBody();
 };

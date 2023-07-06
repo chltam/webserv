@@ -9,6 +9,13 @@
 
 #include <unistd.h>
 
+#include "AResponse.hpp"
+#include "GetResponse.hpp"
+#include "PostResponse.hpp"
+#include "DeleteResponse.hpp"
+
+#define VALID_REQUEST_NUM 3
+
 using namespace std;
 
 class ResponseBuilder {
@@ -16,33 +23,28 @@ class ResponseBuilder {
     public:
 
         ResponseBuilder( int socket,
-            std::vector<std::pair<std::string, std::string>> headerPairs, std::string body );
+            vector<pair<string, string>> headerPairs, string body );
 
-        void printHeaderInfo( void );
-        void printBody( void );
-        void buildResponse( void );
-        void writeToSocket( void );
+        ~ResponseBuilder( void );
+
+        void fillReqInfo();
+        AResponse* createResponse();
 
     private:
 
-        std::vector<std::pair<std::string, std::string>> _reqHeaderPairs;
-        std::string _reqBody;
+        vector<pair<string, string>> _reqHeaderPairs;
+        string _reqBody;
         int _socket;
 
-        std::string _reqType;
-        std::string _path;
-        std::string _status;
-        std::string _statusMsg;
-        std::string _dateTime;
-        std::string _serverName;
-        std::string _contType;
-        std::string _contLen;
+        string _reqType;
+        string _path;
+        string _status;
+        string _statusMsg;
+        string _dateTime;
+        string _serverName;
+        string _contType;
+        string _contLen;
 
-        std::string _respHeader;
-        std::string _respBody;
-
-        void buildHeader( void );
-        void determineStatus( void );
-        void saveDateTime( void );
-        void buildBody( void );
+        string _respHeader;
+        string _respBody;
 };

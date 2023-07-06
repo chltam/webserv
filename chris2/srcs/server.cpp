@@ -1,9 +1,7 @@
 #include "server.hpp"
-#include "RequestParser.hpp"
-#include "ResponseBuilder.hpp"
 
-Server::Server(int domain, int service, int protocol, int port, u_long interface, int backlog)
-{
+Server::Server(int domain, int service, int protocol, int port, u_long interface, int backlog) {
+    
     m_data.emplace_back(Data());
     m_data.emplace_back(Data());
 
@@ -41,6 +39,8 @@ Server::Server(int domain, int service, int protocol, int port, u_long interface
         bzero( m_data[i].m_buffer, sizeof(m_data[i].m_buffer ));
     }
 }
+
+Server::~Server() {};
 
 void Server::test_connection(int item)
 {
@@ -116,8 +116,12 @@ void Server::handle( int index )
 
     ResponseBuilder builder( m_data[index].m_newSocket, parser.getHeaderPairs(), parser.getBody() );
 
-    builder.buildResponse();
-    builder.writeToSocket(); // ERROR HANDLING, REMOVE CLIENT IF < 0
+    AResponse *response = builder.createResponse();
+    string respStr = response.getResponse();
+
+    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.getResponse().length() );  
+        // ERROR HANDLING: REMOVE CLIENT IF < 0
+    
     
     // read any remaining data from the client
     // char buf[1024];
