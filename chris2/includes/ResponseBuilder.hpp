@@ -9,6 +9,8 @@
 
 #include <unistd.h>
 
+using namespace std;
+
 class ResponseBuilder {
 
     public:

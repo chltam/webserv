@@ -4,13 +4,13 @@
 int main() {
 
     int socket = 1;
-    std::string request = "POST /simple.html HTTP/1.1\n\
-Host: www.example.com\n\
-User-Agent: Mozilla\n\
-Accept: text/html\n\
-Accept-Language: en-us\n\
-Connection: keep-alive\n\
-\n\
+    string request = "POST /simple.html HTTP/1.1\r\n\
+Host: www.example.com\r\n\
+User-Agent: Mozilla\r\n\
+Accept: text/html\r\n\
+Accept-Language: en-us\r\n\
+Connection: keep-alive\r\n\
+\r\n\
 body is here for POST requests";
 
     RequestParser parser( request );

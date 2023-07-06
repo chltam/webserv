@@ -46,7 +46,7 @@ void Server::test_connection(int item)
 {
     if(item < 0){
         perror("Failed to Connect...");
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE); // we CANT USE EXIT!
     }
 }
 
@@ -72,7 +72,7 @@ void Server::startListening( void )
 
         if (result < 0) {
             perror("poll() failed");
-            exit(EXIT_FAILURE);
+            exit(EXIT_FAILURE); // REMOVE CLIENT ACCORDING TO EVAL SHEET
         }
         std::cerr << "RESULT = " << result << std::endl;
         for (int i = 0; i < (int)fds.size(); i++)
@@ -93,7 +93,7 @@ void Server::accepter(int index)
 {
 
     m_data[index].m_newSocket = accept(m_data[index].m_sock, (struct sockaddr *)&m_data[index].m_address, (socklen_t *)&m_data[index].m_adressLen);
-    read( m_data[index].m_newSocket,  m_data[index].m_buffer, BUFFER_SIZE );
+    read( m_data[index].m_newSocket,  m_data[index].m_buffer, BUFFER_SIZE ); // ERROR HANDLING, REMOVE CLIENT IF < 0
 }
 
 void Server::respond(int index)
@@ -117,7 +117,7 @@ void Server::handle( int index )
     ResponseBuilder builder( m_data[index].m_newSocket, parser.getHeaderPairs(), parser.getBody() );
 
     builder.buildResponse();
-    builder.writeToSocket();
+    builder.writeToSocket(); // ERROR HANDLING, REMOVE CLIENT IF < 0
     
     // read any remaining data from the client
     // char buf[1024];
