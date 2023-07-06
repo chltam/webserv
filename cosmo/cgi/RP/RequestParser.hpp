@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include <vector>
+#include <map>
 
 class RequestParser {
 
@@ -21,6 +22,7 @@ class RequestParser {
         std::string _buffer;
         std::string _body;
         std::vector<std::pair<std::string, std::string>> _headerPairs;
+		std::map<std::string, std::string> _meta_vars;
 
         void printHeaderPairs( void );
         void printBody( void );

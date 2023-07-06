@@ -1,9 +1,9 @@
-NAME = webserv
+NAME = metavars_tester
 
 CXX := c++
-CXXFLAGS = #-Wall -Wextra -Werror # -std=c++98 -g
+CXXFLAGS =  -g #-Wall -Wextra -Werror # -std=c++98 
 
-SRCS = main.cpp server.cpp RequestParser.cpp ResponseBuilder.cpp
+SRCS = main.cpp MetaVars.cpp
 OBJS := $(SRCS:%.cpp=%.o)
 
 all : $(NAME)
