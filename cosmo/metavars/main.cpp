@@ -1,4 +1,6 @@
 #include "MetaVars.hpp"
+#include "RequestParser.hpp"
+
 /*
 meta_vars
 "AUTH_TYPE"
@@ -13,7 +15,8 @@ meta_vars
 "REMOTE_IDENT"
 "REMOTE_USER"
 "REQUEST_METHOD"
-"SCRIPT_NAME"
+"SCRIPT_NAME" dont use this
+"SCRIPT_FILENAME" use this for php-cgi
 "SERVER_NAME"
 "SERVER_PORT"
 "SERVER_PROTOCOL"
@@ -22,11 +25,15 @@ meta_vars
 int	main(int argc, char **argv, char **envp)
 {
 	MetaVars mvars(envp);
+    std::string request = "GET /simple.html HTTP/1.1\n"
+							"Host: www.example.com\n"
+							"User-Agent: Mozilla\n"
+							"Accept: text/html\n"
+							"Accept-Language: en-us\n"
+							"Connection: keep-alive\n"
+							"\n"
+							"body is here for POST requests\n";
 
-	mvars.set_value("test0", "0");
-	mvars.set_value("test1", "1");
-	mvars.set_value("test2", "2");
-	mvars.set_value("test3", "3");
 	// mvars.update_envp();
 	// mvars.print_envp();
 
@@ -40,7 +47,7 @@ int	main(int argc, char **argv, char **envp)
 		mvars.set_value("PATH_INFO", "/simple.html");
 		mvars.set_value("QUERY_STRING", "");
 		mvars.set_value("REQUEST_METHOD", "GET");
-		mvars.set_value("SCRIPT_NAME", "example.php");
+		// mvars.set_value("SCRIPT_NAME", "example.php");
 		mvars.set_value("SERVER_NAME", "127.0.0.1");
 		mvars.set_value("SERVER_PROTOCOL", "HTTP/1.1");
 		mvars.set_value("SERVER_PORT", "8081");
