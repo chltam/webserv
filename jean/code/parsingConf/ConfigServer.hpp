@@ -5,6 +5,7 @@
 #include <map>
 #include "ConfigRoute.hpp"
 
+
 class ConfigServer
 {
 public:
@@ -15,11 +16,13 @@ public:
     void AddRoute(std::string path, ConfigRoute& route);
     friend std::ostream& operator<< (std::ostream& stream, const ConfigServer& cs);
 
-public: //getters
+public: //getters, setters
 
-private:
+
+
+public: //making it public for now since it will be used a lot
     std::string m_serverName;
-    std::map<std::string,std::string> m_ports;
+    std::vector<std::pair<std::string,std::string>> m_ports;
     std::map<std::string,ConfigRoute> m_routes;
     std::map<int,std::string> m_errorPages;
 
@@ -29,5 +32,7 @@ private:
     size_t m_clientBodyBufferSize;
     bool m_autoindex;
     std::map<std::string,std::string> m_cgi;
+
+    std::string MethodEnumToString(int val) const;
 
 };

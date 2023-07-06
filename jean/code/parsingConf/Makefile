@@ -3,7 +3,7 @@ NAME = configuration
 CXX := c++
 CXXFLAGS = #-Wall -Wextra -Werror -std=c++98
 
-SRCS = main.cpp Config.cpp
+SRCS = main.cpp Config.cpp ConfigServer.cpp ConfigRoute.cpp
 OBJS := $(SRCS:%.cpp=%.o)
 
 all : $(NAME)
