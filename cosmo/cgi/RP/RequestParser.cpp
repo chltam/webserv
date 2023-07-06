@@ -30,7 +30,12 @@ void RequestParser::tokenizeRequest( void ) {
     _headerPairs.push_back(std::make_pair("REQUEST_METHOD", tokens[0]));
     _headerPairs.push_back(std::make_pair("PATH_INFO", tokens[1]));
     _headerPairs.push_back(std::make_pair("SERVER_PROTOCOL", tokens[2]));
-    tokens.clear();
+	
+	_meta_vars.insert(std::make_pair("REQUEST_METHOD", tokens[0]));
+	_meta_vars.insert(std::make_pair("PATH_INFO", tokens[1]));
+	_meta_vars.insert(std::make_pair("SERVER_PROTOCOL", tokens[2]));
+    
+	tokens.clear();
 
     // handle remaining lines
     while ( it != lines.end() ) {
@@ -64,6 +69,13 @@ void RequestParser::printHeaderPairs( void ) {
     for (std::vector<std::pair<std::string, std::string> >::const_iterator it = _headerPairs.begin(); it != _headerPairs.end(); ++it) {
         std::cout << "Key: " << it->first << ", Value: " << it->second << std::endl;
     }
+	std::string mvars[] = {"REQUEST_METHOD", "PATH_INFO", "SERVER_PROTOCOL"};
+	for(std::map<std::string, std::string>::iterator it = _meta_vars.begin(); it != _meta_vars.end(); ++it)
+	{
+		std::cout << it->first << " = " << it->second << std::endl;
+	}
+	
+	
 }
 
 void RequestParser::printBody( void ) {

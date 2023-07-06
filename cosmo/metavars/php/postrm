@@ -1,0 +1,52 @@
+#!/bin/sh
+
+set -e
+
+
+php_enable() { return 0; }
+
+if [ "$1" = "purge" ]; then
+    phpini=/etc/php/8.2/cgi/php.ini
+    # remove the flag to remember the original state
+    if [ -e /etc/php/8.2/cgi/.start ]; then
+	rm -f /etc/php/8.2/cgi/.start
+    fi
+    for ext in '~' '%' .bak .ucf-new .ucf-old .ucf-dist;  do
+	rm -f $phpini$ext
+    done
+    rm -f $phpini
+    if which ucf >/dev/null; then
+	ucf --purge $phpini
+    fi
+    if which ucfr >/dev/null; then
+	ucfr --purge php8.2-cgi $phpini
+    fi
+
+    for dir in \
+	/etc/php/8.2/cgi/conf.d \
+	/etc/php/8.2/cgi \
+	/etc/php/8.2 \
+	/etc/php;
+    do
+	if [ ! -L $dir ] && [ -d $dir ]; then
+	    rmdir --ignore-fail-on-non-empty $dir
+	fi
+    done
+fi
+
+# Automatically added by dh_apache2/UNDECLARED
+if [ "$1" = "purge" ] ; then
+	if php_enable; then
+		if [ -e /usr/share/apache2/apache2-maintscript-helper ] ; then
+			. /usr/share/apache2/apache2-maintscript-helper
+
+			for conf in php8.2-cgi  ; do
+				apache2_invoke disconf $conf  || exit 1
+			done
+		fi
+	fi
+fi
+# End automatically added section
+
+
+exit 0
