@@ -13,16 +13,16 @@ class RequestParser {
 
     public:
 
-        RequestParser( std::string sockBuffer );
+        RequestParser( string sockBuffer );
         void tokenizeRequest();
-        std::vector<std::pair<std::string, std::string>> getHeaderPairs();
-        std::string getBody();
+        vector<pair<string, string>> getHeaderPairs();
+        string getBody();
                 
     private:
 
-        std::string _buffer;
-        std::string _body;
-        std::vector<std::pair<std::string, std::string>> _headerPairs;
+        string _buffer;
+        string _body;
+        vector<pair<string, string>> _headerPairs;
 
         void printHeaderPairs();
         void printBody();

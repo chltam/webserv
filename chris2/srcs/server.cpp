@@ -112,14 +112,16 @@ void Server::handle( int index )
     RequestParser parser( m_data[index].m_buffer );
     parser.tokenizeRequest();
 
-    // std::cout << m_data[index].m_buffer << std::endl;
-
-    ResponseBuilder builder( m_data[index].m_newSocket, parser.getHeaderPairs(), parser.getBody() );
+    ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
+    builder.fillReqInfo();
 
     AResponse *response = builder.createResponse();
-    string respStr = response.getResponse();
+    
+    response->buildResponse();
+    // if NULL, REMOVE CLIENT
+    string respStr = response->getResponse();
 
-    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.getResponse().length() );  
+    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.length() );  
         // ERROR HANDLING: REMOVE CLIENT IF < 0
     
     
@@ -131,4 +133,6 @@ void Server::handle( int index )
     // }
 
     close(m_data[index].m_newSocket);
+
+    delete response;
 }

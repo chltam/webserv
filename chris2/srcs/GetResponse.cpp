@@ -1,6 +1,7 @@
 #include "GetResponse.hpp"
 
-GetResponse::GetResponse( string path, string serverName, string contType, string reqBody ) {
+GetResponse::GetResponse( string path, string serverName, string contType, string reqBody ):
+    AResponse( path, serverName, contType, reqBody ) {
 
 };
 
@@ -30,19 +31,18 @@ void GetResponse::buildBody() {
         _respBody = "EMPTY\n";
     }
 
-    else if ( _reqType == "POST" ) {
+    // else if ( _reqType == "POST" ) {
 
-        cout << "POST received" << endl;
-        _respBody = "DATA POSTED";
-    }
-    else if ( _reqType == "DELETE" ) {
+    //     cout << "POST received" << endl;
+    //     _respBody = "DATA POSTED";
+    // }
+    // else if ( _reqType == "DELETE" ) {
 
-        cout << "DELETE received" << endl;
-        _respBody = "DATA DELETED";
-    }
+    //     cout << "DELETE received" << endl;
+    //     _respBody = "DATA DELETED";
+    // }
     
     stringstream ss;
     ss << _respBody.length();
     _contLen = ss.str();
-
 };

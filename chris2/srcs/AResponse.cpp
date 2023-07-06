@@ -1,16 +1,13 @@
 #include "AResponse.hpp"
 
-AResponse::AResponse( string path, string serverName, string contType, string reqBody ) {
+AResponse::AResponse( string path, string serverName, string contType, string reqBody ):
+    _path( path ), _serverName( serverName ), _contType( contType ), _reqBody( reqBody ) {
 
-    _path = path;
-    _serverName = serverName;
-    _contType = contType;
-    _reqBody = reqBody;
 };
 
 AResponse::~AResponse() {};
 
-string AResponse::buildResponse() {
+void AResponse::buildResponse() {
 
     buildHeader();
     buildBody();
@@ -20,27 +17,10 @@ string AResponse::buildResponse() {
         + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
 
     _response = _respHeader + _respBody;
-    return ( _response );
 }
 
 void AResponse::buildHeader() {
     
-    // for (vector<pair<string, string> >::const_iterator it = _reqHeaderPairs.begin();
-    //     it != _reqHeaderPairs.end(); ++it) {
-        
-    //     if ( it->first == "request type" ) {
-    //         _reqType = it->second;
-    //     }
-    //     else if ( it->first == "path" ) {
-    //         _path = it->second;
-    //     }
-    //     else if ( it->first == "Host" ) {
-    //         _serverName = it->second;
-    //     }
-    //     else if ( it->first == "Accept" ) {
-    //         _contType = it->second;
-    //     }
-    // };
     saveDateTime();
     determineStatus();
 }
@@ -48,10 +28,8 @@ void AResponse::buildHeader() {
 void AResponse::determineStatus() {
 
     // how is it determined?
-    // if ( _reqType == "GET" || _reqType == "POST" || _reqType == "DELETE") {
-    //     _status = "200";
-    //     _statusMsg = " OK";
-    // }
+    _status = "200";
+    _statusMsg = " OK";
     // else if ( _reqType == "DELETE" ) {
         // ( if ( FILE IS FOUND )) {  // request successful
             // _status = "204";

@@ -37,8 +37,6 @@ void RequestParser::tokenizeRequest( void ) {
         // after the header, save the body
         if ( *it == "\r" ) {
 
-            cout << "INSIDE IF" << endl;
-
             ++it;  // skip the empty line
             while (it != lines.end()) {
                 _body += *it + '\n';

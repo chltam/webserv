@@ -18,27 +18,27 @@ class AResponse {
         AResponse( string path, string serverName, string contType, string reqBody );
         virtual ~AResponse();
 
-        string buildResponse();
-        void printHeaderInfo( void );
-        void printBody( void );
+        void buildResponse();
+        void printHeaderInfo();
+        void printBody();
         string getResponse();
 
-    private:
+    protected:
 
         string _response;
         string _respHeader;
         string _respBody;
         
-        string _reqBody;
         string _path;
+        string _serverName;
+        string _contType;
+        string _reqBody;
         string _status;
         string _statusMsg;
         string _dateTime;
-        string _serverName;
-        string _contType;
         string _contLen;
         
-        virtual void buildBody() const = 0;
+        virtual void buildBody() = 0;
         void buildHeader();
         void determineStatus();
         void saveDateTime();
