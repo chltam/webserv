@@ -18,6 +18,7 @@ public:
 private:
 	int	_sock;
 	std::string	_request_str; 
+	std::string	_response_str;
 	MetaVars	_mvars;
 };
 
