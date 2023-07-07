@@ -43,9 +43,22 @@ std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
     os << "Allowed Methods = " << cs.MethodEnumToString(cs.m_allowedMethods) << std::endl;
     os << "Client Body Buff Size = " << cs.m_clientBodyBufferSize << std::endl;
     os << "Autoindex = " << cs.m_autoindex << std::endl;
+    
     os << "----Ports----" << std::endl;
+    if(cs.m_ports.size() != 0) {
     for (int i = 0; i < cs.m_ports.size(); i++)
         os << "elem " <<i << ": " <<cs.m_ports[i].first <<" " << cs.m_ports[i].second << std::endl;
+    }
+    else
+        os << "No Ports found" << std::endl;
+
+    os << "----CGI----" << std::endl;
+    if(cs.m_cgi.size() != 0) {
+        for (int i = 0; i < cs.m_cgi.size(); i++)
+            os << "elem " <<i << ": " <<cs.m_cgi[i].first <<" " << cs.m_cgi[i].second << std::endl;
+    }
+    else
+        os << "No CGI found" << std::endl;
 
     os << "----Routes----" << std::endl;
     if(cs.m_routes.size() != 0){
