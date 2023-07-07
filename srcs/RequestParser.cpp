@@ -73,7 +73,7 @@ void RequestParser::printBody( void ) {
     cout << "BODY: " << this->_body << endl;
 }
 
-vector<pair<string, string>> RequestParser::getHeaderPairs( void ) {
+vector<pair<string, string> > RequestParser::getHeaderPairs( void ) {
 
     return ( this->_headerPairs );
 };

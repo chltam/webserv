@@ -34,48 +34,25 @@
 using namespace std;
 
 
-
-class Data {
-
-    public:
-
-        int m_sock;
-        struct sockaddr_in m_address;
-        int m_adressLen;
-        int m_connection;
-        int m_backlog;
-        int m_listening;
-
-        int m_newSocket;
-        char m_buffer[BUFFER_SIZE];
-		std::string request_str;
-};
-
 class Server {
 
     public:
 
 		Server();
-        Server(int domain, int service, int protocol, int port, u_long interface, int backlog);
+		Server(int temp/*config info*/);
         ~Server();
-		void	set_server_sock(/*conf info*/);
+		// void	set_server_sock(/*conf info*/);
 		void	start_listening();
 		void	accept_connection();
-		void startListening( void );
 
 
-
-        std::vector<Data> m_data;
 
     private:
 
 
         std::vector<Socket>	_server_sock;
 
-        void test_connection(int);
-        void accepter(int index);
         void handle(int index, Socket& client_sock);
-        void respond(int index);
 
 };
 

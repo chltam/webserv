@@ -44,7 +44,7 @@ void    Socket::bind_socket(int port)
     sockaddr_in sockaddr;
     sockaddr.sin_family = AF_INET;
     sockaddr.sin_port = htons(port);
-    sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    sockaddr.sin_addr.s_addr = inet_addr("10.15.109.3");
     if (bind(_sock, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == -1){
         perror("bind error");
         exit(EXIT_FAILURE);
@@ -80,7 +80,6 @@ void    Socket::read_sock()
 		else{
 			int bread = read( _sock,  buffer, BUFFER_SIZE );
 			buffer[bread] = 0;
-			std::cout << bread << std::endl;
 			if (bread == 0)
 				break;
 			else

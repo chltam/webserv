@@ -1,7 +1,7 @@
 NAME = webserv
 
 CXX := c++
-CXXFLAGS = -g #-std=c++98 -g #-Wall -Wextra -Werror
+CXXFLAGS =  -g #-std=c++98 #-Wall -Wextra -Werror
 
 SRCS = main.cpp Server.cpp RequestParser.cpp ResponseBuilder.cpp \
        AResponse.cpp GetResponse.cpp PostResponse.cpp DeleteResponse.cpp \

@@ -15,14 +15,14 @@ class RequestParser {
 
         RequestParser( string sockBuffer );
         void tokenizeRequest();
-        vector<pair<string, string>> getHeaderPairs();
+        vector<pair<string, string> > getHeaderPairs();
         string getBody();
                 
     private:
 
         string _buffer;
         string _body;
-        vector<pair<string, string>> _headerPairs;
+        vector<pair<string, string> > _headerPairs;
 
         void printHeaderPairs();
         void printBody();
