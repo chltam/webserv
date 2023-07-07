@@ -59,15 +59,17 @@ class Server {
         ~Server();
 
         void startListening( void );
-		void	parse_request(int index);
+
 
         std::vector<Data> m_data;
 
 
     private:
 
-        void test_connection(int);
 
+        vector<pair<string, int>>   ip_port;
+
+        void test_connection(int);
         void accepter(int index);
         void handle(int index);
         void respond(int index);

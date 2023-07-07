@@ -2,7 +2,13 @@
 
 Socket::Socket(){};
 
-
+/**
+ * @brief Socket object constructor for listening socket
+ * 
+ * @param ipVersion ipv4=AF_INET
+ * @param service TCP=SOCK_STREAM
+ * @param protocol default = 0
+*/
 Socket::Socket(int ipVersion, int service, int protocol)
 {   
     _sock = socket(ipVersion, service, protocol);
@@ -12,6 +18,11 @@ Socket::Socket(int ipVersion, int service, int protocol)
     }
 }
 
+/**
+ * @brief Socket object constructor for client socket
+ * 
+ * @param listener_fd listener socket fd
+*/
 Socket::Socket(int listener_fd)
 {
     sockaddr_in client_addr{};
