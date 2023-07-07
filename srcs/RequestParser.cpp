@@ -2,7 +2,7 @@
 
 RequestParser::RequestParser( string sockBuffer ) {
 
-    _buffer = string(sockBuffer);
+    _buffer = sockBuffer;
 };
 
 void RequestParser::tokenizeRequest( void ) {

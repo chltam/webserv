@@ -64,12 +64,11 @@ void Server::test_connection(int item)
 void	Server::set_server_sock(/*config info*/)
 {
 	//temp
-	Socket	sock;
 	for (int i = 0; i < 2; i++){
-		sock = Socket(AF_INET, SOCK_STREAM, 0);
+		Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
 		cout << "here2 " << i  << endl;
 		sock.bind_socket(8080 + i);
-		_server_sock.emplace_back(sock);
+		_server_sock.push_back(sock);
 	}
 
 	
