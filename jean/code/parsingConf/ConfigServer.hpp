@@ -31,7 +31,7 @@ public: //making it public for now since it will be used a lot
     int m_allowedMethods;
     size_t m_clientBodyBufferSize;
     bool m_autoindex;
-    std::map<std::string,std::string> m_cgi;
+    std::vector<std::pair<std::string,std::string>> m_cgi;
 
     std::string MethodEnumToString(int val) const;
 

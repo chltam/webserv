@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include "ConfigServer.hpp"
@@ -35,6 +36,7 @@ public:
 
 public: //getters
     const std::vector<ConfigServer>& getServers() const;
+    void printServers();
 
 
 private:
