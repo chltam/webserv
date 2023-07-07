@@ -13,6 +13,7 @@
 #include "GetResponse.hpp"
 #include "PostResponse.hpp"
 #include "DeleteResponse.hpp"
+#include "ErrorResponse.hpp"
 
 #define VALID_REQUEST_NUM 3
 
@@ -22,10 +23,9 @@ class ResponseBuilder {
 
     public:
 
-        ResponseBuilder( int socket,
-            vector<pair<string, string>> headerPairs, string body );
+        ResponseBuilder( vector<pair<string, string>> headerPairs, string body );
 
-        ~ResponseBuilder( void );
+        ~ResponseBuilder();
 
         void fillReqInfo();
         AResponse* createResponse();
@@ -34,7 +34,6 @@ class ResponseBuilder {
 
         vector<pair<string, string>> _reqHeaderPairs;
         string _reqBody;
-        int _socket;
 
         string _reqType;
         string _path;

@@ -1,13 +1,14 @@
 #include "RequestParser.hpp"
-#include "../includes/Server.hpp"
 
 RequestParser::RequestParser( string sockBuffer ) {
 
-    _buffer = sockBuffer;
+    _buffer = string(sockBuffer);
 };
 
 void RequestParser::tokenizeRequest( void ) {
 
+    cout << _buffer << endl;
+    
     // split whole request into lines 
     istringstream line_iss( _buffer ); 
     vector<string> lines;
@@ -38,8 +39,6 @@ void RequestParser::tokenizeRequest( void ) {
         // after the header, save the body
         if ( *it == "\r" ) {
 
-            cout << "INSIDE IF" << endl;
-
             ++it;  // skip the empty line
             while (it != lines.end()) {
                 _body += *it + '\n';
@@ -58,8 +57,8 @@ void RequestParser::tokenizeRequest( void ) {
         it++;
     }
 
-    // this->printHeaderPairs();
-    // this->printBody();
+    this->printHeaderPairs();
+    this->printBody();
 }
 
 void RequestParser::printHeaderPairs( void ) {

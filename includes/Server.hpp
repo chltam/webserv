@@ -1,3 +1,6 @@
+#ifndef _SERVER_H_
+#define _SERVER_H_
+
 #pragma once
 
 #include <iostream>
@@ -13,6 +16,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 #include <poll.h>
 
 #include <vector>
@@ -22,7 +26,14 @@
 #include "ResponseBuilder.hpp"
 #include "AResponse.hpp"
 
-#define BUFFER_SIZE 1024
+#include "MetaVars.hpp"
+#include "Socket.hpp"
+
+#define BUFFER_SIZE 100
+
+using namespace std;
+
+
 
 class Data {
 
@@ -37,25 +48,35 @@ class Data {
 
         int m_newSocket;
         char m_buffer[BUFFER_SIZE];
+		std::string request_str;
 };
 
 class Server {
 
     public:
 
+		Server();
         Server(int domain, int service, int protocol, int port, u_long interface, int backlog);
         ~Server();
+		void	set_server_sock(/*conf info*/);
+		void	start_listening();
+		void	accept_connection();
+		void startListening( void );
 
-        void startListening( void );
+
 
         std::vector<Data> m_data;
 
     private:
 
-        void test_connection(int);
 
+        std::vector<Socket>	_server_sock;
+
+        void test_connection(int);
         void accepter(int index);
-        void handle(int index);
+        void handle(int index, Socket& client_sock);
         void respond(int index);
 
 };
+
+#endif

@@ -12,8 +12,8 @@ int DeleteResponse::exec() {
     stringstream lenStr;
     string pathStr;
 
-    string fileDir = "files";
-    if ( fileDir.compare(0, 4, _path, 0, 5) != 0 ) {
+    string fileDir = "/files";
+    if ( fileDir.compare(0, 5, _path, 0, 5) != 0 ) {
 
         _respBody = "ACCESS FORBIDDEN\n";
         _status = "403 Forbidden";

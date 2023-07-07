@@ -1,10 +1,11 @@
 NAME = webserv
 
 CXX := c++
-CXXFLAGS = #-Wall -Wextra -Werror # -std=c++98 -g
+CXXFLAGS = -g #-std=c++98 -g #-Wall -Wextra -Werror  
 
-SRCS = main.cpp Server.cpp RequestParser.cpp \
-	 MetaVars.cpp Socket.cpp
+SRCS = main.cpp Server.cpp RequestParser.cpp ResponseBuilder.cpp\
+	AResponse.cpp GetResponse.cpp PostResponse.cpp DeleteResponse.cpp\
+	ErrorResponse.cpp MetaVars.cpp Socket.cpp
 OBJS := $(SRCS:%.cpp=%.o)
 SRCDIR = ./srcs
 INCDIR = ./includes

@@ -74,7 +74,7 @@ class Server {
 
         void test_connection(int);
         void accepter(int index);
-        void handle(int index);
+        void handle(int index, Socket& client_sock);
         void respond(int index);
 
 };
