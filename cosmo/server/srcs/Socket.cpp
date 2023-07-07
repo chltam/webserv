@@ -47,6 +47,14 @@ void    Socket::bind_socket(int port)
     }
 }
 
+void	Socket::enable_listener()
+{
+	if (listen(_sock, 10) == -1){
+		perror("listen error");
+		exit(EXIT_FAILURE);
+	}
+}
+
 void    Socket::read_sock()
 {
     pollfd	pfd;
@@ -76,4 +84,8 @@ void    Socket::read_sock()
 		}
 	}
 	std::cout << _request_str << std::endl;
+}
+
+int	Socket::get_sock_fd(){
+	return (_sock);
 }
