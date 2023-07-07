@@ -1,4 +1,4 @@
-#include "MetaVars.hpp"
+#include "../includes/MetaVars.hpp"
 
 MetaVars::MetaVars()
 {
@@ -16,7 +16,7 @@ MetaVars::MetaVars(char** envp)
 
 MetaVars::~MetaVars()
 {
-	free_envp(_envp);
+	// free_envp(_envp);
 }
 
 

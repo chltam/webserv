@@ -1,5 +1,11 @@
 #include "../includes/Server.hpp"
 
+Server::Server()
+{
+	vector<Socket> v;
+	_server_sock = v;
+};
+
 Server::Server(int domain, int service, int protocol, int port, u_long interface, int backlog) {
     
     m_data.emplace_back(Data());
@@ -48,6 +54,66 @@ void Server::test_connection(int item)
         perror("Failed to Connect...");
         exit(EXIT_FAILURE); // we CANT USE EXIT!
     }
+}
+
+/**
+ * @brief setup the vector of server socket, according to config info
+ * 
+ * @param //config object?
+*/
+void	Server::set_server_sock(/*config info*/)
+{
+	//temp
+	Socket	sock;
+	for (int i = 0; i < 2; i++){
+		sock = Socket(AF_INET, SOCK_STREAM, 0);
+		cout << "here2 " << i  << endl;
+		sock.bind_socket(8080 + i);
+		_server_sock.emplace_back(sock);
+	}
+
+	
+}
+
+void	Server::start_listening()
+{
+	for (int n = 0; n < 2; n++)
+	{
+		_server_sock[n].enable_listener();
+	}
+	
+}
+
+void	Server::accept_connection()
+{
+	vector<pollfd> pfd;
+
+	for (int n = 0; n < 2; n++)
+	{
+		pollfd	fd = {_server_sock[n].get_sock_fd(), POLL_IN, 0};
+		pfd.emplace_back(fd);
+	}
+
+	while (true)
+	{
+        std::cout << "========= WAITING ========" << std::endl;
+		int	result = poll(pfd.data(), pfd.size(), 1000);
+
+		if (result < 0){
+			perror("poll failed");
+			exit(EXIT_FAILURE); // REMOVE CLIENT ACCORDING TO EVAL SHEET
+		}
+		cout << "result = " << result << endl;
+		for (int n = 0; n < pfd.size(); n++)
+		{
+			if (pfd[n].revents & POLLIN)
+			{
+				Socket	client_sock(pfd[n].fd);
+				client_sock.read_sock();
+			}
+		}
+	}
+	
 }
 
 void Server::startListening( void )

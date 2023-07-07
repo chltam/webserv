@@ -55,19 +55,22 @@ class Server {
 
     public:
 
+		Server();
         Server(int domain, int service, int protocol, int port, u_long interface, int backlog);
         ~Server();
+		void	set_server_sock(/*conf info*/);
+		void	start_listening();
+		void	accept_connection();
+		void startListening( void );
 
-        void startListening( void );
 
 
         std::vector<Data> m_data;
 
-
     private:
 
 
-        vector<pair<string, int>>   ip_port;
+        std::vector<Socket>	_server_sock;
 
         void test_connection(int);
         void accepter(int index);
