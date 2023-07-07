@@ -34,12 +34,10 @@ class AResponse {
         string _contType;
         string _reqBody;
         string _status;
-        string _statusMsg;
         string _dateTime;
         string _contLen;
         
         virtual int exec() = 0;
         void buildHeader();
-        void determineStatus();
         void saveDateTime();
 };

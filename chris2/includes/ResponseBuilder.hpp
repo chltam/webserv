@@ -13,6 +13,7 @@
 #include "GetResponse.hpp"
 #include "PostResponse.hpp"
 #include "DeleteResponse.hpp"
+#include "ErrorResponse.hpp"
 
 #define VALID_REQUEST_NUM 3
 

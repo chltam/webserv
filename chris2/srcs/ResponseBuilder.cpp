@@ -1,4 +1,4 @@
-#include "ResponseBuilder.hpp"
+#include "../includes/ResponseBuilder.hpp"
 
 ResponseBuilder::ResponseBuilder( vector<pair<string, string>> headerPairs, string body ) {
 
@@ -40,10 +40,14 @@ static AResponse* makeDeleteResponse( string path, string serverName, string con
     return (new DeleteResponse( path, serverName, contType, reqBody ));
 }
 
+static AResponse* makeErrorResponse( string path, string serverName, string contType, string reqBody ) {
+    return (new ErrorResponse( path, serverName, contType, reqBody ));
+}
+
 AResponse* ResponseBuilder::createResponse() {
 
     AResponse* ( *allResponses[] )( string _path, string _serverName, string _contType,
-        string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse };
+        string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse, &makeErrorResponse};
     string responses[] = { "GET", "POST", "DELETE" };
 
     for ( int i = 0; i < VALID_REQUEST_NUM; i++ ) {
@@ -55,5 +59,5 @@ AResponse* ResponseBuilder::createResponse() {
         }
     }
     cout << _reqType << "Response could not be created" << endl;
-    return ( NULL );
+    return ( makeErrorResponse( _path, _serverName, _contType, _reqBody ));
 };

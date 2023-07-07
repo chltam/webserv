@@ -1,4 +1,4 @@
-#include "PostResponse.hpp"
+#include "../includes/PostResponse.hpp"
 
 PostResponse::PostResponse( string path, string serverName, string contType, string reqBody ):
     AResponse( path, serverName, contType, reqBody ) {
@@ -21,6 +21,7 @@ int PostResponse::exec() {
 
         file << _reqBody;
         _respBody = "DATA POSTED";
+        _status = "201 Created";
         lenStr << _respBody.length();
         _contLen = lenStr.str();
         return ( EXIT_SUCCESS );
