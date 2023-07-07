@@ -4,7 +4,7 @@ CXX := c++
 CXXFLAGS = -Wall -Wextra -Werror # -std=c++98 -g
 
 SRCS = main.cpp server.cpp RequestParser.cpp ResponseBuilder.cpp\
-	AResponse.cpp GetResponse.cpp
+	AResponse.cpp GetResponse.cpp PostResponse.cpp DeleteResponse.cpp
 OBJS := $(SRCS:%.cpp=%.o)
 SRCDIR = ./srcs
 INCDIR = ./includes

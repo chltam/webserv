@@ -11,10 +11,6 @@
 
 #include "AResponse.hpp"
 
-// class AResponse;
-
-using namespace std;
-
 class GetResponse : public AResponse {
 
     public:
@@ -24,5 +20,5 @@ class GetResponse : public AResponse {
 
     private:
 
-        void buildBody();
+        int exec();
 };

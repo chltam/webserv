@@ -32,18 +32,18 @@ static AResponse* makeGetResponse( string path, string serverName, string contTy
 	    return (new GetResponse( path, serverName, contType, reqBody ));
     }
 
-// static AResponse* makePostResponse( string path, string serverName, string contType, string reqBody ) {
-//     return (new PostResponse( path, serverName, contType, reqBody ));
-// }
+static AResponse* makePostResponse( string path, string serverName, string contType, string reqBody ) {
+    return (new PostResponse( path, serverName, contType, reqBody ));
+}
 
-// static AResponse* makeDeleteResponse( string path, string serverName, string contType, string reqBody ) {
-//     return (new DeleteResponse( path, serverName, contType, reqBody ));
-// }
+static AResponse* makeDeleteResponse( string path, string serverName, string contType, string reqBody ) {
+    return (new DeleteResponse( path, serverName, contType, reqBody ));
+}
 
 AResponse* ResponseBuilder::createResponse() {
 
     AResponse* ( *allResponses[] )( string _path, string _serverName, string _contType,
-        string _reqBody ) = { &makeGetResponse/* , &makePostResponse, &makeDeleteResponse  */};
+        string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse };
     string responses[] = { "GET", "POST", "DELETE" };
 
     for ( int i = 0; i < VALID_REQUEST_NUM; i++ ) {

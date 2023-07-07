@@ -18,7 +18,7 @@ class AResponse {
         AResponse( string path, string serverName, string contType, string reqBody );
         virtual ~AResponse();
 
-        void buildResponse();
+        void fillResponse();
         void printHeaderInfo();
         void printBody();
         string getResponse();
@@ -38,7 +38,7 @@ class AResponse {
         string _dateTime;
         string _contLen;
         
-        virtual void buildBody() = 0;
+        virtual int exec() = 0;
         void buildHeader();
         void determineStatus();
         void saveDateTime();

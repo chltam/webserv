@@ -7,19 +7,27 @@ GetResponse::GetResponse( string path, string serverName, string contType, strin
 
 GetResponse::~GetResponse() {};
 
-void GetResponse::buildBody() {
+int GetResponse::exec() {
 
     stringstream buffer;
+    stringstream lenStr;
     string filename;
     string bufString;
 
-    filename = "." + _path;
+    filename = "./files/" + _path;
     ifstream file( filename );
 
-    if (file.is_open()) {
+    if ( file.is_open() ) {
+
         buffer << file.rdbuf();
+
     } else {
+
         cout << "Unable to open file\n";
+        _respBody = "COULD NOT OPEN FILE\n";
+        lenStr << _respBody.length();
+        _contLen = lenStr.str();
+        return ( EXIT_FAILURE );
     }
     file.close();
 
@@ -28,21 +36,11 @@ void GetResponse::buildBody() {
         _respBody = bufString;
     }
     else {
-        _respBody = "EMPTY\n";
+        _respBody = "EMPTY FILE\n";
     }
 
-    // else if ( _reqType == "POST" ) {
+    lenStr << _respBody.length();
+    _contLen = lenStr.str();
 
-    //     cout << "POST received" << endl;
-    //     _respBody = "DATA POSTED";
-    // }
-    // else if ( _reqType == "DELETE" ) {
-
-    //     cout << "DELETE received" << endl;
-    //     _respBody = "DATA DELETED";
-    // }
-    
-    stringstream ss;
-    ss << _respBody.length();
-    _contLen = ss.str();
+    return ( EXIT_SUCCESS );
 };

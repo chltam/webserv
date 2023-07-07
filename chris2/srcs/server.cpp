@@ -117,12 +117,11 @@ void Server::handle( int index )
 
     AResponse *response = builder.createResponse();
     
-    response->buildResponse();
-    // if NULL, REMOVE CLIENT
-    string respStr = response->getResponse();
+    response->fillResponse();
+    string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
 
-    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.length() );  
-        // ERROR HANDLING: REMOVE CLIENT IF < 0
+    // write to socket
+    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
     
     
     // read any remaining data from the client

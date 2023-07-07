@@ -7,14 +7,10 @@ AResponse::AResponse( string path, string serverName, string contType, string re
 
 AResponse::~AResponse() {};
 
-void AResponse::buildResponse() {
+void AResponse::fillResponse() {
 
+    exec();
     buildHeader();
-    buildBody();
-
-    // CONTENT TYPE is hard coded because Firefox sends too much info (more parsing needed)
-    _respHeader = "HTTP/1.1 " + _status + _statusMsg + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: text/html"\
-        + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
 
     _response = _respHeader + _respBody;
 }
@@ -23,6 +19,10 @@ void AResponse::buildHeader() {
     
     saveDateTime();
     determineStatus();
+
+    // CONTENT TYPE is hard coded because Firefox sends too much info (more parsing needed)
+    _respHeader = "HTTP/1.1 " + _status + _statusMsg + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: text/html"\
+        + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
 }
 
 void AResponse::determineStatus() {
@@ -51,7 +51,6 @@ void AResponse::saveDateTime() {
     time( &rawtime );
     timeinfo = localtime( &rawtime );
 
-    // Format time as string
     strftime( buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo );
     string str( buffer );
     _dateTime = str;
