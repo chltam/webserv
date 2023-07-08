@@ -14,7 +14,7 @@ int GetResponse::exec() {
     string filename;
     string bufString;
 
-    filename = "./files/" + _path;
+    filename = "." + _path;
     ifstream file( filename );
 
     if ( file.is_open() ) {

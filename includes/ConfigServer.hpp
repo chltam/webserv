@@ -14,7 +14,7 @@ public:
 
     void AddRoute(std::string path, ConfigRoute& route); //not used yet
     friend std::ostream& operator<< (std::ostream& stream, const ConfigServer& cs);
-
+    const ConfigRoute& getRouteFromPath(const std::string& path) const;
 public: //getters, setters
 
 

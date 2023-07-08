@@ -73,16 +73,6 @@ void RequestParser::printBody( void ) {
     cout << "BODY: " << this->_body << endl;
 }
 
-vector<pair<string, string>> RequestParser::getHeaderPairs( void ) {
-
-    return ( this->_headerPairs );
-};
-
-string RequestParser::getBody( void ) {
-
-    return ( this->_body );
-};
-
 std::string RequestParser::getHeaderValueFromKey(const std::string &key)
 {
     for (int i = 0; i < _headerPairs.size(); i++) {
@@ -92,3 +82,11 @@ std::string RequestParser::getHeaderValueFromKey(const std::string &key)
 
     return std::string();
 }
+
+Request* RequestParser::createRequest() {
+
+    Request* request = new Request();
+    request->_headerPairs = _headerPairs;
+    request->_body = _body;
+    return (request);
+};

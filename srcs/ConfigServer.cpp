@@ -17,6 +17,11 @@ void ConfigServer::AddRoute(std::string path, ConfigRoute &route)
     m_routes.emplace(path,route);
 }
 
+const ConfigRoute& ConfigServer::getRouteFromPath(const std::string& path) const
+{
+    return m_routes.find(path)->second;
+}
+
 std::string ConfigServer::MethodEnumToString(int val) const
 {
     std::string ret;

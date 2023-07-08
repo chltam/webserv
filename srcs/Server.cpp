@@ -215,16 +215,15 @@ void Server::handle( int index, Socket& client_sock )
 
     RequestParser parser( client_sock.get_request_str() );
     parser.tokenizeRequest();
+	
 
 	const ConfigServer& server = m_Config.getConfigServerFromRequest(parser.getHeaderValueFromKey("Host"));
 
 	std::cerr << server << std::endl;
 
-    ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
-    builder.fillReqInfo();
-
-
-    AResponse *response = builder.createResponse();
+    // ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
+	ResponseBuilder builder;
+    AResponse *response = builder.createResponse( *parser.createRequest(), m_Config );
 
     response->fillResponse();
     string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
@@ -235,6 +234,7 @@ void Server::handle( int index, Socket& client_sock )
     close(client_sock.get_sock_fd());
 
     delete response;
+	// delete request;
 }
 
 /*
