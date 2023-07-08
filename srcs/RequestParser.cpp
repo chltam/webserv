@@ -8,9 +8,9 @@ RequestParser::RequestParser( string sockBuffer ) {
 void RequestParser::tokenizeRequest( void ) {
 
     cout << _buffer << endl;
-    
-    // split whole request into lines 
-    istringstream line_iss( _buffer ); 
+
+    // split whole request into lines
+    istringstream line_iss( _buffer );
     vector<string> lines;
     string tmp_line;
 
@@ -23,7 +23,7 @@ void RequestParser::tokenizeRequest( void ) {
     istringstream token_iss( *it );
     it++;
     vector<string> tokens;
-    string tmp_token;    
+    string tmp_token;
 
     // handle first request line
     while ( getline( token_iss, tmp_token, ' ' )) {
@@ -82,3 +82,13 @@ string RequestParser::getBody( void ) {
 
     return ( this->_body );
 };
+
+std::string RequestParser::getHeaderValueFromKey(const std::string &key)
+{
+    for (int i = 0; i < _headerPairs.size(); i++) {
+        if(_headerPairs[i].first == key)
+            return _headerPairs[i].second;
+    }
+
+    return std::string();
+}

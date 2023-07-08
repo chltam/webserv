@@ -222,3 +222,19 @@ bool Config::isValidChar(char c)
 
     return true;
 }
+
+const ConfigServer &Config::getConfigServerFromRequest(std::string hostPort) const
+{
+    //error checking might not be neccesary because if we get here we already know its one of our expected ports
+
+    int port(std::atoi(hostPort.substr(hostPort.find(":")+1).c_str()));
+    for (int i = 0; i < m_servers.size(); i++){
+        for (int j = 0; j < m_servers[i].m_ports.size(); j++) {
+
+            if(m_servers[i].m_ports[j].second == port)
+                return m_servers[i];
+        }
+
+    }
+
+}
