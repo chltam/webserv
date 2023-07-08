@@ -8,14 +8,6 @@ Server::Server(char *ConfigPath):m_Config(ConfigPath)
 
 Server::~Server() {};
 
-// void Server::test_connection(int item)
-// {
-//     if(item < 0){
-//         perror("Failed to Connect...");
-//         exit(EXIT_FAILURE); // we CANT USE EXIT!
-//     }
-// }
-
 /**
  * @brief setup the vector of server socket, according to config info
  *
@@ -34,6 +26,7 @@ void	Server::set_server_sock(/*config info*/)
 
 		}
 	}
+
 }
 
 void	Server::start_listening()//need to add poll later
@@ -79,83 +72,6 @@ void	Server::accept_connection()
 	}
 
 }
-
-// void Server::startListening( void )
-// {
-
-//     for (int i = 0; i < (int)m_data.size(); i++)
-//     {
-//         m_data[i].m_listening = listen(m_data[i].m_sock, m_data[i].m_backlog);
-//         test_connection(m_data[i].m_listening);
-//     }
-
-//     std::vector<pollfd> fds(m_data.size());
-// 	for (int n = 0; n < m_data.size(); n++)
-// 	{
-// 		fds[n].fd = m_data[n].m_sock;
-// 		fds[n].events = POLLIN;
-// 		fds[n].revents = 0;
-// 	}
-
-//     while (true)
-//     {
-//         std::cout << "========= WAITING ========" << std::endl;
-//         int result = poll(fds.data(), fds.size(), 1000);
-//         std::cout << "right after poll()" << std::endl;
-
-//         if (result < 0) {
-//             perror("poll() failed");
-//             exit(EXIT_FAILURE); // REMOVE CLIENT ACCORDING TO EVAL SHEET
-//         }
-//         std::cerr << "RESULT = " << result << std::endl;
-//         for (int i = 0; i < (int)fds.size(); i++)
-//         {
-//             if (fds[i].revents & POLLIN)
-//             {
-//                 std::cout << "Found proper fd at: " << i << std::endl;
-//                 accepter(i);
-//                 respond(i); // just our basic responses
-//                 handle(i);
-//             }
-//         }
-//         std::cout << "======== DONE =====" << std::endl;
-//     }
-// }
-
-// void Server::accepter(int index)
-// {
-
-//     m_data[index].m_newSocket = accept(m_data[index].m_sock, (struct sockaddr *)&m_data[index].m_address, (socklen_t *)&m_data[index].m_adressLen);
-//     // read( m_data[index].m_newSocket,  m_data[index].m_buffer, BUFFER_SIZE );
-// 	// std::cout << m_data[index].m_buffer << std::endl;
-// 	pollfd	pfd;
-// 	pfd.fd = m_data[index].m_newSocket;
-// 	pfd.events = POLLIN;
-// 	pfd.revents = 0;
-// 	m_data[index].request_str.clear();
-// 	while (1)
-// 	{
-// 		// char *buffer = new char*[BUFFER_SIZE];
-// 		int	poll_result = poll(&pfd, 1, 100);
-// 		if (poll_result == -1){
-// 			perror("poll error");
-// 			break;
-// 		}
-// 		else if (poll_result == 0)
-// 			break;
-// 		else{
-// 			int bread = read( m_data[index].m_newSocket,  m_data[index].m_buffer, BUFFER_SIZE );
-// 			m_data[index].m_buffer[bread] = 0;
-// 			std::cout << bread << std::endl;
-// 			if (bread == 0)
-// 				break;
-// 			else
-// 				m_data[index].request_str += m_data[index].m_buffer;
-// 		}
-// 	}
-// 	std::cout << m_data[index].request_str << std::endl;
-// }
-
 
 void Server::handle( int index, Socket& client_sock )
 {
