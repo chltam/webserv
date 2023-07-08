@@ -69,7 +69,6 @@ void    Socket::read_sock()
 	_request_str.clear();
 	while (1)
 	{
-		// char *buffer = new char*[BUFFER_SIZE];
 		int	poll_result = poll(&pfd, 1, 100);
 		if (poll_result == -1){
 			perror("poll error");
