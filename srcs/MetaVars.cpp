@@ -42,6 +42,11 @@ std::string	MetaVars::get_value(std::string key)
 		return ("");
 }
 
+void	MetaVars::set_content_length(std::string& body)
+{
+	set_value("CONTENT_LENGTH", to_string(body.length()));
+}
+
 void	MetaVars::update_envp()
 {
 	cout << "size = " <<_meta_map.size() << endl;

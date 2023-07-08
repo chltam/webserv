@@ -1,8 +1,8 @@
 #include "../includes/Server.hpp"
 
-Server::Server(char *ConfigPath):m_Config(ConfigPath)
+Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath)
 {
-
+	_envp = envp;
 };
 
 Server::~Server() {};
@@ -14,15 +14,19 @@ Server::~Server() {};
 */
 void	Server::set_server_sock(/*config info*/)
 {
-	//temp
-	for (int i = 0; i < 2; i++){
-		Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-		sock.bind_socket(8080 + i);
-		_server_sock.push_back(sock);
+	//slightly less temp, how do we get the right server object from the socket in question?
+	const std::vector<ConfigServer>& servers = m_Config.getServers();
+	for(int i = 0; i < servers.size(); i++){
+		for(int j = 0;j < servers[i].m_ports.size(); j++){
+			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
+			cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << endl;
+			sock.bind_socket(servers[i].m_ports[j].second);
+			_server_sock.push_back(sock);
+
+		}
 	}
-
-
 }
+
 
 void	Server::start_listening()//need to add poll later
 {
@@ -77,7 +81,7 @@ void Server::handle( int index, Socket& client_sock )
 
 	std::cerr << server << std::endl;
 
-    ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
+    ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody(), _envp );
     builder.fillReqInfo();
 
 

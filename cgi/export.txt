@@ -5,16 +5,34 @@ export CONTENT_TYPE="text/html"
 export PATH_INFO="./example.php"
 export QUERY_STRING=""
 export REQUEST_METHOD="GET"
-export SCRIPT_NAME="./simple.html"
+export SCRIPT_FILENAME="./simple.html"
 export SERVER_NAME="127.0.0.1"
 export SERVER_PROTOCOL="HTTP/1.1"
 export SERVER_PORT="8081"
+export REDIRECT_STATUS=0 
+
 export SCRIPT_NAME="example.php"
 export SERVER_SOFTWARE=""
-export REDIRECT_STATUS=""
 export GATEWAY_INTERFACE
 export PATH_TRANSLATED
 export REMOTE_ADDR
 export REMOTE_HOST
 export REMOTE_IDENT
 export REMOTE_USER
+
+GET / HTTP/1.1
+Host: 127.0.0.1:8080
+Connection: keep-alive
+sec-ch-ua: "Chromium";v="112", "Brave";v="112", "Not:A-Brand";v="99"
+sec-ch-ua-mobile: ?0
+sec-ch-ua-platform: "Linux"
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8
+Sec-GPC: 1
+Accept-Language: en-US,en
+Sec-Fetch-Site: none
+Sec-Fetch-Mode: navigate
+Sec-Fetch-User: ?1
+Sec-Fetch-Dest: document
+Accept-Encoding: gzip, deflate, br

@@ -40,7 +40,7 @@ class Server {
 
     public:
 
-		Server(char *configPath);
+		Server(char *configPath, char **envp);
         ~Server();
 		void	set_server_sock(/*conf info*/);
 		void	start_listening();
@@ -53,7 +53,7 @@ class Server {
 
         std::vector<Socket>	_server_sock;
         Config m_Config;
-
+		char	**_envp;
         void handle(int index, Socket& client_sock);
 
 };

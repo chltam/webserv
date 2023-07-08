@@ -23,7 +23,7 @@ class ResponseBuilder {
 
     public:
 
-        ResponseBuilder( vector<pair<string, string> > headerPairs, string body );
+        ResponseBuilder( vector<pair<string, string> > headerPairs, string body, char **envp );
 
         ~ResponseBuilder();
 
@@ -46,4 +46,6 @@ class ResponseBuilder {
 
         string _respHeader;
         string _respBody;
+
+		char	**_envp;
 };

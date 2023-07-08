@@ -1,5 +1,24 @@
 #include "RequestParser.hpp"
 
+
+// GET / HTTP/1.1
+// Host: 127.0.0.1:8080
+// Connection: keep-alive
+// sec-ch-ua: "Chromium";v="112", "Brave";v="112", "Not:A-Brand";v="99"
+// sec-ch-ua-mobile: ?0
+// sec-ch-ua-platform: "Linux"
+// Upgrade-Insecure-Requests: 1
+// User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36
+// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8
+// Sec-GPC: 1
+// Accept-Language: en-US,en
+// Sec-Fetch-Site: none
+// Sec-Fetch-Mode: navigate
+// Sec-Fetch-User: ?1
+// Sec-Fetch-Dest: document
+// Accept-Encoding: gzip, deflate, br
+
+
 RequestParser::RequestParser( string sockBuffer ) {
 
     _buffer = sockBuffer;
@@ -31,6 +50,7 @@ void RequestParser::tokenizeRequest( void ) {
     }
     _headerPairs.push_back(make_pair("request type", tokens[0]));
     _headerPairs.push_back(make_pair("path", tokens[1]));
+    _headerPairs.push_back(make_pair("protocol", tokens[2]));
     tokens.clear();
 
     // handle remaining lines

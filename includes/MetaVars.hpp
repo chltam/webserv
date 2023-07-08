@@ -20,6 +20,7 @@ public:
 	~MetaVars();
 	// void	insert_pair(std::string key, std::string value);
 	void	set_value(std::string key, std::string value);
+	void	set_content_length(std::string& body);
 	std::string get_value(std::string key);
 	char	**get_envp();
 	void	update_envp(void);
