@@ -36,23 +36,6 @@
 using namespace std;
 
 
-
-class Data {
-
-    public:
-
-        int m_sock;
-        struct sockaddr_in m_address;
-        int m_adressLen;
-        int m_connection;
-        int m_backlog;
-        int m_listening;
-
-        int m_newSocket;
-        char m_buffer[BUFFER_SIZE];
-		std::string request_str;
-};
-
 class Server {
 
     public:
@@ -63,21 +46,16 @@ class Server {
 		void	set_server_sock(/*conf info*/);
 		void	start_listening();
 		void	accept_connection();
-		void startListening( void );
 
 
 
-        std::vector<Data> m_data;
     private:
 
 
         std::vector<Socket>	_server_sock;
         Config m_Config;
 
-        void test_connection(int);
-        void accepter(int index);
         void handle(int index, Socket& client_sock);
-        void respond(int index);
 
 };
 

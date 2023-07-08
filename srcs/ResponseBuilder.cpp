@@ -1,6 +1,6 @@
 #include "../includes/ResponseBuilder.hpp"
 
-ResponseBuilder::ResponseBuilder( vector<pair<string, string>> headerPairs, string body ) {
+ResponseBuilder::ResponseBuilder( vector<pair<string, string> > headerPairs, string body ) {
 
     _reqHeaderPairs = headerPairs;
     _reqBody = body;

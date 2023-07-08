@@ -23,7 +23,7 @@ class ResponseBuilder {
 
     public:
 
-        ResponseBuilder( vector<pair<string, string>> headerPairs, string body );
+        ResponseBuilder( vector<pair<string, string> > headerPairs, string body );
 
         ~ResponseBuilder();
 
@@ -32,7 +32,7 @@ class ResponseBuilder {
 
     private:
 
-        vector<pair<string, string>> _reqHeaderPairs;
+        vector<pair<string, string> > _reqHeaderPairs;
         string _reqBody;
 
         string _reqType;

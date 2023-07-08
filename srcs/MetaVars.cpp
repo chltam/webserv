@@ -16,7 +16,7 @@ MetaVars::MetaVars(char** envp)
 
 MetaVars::~MetaVars()
 {
-	// free_envp(_envp);
+	free_envp(_envp);
 }
 
 
@@ -103,6 +103,8 @@ char	**copy_envp(char **envp, int& _envp_size)
 
 void	free_envp(char **envp)
 {
+	if (!envp)
+		return ;
 	for (int n = 0; envp[n]; ++n){
 		free(envp[n]);
 	}

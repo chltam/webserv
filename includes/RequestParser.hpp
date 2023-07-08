@@ -15,15 +15,15 @@ class RequestParser {
 
         RequestParser( string sockBuffer );
         void tokenizeRequest();
-        vector<pair<string, string>> getHeaderPairs();
-        std::string getHeaderValueFromKey(const std::string& key);
+        vector<pair<string, string> > getHeaderPairs();
+		std::string getHeaderValueFromKey(const std::string &key);
         string getBody();
 
     private:
 
         string _buffer;
         string _body;
-        vector<pair<string, string>> _headerPairs;
+        vector<pair<string, string> > _headerPairs;
 
         void printHeaderPairs();
         void printBody();

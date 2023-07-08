@@ -80,7 +80,6 @@ void    Socket::read_sock()
 		else{
 			int bread = read( _sock,  buffer, BUFFER_SIZE );
 			buffer[bread] = 0;
-			std::cout << bread << std::endl;
 			if (bread == 0)
 				break;
 			else
