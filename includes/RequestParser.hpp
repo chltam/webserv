@@ -16,8 +16,9 @@ class RequestParser {
         RequestParser( string sockBuffer );
         void tokenizeRequest();
         vector<pair<string, string> > getHeaderPairs();
+        std::string getHeaderValueFromKey(const std::string& key);
         string getBody();
-                
+
     private:
 
         string _buffer;

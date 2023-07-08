@@ -1,7 +1,0 @@
-c623f94e8e070cdc8d1463d38bcbe1b1  usr/bin/php-cgi8.2
-c623f94e8e070cdc8d1463d38bcbe1b1  usr/lib/cgi-bin/php8.2
-d41d8cd98f00b204e9800998ecf8427e  usr/lib/php/8.2/sapi/cgi
-a2e953e488220348284f864610e8fba4  usr/share/bug/php8.2-cgi/control
-e04230b6b2b1731ed8317961eea42559  usr/share/bug/php8.2-cgi/script
-f426d3cb75c7b0d97e30b855e89633cc  usr/share/lintian/overrides/php8.2-cgi
-34cffc1c62bdd3abbb75d89b07872008  usr/share/man/man1/php-cgi8.2.1.gz

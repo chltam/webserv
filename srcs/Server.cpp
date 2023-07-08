@@ -1,12 +1,8 @@
 #include "../includes/Server.hpp"
 
-Server::Server(int temp/*config info*/)
+Server::Server(char *ConfigPath):m_Config(ConfigPath)
 {
-	for (int i = 0; i < 2; i++){
-		Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-		sock.bind_socket(8080 + i);
-		_server_sock.push_back(sock);
-	}
+
 };
 
 Server::~Server() {};
@@ -21,35 +17,37 @@ Server::~Server() {};
 
 /**
  * @brief setup the vector of server socket, according to config info
- * 
+ *
  * @param //config object?
 */
-// void	Server::set_server_sock(/*config info*/)
-// {
-// 	//temp
-// 	for (int i = 0; i < 2; i++){
-// 		Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-// 		cout << "here2 " << i  << endl;
-// 		sock.bind_socket(8080 + i);
-// 		_server_sock.push_back(sock);
-// 	}
+void	Server::set_server_sock(/*config info*/)
+{
+	//temp
+	for (int i = 0; i < 2; i++){
+		Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
+		cout << "here2 " << i  << endl;
+		sock.bind_socket(8080 + i);
+		_server_sock.push_back(sock);
+	}
 
 	
-// }
+}
 
 void	Server::start_listening()//need to add poll later
 {
 	for (int n = 0; n < _server_sock.size(); n++)
+	for (int n = 0; n < _server_sock.size(); n++)
 	{
 		_server_sock[n].enable_listener();
 	}
-	
+
 }
 
 void	Server::accept_connection()
 {
 	vector<pollfd> pfd;
 
+	for (int n = 0; n < _server_sock.size(); n++)
 	for (int n = 0; n < _server_sock.size(); n++)
 	{
 		pollfd	fd = {_server_sock[n].get_sock_fd(), POLL_IN, 0};
@@ -77,7 +75,7 @@ void	Server::accept_connection()
 			}
 		}
 	}
-	
+
 }
 
 // void Server::startListening( void )
@@ -163,11 +161,16 @@ void Server::handle( int index, Socket& client_sock )
     RequestParser parser( client_sock.get_request_str() );
     parser.tokenizeRequest();
 
+	const ConfigServer& server = m_Config.getConfigServerFromRequest(parser.getHeaderValueFromKey("Host"));
+
+	std::cerr << server << std::endl;
+
     ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
     builder.fillReqInfo();
 
+
     AResponse *response = builder.createResponse();
-    
+
     response->fillResponse();
     string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
 
@@ -232,10 +235,10 @@ void Server::handle( int index )
                            "</body>\r\n"
                            "</html>\r\n";
 
-    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.size());  
+    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.size());
         // ERROR HANDLING: REMOVE CLIENT IF < 0
-    
-    
+
+
     // read any remaining data from the client
     // char buf[1024];
     // while (recv(m_data[index].m_newSocket, buf, sizeof(buf), 0) > 0) {

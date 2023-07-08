@@ -1,2 +1,0 @@
-php8.2-cgi: embedded-library usr/bin/php-cgi8.2: file
-php8.2-cgi: embedded-library usr/lib/cgi-bin/php8.2: file
