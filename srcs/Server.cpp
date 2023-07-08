@@ -1,13 +1,15 @@
 #include "../includes/Server.hpp"
 
-Server::Server()
+Server::Server(char *ConfigPath):m_Config(ConfigPath)
 {
 	vector<Socket> v;
 	_server_sock = v;
+
+	m_Config.printServers();
 };
 
-Server::Server(int domain, int service, int protocol, int port, u_long interface, int backlog) {
-    
+Server::Server(int domain, int service, int protocol, int port, u_long interface, int backlog):m_Config(NULL) {
+
     m_data.emplace_back(Data());
     m_data.emplace_back(Data());
 
@@ -58,36 +60,38 @@ void Server::test_connection(int item)
 
 /**
  * @brief setup the vector of server socket, according to config info
- * 
+ *
  * @param //config object?
 */
 void	Server::set_server_sock(/*config info*/)
 {
-	//temp
-	for (int i = 0; i < 2; i++){
-		Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-		cout << "here2 " << i  << endl;
-		sock.bind_socket(8080 + i);
-		_server_sock.push_back(sock);
-	}
+	//slightly less temp, how do we get the right server object from the socket in question?
+	const std::vector<ConfigServer>& servers = m_Config.getServers();
+	for(int i = 0; i < servers.size(); i++){
+		for(int j = 0;j < servers[i].m_ports.size(); j++){
+			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
+			cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << endl;
+			sock.bind_socket(servers[i].m_ports[j].second);
+			_server_sock.push_back(sock);
 
-	
+		}
+	}
 }
 
 void	Server::start_listening()
 {
-	for (int n = 0; n < 2; n++)
+	for (int n = 0; n < _server_sock.size(); n++)
 	{
 		_server_sock[n].enable_listener();
 	}
-	
+
 }
 
 void	Server::accept_connection()
 {
 	vector<pollfd> pfd;
 
-	for (int n = 0; n < 2; n++)
+	for (int n = 0; n < _server_sock.size(); n++)
 	{
 		pollfd	fd = {_server_sock[n].get_sock_fd(), POLL_IN, 0};
 		pfd.emplace_back(fd);
@@ -114,7 +118,7 @@ void	Server::accept_connection()
 			}
 		}
 	}
-	
+
 }
 
 // void Server::startListening( void )
@@ -206,7 +210,7 @@ void Server::respond(int index)
 
 void Server::handle( int index, Socket& client_sock )
 {
-	
+
 	cout << "here12333\n" << endl;
 
     RequestParser parser( client_sock.get_request_str() );
@@ -216,7 +220,7 @@ void Server::handle( int index, Socket& client_sock )
     builder.fillReqInfo();
 
     AResponse *response = builder.createResponse();
-    
+
     response->fillResponse();
     string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
 
@@ -281,10 +285,10 @@ void Server::handle( int index )
                            "</body>\r\n"
                            "</html>\r\n";
 
-    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.size());  
+    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.size());
         // ERROR HANDLING: REMOVE CLIENT IF < 0
-    
-    
+
+
     // read any remaining data from the client
     // char buf[1024];
     // while (recv(m_data[index].m_newSocket, buf, sizeof(buf), 0) > 0) {

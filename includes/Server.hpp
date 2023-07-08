@@ -29,6 +29,8 @@
 #include "MetaVars.hpp"
 #include "Socket.hpp"
 
+#include "Config.hpp"
+
 #define BUFFER_SIZE 100
 
 using namespace std;
@@ -55,7 +57,7 @@ class Server {
 
     public:
 
-		Server();
+		Server(char *configPath);
         Server(int domain, int service, int protocol, int port, u_long interface, int backlog);
         ~Server();
 		void	set_server_sock(/*conf info*/);
@@ -66,11 +68,11 @@ class Server {
 
 
         std::vector<Data> m_data;
-
     private:
 
 
         std::vector<Socket>	_server_sock;
+        Config m_Config;
 
         void test_connection(int);
         void accepter(int index);
