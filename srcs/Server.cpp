@@ -2,8 +2,7 @@
 
 Server::Server(char *ConfigPath):m_Config(ConfigPath)
 {
-	vector<Socket> v;
-	_server_sock = v;
+
 };
 
 Server::~Server() {};
@@ -15,23 +14,18 @@ Server::~Server() {};
 */
 void	Server::set_server_sock(/*config info*/)
 {
-	//slightly less temp, how do we get the right server object from the socket in question?
-	const std::vector<ConfigServer>& servers = m_Config.getServers();
-	for(int i = 0; i < servers.size(); i++){
-		for(int j = 0;j < servers[i].m_ports.size(); j++){
-			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-			cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << endl;
-			sock.bind_socket(servers[i].m_ports[j].second);
-			_server_sock.push_back(sock);
-
-		}
+	//temp
+	for (int i = 0; i < 2; i++){
+		Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
+		sock.bind_socket(8080 + i);
+		_server_sock.push_back(sock);
 	}
+
 
 }
 
 void	Server::start_listening()//need to add poll later
 {
-	for (int n = 0; n < _server_sock.size(); n++)
 	for (int n = 0; n < _server_sock.size(); n++)
 	{
 		_server_sock[n].enable_listener();

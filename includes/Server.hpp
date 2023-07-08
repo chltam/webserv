@@ -41,7 +41,6 @@ class Server {
     public:
 
 		Server(char *configPath);
-        Server(int domain, int service, int protocol, int port, u_long interface, int backlog);
         ~Server();
 		void	set_server_sock(/*conf info*/);
 		void	start_listening();
