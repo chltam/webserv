@@ -74,7 +74,7 @@ void	MetaVars::print_envp()
 	}
 }
 
-int	count_envp_size(char **envp)
+int	MetaVars::count_envp_size(char **envp)
 {
 	int	_envp_size = 0;
 
@@ -90,7 +90,7 @@ int	count_envp_size(char **envp)
  *	@param _envp_size size of the envp
  *	@return new copy of envp
 */
-char	**copy_envp(char **envp, int& _envp_size)
+char	**MetaVars::copy_envp(char **envp, int& _envp_size)
 {
 	char **new_envp;
 
@@ -106,7 +106,7 @@ char	**copy_envp(char **envp, int& _envp_size)
 	return (new_envp);
 }
 
-void	free_envp(char **envp)
+void	MetaVars::free_envp(char **envp)
 {
 	if (!envp)
 		return ;

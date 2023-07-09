@@ -25,16 +25,18 @@ public:
 	char	**get_envp();
 	void	update_envp(void);
 	void	print_envp(void);
+
 private:
 	char**	_envp;
 	int		_envp_size;
 	std::map<std::string, std::string> _meta_map;
 
+	int	count_envp_size(char **envp);
+	char	**copy_envp(char **envp, int& _envp_size);
+	void	free_envp(char **envp);
+
 };
 
-int	count_envp_size(char **envp);
-char	**copy_envp(char **envp, int& _envp_size);
-void	free_envp(char **envp);
 
 
 #endif

@@ -1,6 +1,6 @@
 <?php
 // Path to the static HTML file
-$htmlFilePath = "simple.html";
+$htmlFilePath = "../files/index.html";
 
 // Check if the HTML file exists
 if (file_exists($htmlFilePath)) {
