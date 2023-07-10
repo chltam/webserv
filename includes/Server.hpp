@@ -31,39 +31,19 @@
 
 #include "Config.hpp"
 
-#define BUFFER_SIZE 100
 
 using namespace std;
-
-class Data {
-
-    public:
-
-        int m_sock;
-        struct sockaddr_in m_address;
-        int m_adressLen;
-        int m_connection;
-        int m_backlog;
-        int m_listening;
-
-        int m_newSocket;
-        char m_buffer[BUFFER_SIZE];
-		std::string request_str;
-};
 
 class Server {
 
     public:
 
 		Server(char *configPath);
-        Server(int domain, int service, int protocol, int port, u_long interface, int backlog);
         ~Server();
 		void	set_server_sock(/*conf info*/);
 		void	start_listening();
 		void	accept_connection();
-		void startListening( void );
 
-        std::vector<Data> m_data;
 
     private:
 
