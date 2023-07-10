@@ -39,12 +39,12 @@ Socket::~Socket()
 	
 }
 
-void    Socket::bind_socket(int port)
+void    Socket::bind_socket(std::string ip, int port)
 {
     sockaddr_in sockaddr{};
     sockaddr.sin_family = AF_INET;
     sockaddr.sin_port = htons(port);
-    sockaddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    sockaddr.sin_addr.s_addr = inet_addr(ip.c_str());
     if (bind(_sock, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == -1){
         perror("bind error");
         exit(EXIT_FAILURE);

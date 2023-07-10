@@ -28,6 +28,7 @@
 
 #include "MetaVars.hpp"
 #include "Socket.hpp"
+#include "Request.hpp"
 
 #include "Config.hpp"
 

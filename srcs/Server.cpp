@@ -20,7 +20,7 @@ void	Server::set_server_sock(/*config info*/)
 		for(int j = 0;j < servers[i].m_ports.size(); j++){
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
 			cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << endl;
-			sock.bind_socket(servers[i].m_ports[j].second);
+			sock.bind_socket(servers[i].m_ports[j].first, servers[i].m_ports[j].second);
 			_server_sock.push_back(sock);
 
 		}
@@ -82,15 +82,16 @@ void	Server::accept_connection()
 
 void Server::handle( int index, Socket& client_sock )
 {
-    RequestParser parser( client_sock.get_request_str() );
-    parser.tokenizeRequest();
+	Request	request(client_sock.get_request_str());
+    // RequestParser parser( client_sock.get_request_str() );
+    // parser.tokenizeRequest();
 	std::cout << "here123\n";
 
-	const ConfigServer& server = m_Config.getConfigServerFromRequest(parser.getHeaderValueFromKey("Host"));
+	const ConfigServer& server = m_Config.getConfigServerFromRequest(request.getHeaderValueFromKey("Host"));
 
 	std::cerr << server << std::endl;
 
-    ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody(), _envp );
+    ResponseBuilder builder( request.get_request_pair(), request.getBody(), _envp );
     builder.fillReqInfo();
 
 

@@ -1,8 +1,8 @@
-#include "Request.hpp"
+#include "../includes/Request.hpp"
 
 using namespace std;
 
-Request::Request(std::string& request_str)
+Request::Request(std::string request_str)
 {
     std::istringstream   str_iss(request_str);
     vector<string>    lines;
@@ -19,7 +19,7 @@ Request::Request(std::string& request_str)
     while (getline(line_iss, getline_buffer, ' '))
         tokens.push_back(getline_buffer);
     _request_pair.push_back(make_pair("request type", tokens[0]));
-    set_path_query(tokens[1]);
+    set_path_query(tokens[1]);//split the query string after '?'
     _request_pair.push_back(make_pair("protocol", tokens[2]));
     tokens.clear();
     it++;
@@ -47,11 +47,30 @@ Request::Request(std::string& request_str)
         tokens.clear();
         it++;
     }
-	set_name_port();
+	set_name_port(); //read the 'Host' pair and split into 'server_name' and 'server_port'
 
 }
 
 Request::~Request(){}
+
+std::string Request::getHeaderValueFromKey(const std::string &key)
+{
+    for (int i = 0; i < _request_pair.size(); i++) {
+        if(_request_pair[i].first == key)
+            return _request_pair[i].second;
+    }
+    return std::string();
+}
+
+std::string	Request::getBody()
+{
+	return (_body);
+}
+
+std::vector<std::pair<std::string, std::string> >& Request::get_request_pair()
+{
+	return (_request_pair);
+}
 
 std::string	Request::get_value(std::string& key)
 {
@@ -69,7 +88,7 @@ void    Request::set_path_query(string uri)
     if (split != string::npos)
     {
         _request_pair.push_back(make_pair("path", uri.substr(0, split)));
-        _request_pair.push_back(make_pair("query", uri.substr(split)));
+        _request_pair.push_back(make_pair("query", uri.substr(split + 1)));
     }
     else
         _request_pair.push_back(make_pair("path", uri));
@@ -77,6 +96,23 @@ void    Request::set_path_query(string uri)
 
 void	Request::set_name_port()
 {
+	// for (int n = 0; n < _request_pair.size(); n++)
+	// {
+	// 	if (_request_pair[n].first == "Host")
+	// 	{
+	// 		int split = _request_pair[n].second.find(':');
+	// 		if (split != string::npos)
+	// 		{
+	// 			_request_pair.push_back(make_pair("server_name", _request_pair[n].second.substr(0, split)));
+	// 			_request_pair.push_back(make_pair("server_port", _request_pair[n].second.substr(split + 1)));
+	// 		}
+	// 		else
+	// 		{
+	// 			_request_pair.push_back(make_pair("server_name", _request_pair[n].second));
+	// 			_request_pair.push_back(make_pair("server_port", "80"));
+	// 		}
+	// 	}
+	// }
 	vector<pair<string, string> >::iterator	it = _request_pair.begin();
 
 	while (it != _request_pair.end())
@@ -86,15 +122,26 @@ void	Request::set_name_port()
 			int split = it->second.find(':');
 			if (split != string::npos)
 			{
-				_request_pair.push_back(make_pair("server name", it->second.substr(0, split)));
-				_request_pair.push_back(make_pair("server port", it->second.substr(split)));
+				_request_pair.push_back(make_pair("server_name", it->second.substr(0, split)));
+				_request_pair.push_back(make_pair("server_port", it->second.substr(split + 1)));
 			}
 			else
 			{
-				_request_pair.push_back(make_pair("server name", it->first));
-				_request_pair.push_back(make_pair("server port", "80"));
+				_request_pair.push_back(make_pair("server_name", it->first));
+				_request_pair.push_back(make_pair("server_port", "80"));
 			}
 		}
 		it++;
 	}
+}
+
+void	Request::printf_all()
+{
+	for (int n = 0; n < _request_pair.size(); n++)
+	{
+		cout << _request_pair[n].first << "=" << _request_pair[n].second << endl;
+	}
+
+	cout << _body;
+	
 }

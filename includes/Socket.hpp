@@ -1,7 +1,6 @@
 #ifndef _SOCKET_H_
 #define _SOCKET_H_
 
-// #include "Server.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -30,14 +29,14 @@ public:
 	Socket(int ipVersion, int service, int protocol);
 	Socket(int listener_fd);
 	~Socket();
-	void	bind_socket(int port);
+	void	bind_socket(std::string ip, int port);
 	void	enable_listener();
 	void	read_sock();
 	void	parse_request();
 	void	call_cgi();
 	void	parse_response();
 	int		get_sock_fd();
-	string	get_request_str();
+	std::string	get_request_str();
 private:
 	int	_sock;
 	std::string	_request_str; 
