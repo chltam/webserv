@@ -37,8 +37,10 @@ void AResponse::saveDateTime() {
     char buffer[ 80 ];
 
     time( &rawtime );
+    //  All HTTP date/time stamps MUST be represented in Greenwich Mean Time (GMT)!!!
     timeinfo = localtime( &rawtime );
 
+    // HTTP also requires the weekday in front! This is preferred: Sun, 06 Nov 1994 08:49:37 GMT
     strftime( buffer, 80, "%Y-%m-%d %H:%M:%S", timeinfo );
     string str( buffer );
     _dateTime = str;

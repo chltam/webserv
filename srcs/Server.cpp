@@ -121,48 +121,6 @@ void	Server::accept_connection()
 
 }
 
-// void Server::startListening( void )
-// {
-
-//     for (int i = 0; i < (int)m_data.size(); i++)
-//     {
-//         m_data[i].m_listening = listen(m_data[i].m_sock, m_data[i].m_backlog);
-//         test_connection(m_data[i].m_listening);
-//     }
-
-//     std::vector<pollfd> fds(m_data.size());
-// 	for (int n = 0; n < m_data.size(); n++)
-// 	{
-// 		fds[n].fd = m_data[n].m_sock;
-// 		fds[n].events = POLLIN;
-// 		fds[n].revents = 0;
-// 	}
-
-//     while (true)
-//     {
-//         std::cout << "========= WAITING ========" << std::endl;
-//         int result = poll(fds.data(), fds.size(), 1000);
-//         std::cout << "right after poll()" << std::endl;
-
-//         if (result < 0) {
-//             perror("poll() failed");
-//             exit(EXIT_FAILURE); // REMOVE CLIENT ACCORDING TO EVAL SHEET
-//         }
-//         std::cerr << "RESULT = " << result << std::endl;
-//         for (int i = 0; i < (int)fds.size(); i++)
-//         {
-//             if (fds[i].revents & POLLIN)
-//             {
-//                 std::cout << "Found proper fd at: " << i << std::endl;
-//                 accepter(i);
-//                 respond(i); // just our basic responses
-//                 handle(i);
-//             }
-//         }
-//         std::cout << "======== DONE =====" << std::endl;
-//     }
-// }
-
 void Server::accepter(int index)
 {
 
@@ -197,25 +155,12 @@ void Server::accepter(int index)
 	std::cout << m_data[index].request_str << std::endl;
 }
 
-void Server::respond(int index)
-{
-    (void)index;
-    // if (index) { // port 8081
-    //     char l[] = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 1234\nDate: Thu, 01 Jul 2023 12:34:56 GMT\nServer: Apache\n\n<!DOCTYPE html>\n<html>\n<head>\n<title>Example Page</title>\n</head>\n<body>\n<h1>Hello, World!</h1>\n</body>\n</html>";
-    //     write(m_data[index].m_newSocket,l,sizeof(l));
-    // }
-    // else // port 8080
-    //     write(m_data[index].m_newSocket,"wtf\n",4);
-}
-
 void Server::handle( int index, Socket& client_sock )
 {
+    RequestParser parser( client_sock.get_request_str() ); // COSMO: sometimes this string is empty with Firefox requests, should never be 
+	cout << client_sock.get_request_str() << endl;
 
-	cout << "here12333\n" << endl;
-
-    RequestParser parser( client_sock.get_request_str() );
     parser.tokenizeRequest();
-	
 
 	const ConfigServer& server = m_Config.getConfigServerFromRequest(parser.getHeaderValueFromKey("Host"));
 

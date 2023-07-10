@@ -21,35 +21,30 @@
 
 #define VALID_REQUEST_NUM 3
 
-using namespace std;
-
 class ResponseBuilder {
 
     public:
 
-        // ResponseBuilder( vector<pair<string, string>> headerPairs, string body );
-        ResponseBuilder( );
+        ResponseBuilder();
         ~ResponseBuilder();
 
-        AResponse* createResponse(Request& request, const Config& config);
+        AResponse* createResponse( Request& request, const Config& config );
 
     private:
-        void fillReqInfo(Request& request, const Config& config);
 
-        // vector<pair<string, string>> _reqHeaderPairs;
-        // string _reqBody;
-        // Config _config;
-        // RequestParser _request;
+        void fillReqInfo( Request& request, const Config& config );
+        void buildPath( Request& request, const Config& config );
+        bool checkIfDir( const ConfigServer& server, const std::string& path );
 
-        string _reqType;
-        string _path;
-        string _status;
-        string _statusMsg;
-        string _dateTime;
-        string _serverName;
-        string _contType;
-        string _contLen;
+        std::string _reqType;
+        std::string _path;
+        std::string _status;
+        std::string _statusMsg;
+        std::string _dateTime;
+        std::string _serverName;
+        std::string _contType;
+        std::string _contLen;
 
-        string _respHeader;
-        string _respBody;
+        std::string _respHeader;
+        std::string _respBody;
 };

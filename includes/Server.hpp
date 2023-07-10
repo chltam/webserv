@@ -35,8 +35,6 @@
 
 using namespace std;
 
-
-
 class Data {
 
     public:
@@ -65,11 +63,9 @@ class Server {
 		void	accept_connection();
 		void startListening( void );
 
-
-
         std::vector<Data> m_data;
-    private:
 
+    private:
 
         std::vector<Socket>	_server_sock;
         Config m_Config;
@@ -77,8 +73,6 @@ class Server {
         void test_connection(int);
         void accepter(int index);
         void handle(int index, Socket& client_sock);
-        void respond(int index);
-
 };
 
 #endif

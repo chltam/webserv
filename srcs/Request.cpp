@@ -1,9 +1,7 @@
 #include "../includes/Request.hpp"
 #include "Request.hpp"
 
-Request::Request() {
-
-};
+Request::Request() {};
 
 Request::~Request() {};
 
