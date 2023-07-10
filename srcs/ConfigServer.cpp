@@ -1,9 +1,10 @@
 #include "ConfigServer.hpp"
+#include "webserv.hpp"
 
 ConfigServer::ConfigServer()
 {
     //setup default values
-    m_root = "/default";
+    m_root = "/files";
     m_defaultFile = "index.html";
     m_allowedMethods = METH_ALL;
     m_clientBodyBufferSize = 1000000000;
@@ -17,9 +18,41 @@ void ConfigServer::AddRoute(std::string path, ConfigRoute &route)
     m_routes.emplace(path,route);
 }
 
-const ConfigRoute& ConfigServer::getRouteFromPath(const std::string& path) const
+const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
 {
-    return m_routes.find(path)->second;
+    const ConfigRoute* route = &(m_routes.find("/")->second); //guaranteed to be in there
+    const ConfigRoute* tmpRoute = NULL;
+
+    std::string tempPath("/");
+
+    int slashes = 1;
+    while(tempPath != path){
+        tmpRoute = &(m_routes.find(tempPath)->second);
+        if(tmpRoute == NULL)
+            break;
+        else
+            route = tmpRoute;
+        slashes++;
+        tempPath = path.substr(0,path.find("/",3));
+    }
+
+
+
+    //route = &(m_routes.find(path)->second);
+    //find the best matching path
+
+    // /whatever/anotherdir/newdir
+    //  /
+    //  /whatever/
+    //  /whatever/anotherdir/
+    //  /whatever/anotherdir/newdir
+
+
+
+    PRINT(path);
+
+
+    return route;
 }
 
 std::string ConfigServer::MethodEnumToString(int val) const

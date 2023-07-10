@@ -78,8 +78,12 @@ void Config::Parser()
             m_servers.push_back(ConfigServer());
             brackCount++;
         }
-        else if(m_rawData[i].second == T_BRACK_CLS)
+        else if(m_rawData[i].second == T_BRACK_CLS){
+            //completed looking through server, can add the root directory
+            int currServerId = m_servers.size() -1;
+            m_servers[currServerId].m_routes.emplace("/",ConfigRoute(m_servers[currServerId]));
             brackCount--;
+        }
         else if(m_rawData[i].second != T_VALUE){
             //found a key that needs to be sorted out
             int currServerId = m_servers.size() -1;
@@ -223,7 +227,7 @@ bool Config::isValidChar(char c)
     return true;
 }
 
-const ConfigServer &Config::getConfigServerFromRequest(std::string hostPort) const
+const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) const
 {
     //error checking might not be neccesary because if we get here we already know its one of our expected ports
 
@@ -231,10 +235,14 @@ const ConfigServer &Config::getConfigServerFromRequest(std::string hostPort) con
     for (int i = 0; i < m_servers.size(); i++){
         for (int j = 0; j < m_servers[i].m_ports.size(); j++) {
 
-            if(m_servers[i].m_ports[j].second == port)
-                return m_servers[i];
+            if(m_servers[i].m_ports[j].second == port){
+                std::cerr << "trying to return a server" << std::endl;
+                return &m_servers[i];
+            }
         }
 
     }
+    std::cerr << "returning NULL" << std::endl;
 
+    return NULL;
 }
