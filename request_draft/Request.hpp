@@ -18,8 +18,10 @@ public:
     std::string getBody();
     
 private:
-    std::string _body;
     std::vector<std::pair<std::string, std::string> >    _request_pair;
+    std::string _body;
+
+    void    set_path_query(std::string uri);
 
 };
 

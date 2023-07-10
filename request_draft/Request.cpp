@@ -19,8 +19,8 @@ Request::Request(std::string& request_str)
     while (getline(line_iss, getline_buffer, ' '))
         tokens.push_back(getline_buffer);
     _request_pair.push_back(make_pair("request type", tokens[0]));
-    //set path
-    //set host protocol
+    set_path_query(tokens[1]);
+    _request_pair.push_back(make_pair("protocol", tokens[2]));
     tokens.clear();
     it++;
 
@@ -51,4 +51,16 @@ Request::Request(std::string& request_str)
 }
 
 Request::~Request(){}
+
+void    Request::set_path_query(string uri)
+{
+    int split = uri.find('?');
+    if (split != string::npos)
+    {
+        _request_pair.push_back(make_pair("path", uri.substr(0, split)));
+        _request_pair.push_back(make_pair("query", uri.substr(split)));
+    }
+    else
+        _request_pair.push_back(make_pair("path", uri));
+}       
 
