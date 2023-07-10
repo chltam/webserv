@@ -33,6 +33,7 @@ void RequestParser::tokenizeRequest( void ) {
     _headerPairs.push_back(make_pair("path", tokens[1]));
     tokens.clear();
 
+
     // handle remaining lines
     while ( it != lines.end() ) {
 
@@ -79,7 +80,6 @@ std::string RequestParser::getHeaderValueFromKey(const std::string &key)
         if(_headerPairs[i].first == key)
             return _headerPairs[i].second;
     }
-
     return std::string();
 }
 

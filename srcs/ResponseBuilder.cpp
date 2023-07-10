@@ -1,13 +1,12 @@
 #include "../includes/ResponseBuilder.hpp"
 
-// ResponseBuilder::ResponseBuilder( vector<pair<string, string>> headerPairs, string body ) {
-ResponseBuilder::ResponseBuilder() {
+using namespace std;
 
-};
+ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
-void ResponseBuilder::fillReqInfo(Request& request, const Config& config) {
+void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
     //find server based on port
     //check the directory (valid route) -> if not exist == error
@@ -19,40 +18,10 @@ void ResponseBuilder::fillReqInfo(Request& request, const Config& config) {
         //if CGI valid -> run CGI
         //else do the rest her
 
+	// buildPath( request, config);
 
-	const ConfigServer& server = config.getConfigServerFromRequest(request.getHeaderValueFromKey("Host"));
-	std::cerr << server << std::endl;
-
-    std::string path = request.getHeaderValueFromKey("path");
-    std::cerr << path << std::endl;
-
-    // if (!checkIfFolder(path))
-        // --> it's a file!
-
-    DIR* dir; // DIR is a type from dirent.h
-    struct dirent* ent; // dirent is a struct type from dirent.h
-
-    dir = opendir((server.m_root + path).c_str()); // replace with your directory
-    if (dir == NULL) { // always check if opendir was successful
-        std::cerr << "NOT A DIR" << std::endl;
-        // return ;
-    } else {
-
-        std::cerr << "IT IS A DIR" << std::endl;
-    }
-
-
-    std::string tempPath(path.substr(0,path.rfind('/')));
-    std::cerr << "temp path =" << tempPath << std::endl;
-    // /files/test_dir ->loop over the routes
-    const ConfigRoute& configRoute = server.getRouteFromPath(tempPath);
-    //if(!validDirectory(path))
-        //error handling
-    std::string completePath(configRoute.m_root + tempPath);
-        std::cerr << "compelte path =" << completePath << std::endl;
-
-    std::cerr << "HEEEEEEEEEEEEEEE" << std::endl;
-    std::cerr << configRoute << std::endl;
+    // give 301 Code (Moved Permanently) here? Server responds with the new url.
+    // Once a client receives that request he will than make a new http request from that location. 
 
     vector<pair<string, string>> reqHeaderPairs = request.getHeaderPairs(); 
 
@@ -62,8 +31,9 @@ void ResponseBuilder::fillReqInfo(Request& request, const Config& config) {
         if ( it->first == "request type" ) {
             _reqType = it->second;
         }
-        else if ( it->first == "path" ) { // COULD BE another function that resolves the path
+        else if ( it->first == "path" ) { // SHOULD BE REPLACED by buildPath()
             
+            cerr << "IT->SECOND: " << it->second << endl;
             if ( it->second == "/" ) {
                 _path = "/files/index.html";
             }
@@ -75,9 +45,53 @@ void ResponseBuilder::fillReqInfo(Request& request, const Config& config) {
             _serverName = it->second;
         }
         else if ( it->first == "Accept" ) {
-            _contType = it->second;
+            _contType = it->second;     // media-type = type "/" subtype * (NO whitespace between)
         }
     };
+};
+
+void ResponseBuilder::buildPath( Request& request, const Config& config ) {
+
+    const ConfigServer& server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
+	cerr << server << endl;
+    // check here? if no server/config route -> ERROR
+
+    string path = request.getHeaderValueFromKey( "path" );
+    cerr << "path from request: " << path << endl;
+
+    // if ( !checkIfDir( server, path) ) {
+    //     // do sth to path string?
+    // }
+
+    string tempPath( path.substr( 0,path.rfind('/') ));
+    cerr << "temp path =" << tempPath << endl;
+    // /files/test_dir ->loop over the routes
+
+    string completePath;
+    if ( tempPath.length() != 0 ) {
+
+        const ConfigRoute& configRoute = server.getRouteFromPath( tempPath );
+        completePath = configRoute.m_root + tempPath;
+        cerr << "complete path =" << completePath << endl;
+
+        cerr << "HEEEEEEEEEEEEEEE" << endl;
+        cerr << configRoute << endl;
+    }
+};
+
+bool ResponseBuilder::checkIfDir( const ConfigServer& server, const string& path ) {
+
+    DIR* dir;
+    struct dirent* ent;
+
+    dir = opendir((server.m_root + path).c_str());
+    if (dir == NULL) { 
+        cerr << "NOT A DIR" << endl;
+        return ( false );
+    } else {
+        cerr << "IT IS A DIR" << endl;
+        return ( true );
+    }
 };
 
 static AResponse* makeGetResponse( string path, string serverName, string contType, string reqBody ) {
