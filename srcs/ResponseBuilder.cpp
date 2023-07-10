@@ -38,7 +38,7 @@ void ResponseBuilder::fillReqInfo() {
 	mvars.set_value("SCRIPT_FILENAME", "files/simple.html");
 	mvars.set_content_length(_reqBody);
 	mvars.update_envp();
-	mvars.print_envp();
+	// mvars.print_envp();
 
 };
 

@@ -31,7 +31,6 @@
 
 #include "Config.hpp"
 
-#define BUFFER_SIZE 100
 
 using namespace std;
 

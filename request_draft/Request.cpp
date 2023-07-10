@@ -47,10 +47,21 @@ Request::Request(std::string& request_str)
         tokens.clear();
         it++;
     }
+	set_name_port();
 
 }
 
 Request::~Request(){}
+
+std::string	Request::get_value(std::string& key)
+{
+
+	for (vector<pair<string, string> >::iterator it = _request_pair.begin();
+			it != _request_pair.end(); it++)
+		if (it->first == key)
+			return (it->second);
+	return ("");
+}
 
 void    Request::set_path_query(string uri)
 {
@@ -64,3 +75,26 @@ void    Request::set_path_query(string uri)
         _request_pair.push_back(make_pair("path", uri));
 }       
 
+void	Request::set_name_port()
+{
+	vector<pair<string, string> >::iterator	it = _request_pair.begin();
+
+	while (it != _request_pair.end())
+	{
+		if (it->first == "Host")
+		{
+			int split = it->second.find(':');
+			if (split != string::npos)
+			{
+				_request_pair.push_back(make_pair("server name", it->second.substr(0, split)));
+				_request_pair.push_back(make_pair("server port", it->second.substr(split)));
+			}
+			else
+			{
+				_request_pair.push_back(make_pair("server name", it->first));
+				_request_pair.push_back(make_pair("server port", "80"));
+			}
+		}
+		it++;
+	}
+}

@@ -26,8 +26,6 @@ RequestParser::RequestParser( string sockBuffer ) {
 
 void RequestParser::tokenizeRequest( void ) {
 
-    cout << _buffer << endl;
-
     // split whole request into lines
     istringstream line_iss( _buffer );
     vector<string> lines;
@@ -77,8 +75,8 @@ void RequestParser::tokenizeRequest( void ) {
         it++;
     }
 
-    this->printHeaderPairs();
-    this->printBody();
+    // this->printHeaderPairs();
+    // this->printBody();
 }
 
 void RequestParser::printHeaderPairs( void ) {

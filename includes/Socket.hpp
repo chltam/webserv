@@ -21,7 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <MetaVars.hpp>
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 500
 
 class Socket {
 

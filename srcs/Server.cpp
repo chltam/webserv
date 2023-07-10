@@ -62,20 +62,29 @@ void	Server::accept_connection()
 			if (pfd[n].revents & POLLIN)
 			{
 				Socket	client_sock(pfd[n].fd);
+				
+				// pollfd cfd = {client_sock.get_sock_fd(), POLL_IN, 0};
+				// pfd.push_back(cfd);
+				
 				client_sock.read_sock();
+				std::cout << "here\n";
+
+				// cout << client_sock.get_request_str() << endl;
 				handle(n, client_sock);
 				// cout << client_sock.get_request_str() << endl;
+				// pfd.pop_back();
 			}
 		}
+
 	}
 
 }
 
 void Server::handle( int index, Socket& client_sock )
 {
-
     RequestParser parser( client_sock.get_request_str() );
     parser.tokenizeRequest();
+	std::cout << "here123\n";
 
 	const ConfigServer& server = m_Config.getConfigServerFromRequest(parser.getHeaderValueFromKey("Host"));
 
