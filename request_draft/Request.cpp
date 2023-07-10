@@ -67,6 +67,11 @@ std::string	Request::getBody()
 	return (_body);
 }
 
+std::vector<std::pair<std::string, std::string> >& Request::get_request_pair()
+{
+	return (_request_pair);
+}
+
 std::string	Request::get_value(std::string& key)
 {
 

@@ -79,40 +79,6 @@ void	Server::accept_connection()
 
 }
 
-// void Server::accepter(int index)
-// {
-
-//     m_data[index].m_newSocket = accept(m_data[index].m_sock, (struct sockaddr *)&m_data[index].m_address, (socklen_t *)&m_data[index].m_adressLen);
-//     // read( m_data[index].m_newSocket,  m_data[index].m_buffer, BUFFER_SIZE );
-// 	// std::cout << m_data[index].m_buffer << std::endl;
-// 	pollfd	pfd;
-// 	pfd.fd = m_data[index].m_newSocket;
-// 	pfd.events = POLLIN;
-// 	pfd.revents = 0;
-// 	m_data[index].request_str.clear();
-// 	while (1)
-// 	{
-// 		// char *buffer = new char*[BUFFER_SIZE];
-// 		int	poll_result = poll(&pfd, 1, 100);
-// 		if (poll_result == -1){
-// 			perror("poll error");
-// 			break;
-// 		}
-// 		else if (poll_result == 0)
-// 			break;
-// 		else{
-// 			int bread = read( m_data[index].m_newSocket,  m_data[index].m_buffer, BUFFER_SIZE );
-// 			m_data[index].m_buffer[bread] = 0;
-// 			std::cout << bread << std::endl;
-// 			if (bread == 0)
-// 				break;
-// 			else
-// 				m_data[index].request_str += m_data[index].m_buffer;
-// 		}
-// 	}
-// 	std::cout << m_data[index].request_str << std::endl;
-// }
-
 void Server::handle( int index, Socket& client_sock )
 {
     RequestParser parser( client_sock.get_request_str() ); // COSMO: sometimes this string is empty with Firefox requests, should never be 
@@ -120,11 +86,11 @@ void Server::handle( int index, Socket& client_sock )
 
     parser.tokenizeRequest();
 
-	// const ConfigServer& server = m_Config.getConfigServerFromRequest(parser.getHeaderValueFromKey("Host"));
+	const ConfigServer& server = m_Config.getConfigServerFromRequest(parser.getHeaderValueFromKey("Host"));
 
-	// std::cerr << server << std::endl;
+	std::cerr << server << std::endl;
 
-    // ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
+    ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
 	ResponseBuilder builder;
     AResponse *response = builder.createResponse( *parser.createRequest(), m_Config );
 
