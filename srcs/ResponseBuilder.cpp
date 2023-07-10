@@ -6,6 +6,8 @@ ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
+// if anything fails, create ErrorResponse!
+
 void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
     //find server based on port
@@ -33,7 +35,6 @@ void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
         }
         else if ( it->first == "path" ) { // SHOULD BE REPLACED by buildPath()
             
-            cerr << "IT->SECOND: " << it->second << endl;
             if ( it->second == "/" ) {
                 _path = "/files/index.html";
             }
@@ -106,15 +107,15 @@ static AResponse* makeDeleteResponse( string path, string serverName, string con
     return (new DeleteResponse( path, serverName, contType, reqBody ));
 }
 
-static AResponse* makeErrorResponse( string path, string serverName, string contType, string reqBody ) {
-    return (new ErrorResponse( path, serverName, contType, reqBody ));
+static AResponse* makeErrorResponse( string path, string serverName, string contType, string reqBody, string status ) {
+    return (new ErrorResponse( path, serverName, contType, reqBody, status ));
 }
 
+
+// WORK ON GETTING THE ERROR RESPONSE IN CORRECT CASES!
 AResponse* ResponseBuilder::createResponse(Request& request, const Config& config) {
 
-    // fillReqInfo stuff here
     fillReqInfo(request,config);
-
 
     AResponse* ( *allResponses[] )( string _path, string _serverName, string _contType,
         string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse };
@@ -124,10 +125,20 @@ AResponse* ResponseBuilder::createResponse(Request& request, const Config& confi
 
         if ( _reqType == responses[ i ] ) {
 
-            cout << _reqType << "Response created" << endl;
-			return ( allResponses[ i ]( _path, _serverName, _contType, request.getBody() )); // call creator ft here
+            AResponse* response = allResponses[ i ]( _path, _serverName, _contType, request.getBody() );
+			if ( response->getExecResult() == 1 ) {
+
+                string status = response->getStatus();
+                cout << _reqType << "Response could not be created" << endl;
+                delete response;
+                return ( makeErrorResponse( _path, _serverName, _contType, request.getBody(), status ));
+            
+            } else {
+                cout << _reqType << "Response created" << endl;
+                return ( response );
+            }
         }
     }
     cout << _reqType << "Response could not be created" << endl;
-    return ( makeErrorResponse( _path, _serverName, _contType, request.getBody() ));
+    return ( makeErrorResponse( _path, _serverName, _contType, request.getBody(), "501 Not Implemented" ));
 };
