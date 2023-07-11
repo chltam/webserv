@@ -1,14 +1,11 @@
 #include "Server.hpp"
 
-int main(int ac, char **av) {
+int main(int argc, char **argv, char **envp) {
 
-    (void)ac;
-    (void)av;
-    // configuration = readfile(file);
-    // Server server = Server( AF_INET, SOCK_STREAM, 0, 8080, INADDR_ANY, 10 );
-    // server.startListening();
+    (void)argc;
+    
 
-	Server	tserver(av[1]);
+	Server	tserver(argv[1], envp);
 	tserver.set_server_sock(); //should that be part of the object creation?
 	cout << "here\n" << endl;
 	tserver.start_listening();
