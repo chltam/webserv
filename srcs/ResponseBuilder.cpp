@@ -21,18 +21,18 @@ void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 	// buildPath( request, config);
 
     // give 301 Code (Moved Permanently) here? Server responds with the new url.
-    // Once a client receives that request he will than make a new http request from that location. 
+    // Once a client receives that request he will than make a new http request from that location.
 
-    vector<pair<string, string>> reqHeaderPairs = request.getHeaderPairs(); 
+    vector<pair<string, string>> reqHeaderPairs = request.getHeaderPairs();
 
     for (vector< pair<string, string> >::const_iterator it = reqHeaderPairs.begin();
         it != reqHeaderPairs.end(); ++it) {
-        
+
         if ( it->first == "request type" ) {
             _reqType = it->second;
         }
         else if ( it->first == "path" ) { // SHOULD BE REPLACED by buildPath()
-            
+
             cerr << "IT->SECOND: " << it->second << endl;
             if ( it->second == "/" ) {
                 _path = "/files/index.html";
@@ -52,31 +52,17 @@ void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
 void ResponseBuilder::buildPath( Request& request, const Config& config ) {
 
-    const ConfigServer& server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
+    const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 	cerr << server << endl;
-    // check here? if no server/config route -> ERROR
 
     string path = request.getHeaderValueFromKey( "path" );
     cerr << "path from request: " << path << endl;
 
-    // if ( !checkIfDir( server, path) ) {
-    //     // do sth to path string?
-    // }
+    const ConfigRoute* configRoute = server->getRouteFromPath( path );
 
-    string tempPath( path.substr( 0,path.rfind('/') ));
-    cerr << "temp path =" << tempPath << endl;
-    // /files/test_dir ->loop over the routes
+    cerr << "HEEEEEEEEEEEEEEE" << endl;
+    cerr << *configRoute << endl;
 
-    string completePath;
-    if ( tempPath.length() != 0 ) {
-
-        const ConfigRoute& configRoute = server.getRouteFromPath( tempPath );
-        completePath = configRoute.m_root + tempPath;
-        cerr << "complete path =" << completePath << endl;
-
-        cerr << "HEEEEEEEEEEEEEEE" << endl;
-        cerr << configRoute << endl;
-    }
 };
 
 bool ResponseBuilder::checkIfDir( const ConfigServer& server, const string& path ) {
@@ -85,7 +71,7 @@ bool ResponseBuilder::checkIfDir( const ConfigServer& server, const string& path
     struct dirent* ent;
 
     dir = opendir((server.m_root + path).c_str());
-    if (dir == NULL) { 
+    if (dir == NULL) {
         cerr << "NOT A DIR" << endl;
         return ( false );
     } else {
@@ -114,7 +100,7 @@ AResponse* ResponseBuilder::createResponse(Request& request, const Config& confi
 
     // fillReqInfo stuff here
     fillReqInfo(request,config);
-
+    buildPath(request,config); //currently used for jean testing
 
     AResponse* ( *allResponses[] )( string _path, string _serverName, string _contType,
         string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse };
