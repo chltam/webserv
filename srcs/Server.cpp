@@ -86,6 +86,11 @@ void Server::handle( int index, Socket& client_sock )
 
     // parser.tokenizeRequest();
 
+	if (client_sock.get_request_str().empty() == true)
+	{
+   		close(client_sock.get_sock_fd());
+		return ;
+	}
 	Request	request(client_sock.get_request_str());
 
     //ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );

@@ -70,7 +70,7 @@ void    Socket::read_sock()
 	while (1)
 	{
 		// char *buffer = new char*[BUFFER_SIZE];
-		int	poll_result = poll(&pfd, 1, 100);
+		int	poll_result = poll(&pfd, 1, 1000);
 		if (poll_result == -1){
 			perror("poll error");
 			break;

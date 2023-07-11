@@ -48,7 +48,7 @@ Request::Request(std::string request_str)
         tokens.clear();
         it++;
     }
-	set_name_port(); //read the 'Host' pair and split into 'server_name' and 'server_port'
+	// set_name_port(); //read the 'Host' pair and split into 'server_name' and 'server_port'
 
 }
 
