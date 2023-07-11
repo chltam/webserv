@@ -33,7 +33,6 @@ void RequestParser::tokenizeRequest( void ) {
     _headerPairs.push_back(make_pair("path", tokens[1]));
     tokens.clear();
 
-
     // handle remaining lines
     while ( it != lines.end() ) {
 
@@ -41,7 +40,7 @@ void RequestParser::tokenizeRequest( void ) {
         if ( *it == "\r" ) {
 
             ++it;  // skip the empty line
-            while (it != lines.end()) {
+            while ( it != lines.end() ) {
                 _body += *it + '\n';
                 ++it;
             }
@@ -57,7 +56,6 @@ void RequestParser::tokenizeRequest( void ) {
         tokens.clear();
         it++;
     }
-
     this->printHeaderPairs();
     this->printBody();
 }

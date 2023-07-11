@@ -32,7 +32,7 @@ class ResponseBuilder {
 
     private:
 
-        void fillReqInfo( Request& request, const Config& config );
+        int fillReqInfo( Request& request, const Config& config );
         void buildPath( Request& request, const Config& config );
         bool checkIfDir( const ConfigServer& server, const std::string& path );
 

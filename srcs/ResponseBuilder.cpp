@@ -6,9 +6,7 @@ ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
-// if anything fails, create ErrorResponse!
-
-void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
+int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
     //find server based on port
     //check the directory (valid route) -> if not exist == error
@@ -49,6 +47,8 @@ void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
             _contType = it->second;     // media-type = type "/" subtype * (NO whitespace between)
         }
     };
+
+    return ( EXIT_SUCCESS );
 };
 
 void ResponseBuilder::buildPath( Request& request, const Config& config ) {
@@ -111,11 +111,13 @@ static AResponse* makeErrorResponse( string path, string serverName, string cont
     return (new ErrorResponse( path, serverName, contType, reqBody, status ));
 }
 
-
-// WORK ON GETTING THE ERROR RESPONSE IN CORRECT CASES!
 AResponse* ResponseBuilder::createResponse(Request& request, const Config& config) {
 
-    fillReqInfo(request,config);
+    int checker = 0;
+
+    if ( fillReqInfo(request,config) == EXIT_FAILURE ) {
+        makeErrorResponse ( _path, _serverName, _contType, request.getBody(), _status);
+    };
 
     AResponse* ( *allResponses[] )( string _path, string _serverName, string _contType,
         string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse };

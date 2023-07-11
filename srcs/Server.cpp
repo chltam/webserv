@@ -170,6 +170,7 @@ void Server::handle( int index, Socket& client_sock )
     AResponse *response = builder.createResponse( request, m_Config );
 
     response->fillResponse();
+	response->printHeaderInfo();
     string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
 
     // write to socket
