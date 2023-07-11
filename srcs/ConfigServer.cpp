@@ -31,7 +31,7 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
     std::string tempPath("/");
 
     size_t prev = 0;
-    while(tempPath != path){
+    while(true){ //sketchy! might find a better way out
         it = m_routes.find(tempPath);
         if(it == m_routes.end()){
             //std::cout << "Couldn't find:" << tempPath << std::endl;
@@ -42,13 +42,19 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
             route = &(m_routes.find(tempPath)->second);
         }
         prev = path.find("/",prev+1);
-        tempPath = path.substr(0,prev);
+        PRINTVAR(prev);
+        if(prev != std::string::npos){
+            PRINT("found NPOS");
+            tempPath = path.substr(0,prev);
+        }
+        else
+             tempPath = path.substr(0);
         if(tempPath.empty()){
             break;
         }
     }
     PRINT("Final CONFIG");
-    PRINT(*route);
+    PRINTVAR(*route);
 
     return route;
 }
