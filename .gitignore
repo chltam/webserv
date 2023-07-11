@@ -1,0 +1,5 @@
+files/
+objs/
+.vscode/
+/Default.conf
+/simple.conf
