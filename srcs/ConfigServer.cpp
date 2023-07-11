@@ -18,39 +18,37 @@ void ConfigServer::AddRoute(std::string path, ConfigRoute &route)
     m_routes.emplace(path,route);
 }
 
+//find the best matching path
+// path = /whatever/anotherdir/newdir
+//  /
+//  /whatever/
+//  /whatever/anotherdir/
+//  /whatever/anotherdir/newdir
 const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
 {
     const ConfigRoute* route = &(m_routes.find("/")->second); //guaranteed to be in there
-    const ConfigRoute* tmpRoute = NULL;
-
+    std::map<std::string,ConfigRoute>::const_iterator it;
     std::string tempPath("/");
 
-    int slashes = 1;
+    size_t prev = 0;
     while(tempPath != path){
-        tmpRoute = &(m_routes.find(tempPath)->second);
-        if(tmpRoute == NULL)
+        it = m_routes.find(tempPath);
+        if(it == m_routes.end()){
+            //std::cout << "Couldn't find:" << tempPath << std::endl;
             break;
-        else
-            route = tmpRoute;
-        slashes++;
-        tempPath = path.substr(0,path.find("/",3));
+        }
+        else{
+            //std::cout << "Found route with path [" << tempPath << "]" << std::endl;
+            route = &(m_routes.find(tempPath)->second);
+        }
+        prev = path.find("/",prev+1);
+        tempPath = path.substr(0,prev);
+        if(tempPath.empty()){
+            break;
+        }
     }
-
-
-
-    //route = &(m_routes.find(path)->second);
-    //find the best matching path
-
-    // /whatever/anotherdir/newdir
-    //  /
-    //  /whatever/
-    //  /whatever/anotherdir/
-    //  /whatever/anotherdir/newdir
-
-
-
-    PRINT(path);
-
+    PRINT("Final CONFIG");
+    PRINT(*route);
 
     return route;
 }
