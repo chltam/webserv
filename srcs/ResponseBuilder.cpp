@@ -31,7 +31,7 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
         if ( it->first == "request type" ) {
             _reqType = it->second;
-			mvars.set_value("REQUEST_METHOD", it->second);
+			
         }
         else if ( it->first == "path" ) { // SHOULD BE REPLACED by buildPath()
 
@@ -44,8 +44,6 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
         }
         else if ( it->first == "Host" ) {
             _serverName = it->second;
-			mvars.set_value("SERVER_NAME", it->second.substr(0, it->second.find(':')));
-			mvars.set_value("SERVER_PORT", it->second.substr(it->second.find(':'), it->second.size()));
         }
         else if ( it->first == "Accept" ) {
             _contType = it->second;     // media-type = type "/" subtype * (NO whitespace between)

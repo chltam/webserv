@@ -50,9 +50,13 @@ class Server {
 
     private:
 
+        char **_envp;
         std::vector<Socket>	_server_sock;
         Config m_Config;
-		char	**_envp;
+        ResponseBuilder _builder;
+
+        void test_connection(int);
+        void accepter(int index);
         void handle(int index, Socket& client_sock);
 
 };
