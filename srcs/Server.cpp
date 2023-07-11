@@ -1,6 +1,6 @@
 #include "../includes/Server.hpp"
 
-Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath)
+Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder()
 {
 	_envp = envp;
 	m_Config.printServers();
@@ -92,10 +92,10 @@ void Server::handle( int index, Socket& client_sock )
 		return ;
 	}
 	Request	request(client_sock.get_request_str());
+	request.printf_all();
 
     //ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
-	ResponseBuilder builder;
-    AResponse *response = builder.createResponse( request, m_Config );
+    AResponse *response = _builder.createResponse( request, m_Config );
 
     response->fillResponse();
 	response->printHeaderInfo();

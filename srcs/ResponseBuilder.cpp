@@ -37,7 +37,7 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
                 _path = "/files/index.html";
             }
             else {
-                _path = it->second;
+                _path = it->second; // return the path from pathBuilder ft (which takes it->second)
             }
         }
         else if ( it->first == "Host" ) {

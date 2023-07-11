@@ -51,6 +51,7 @@ class Server {
 		char **_envp;
         std::vector<Socket>	_server_sock;
         Config m_Config;
+        ResponseBuilder _builder;
 
         void test_connection(int);
         void accepter(int index);
