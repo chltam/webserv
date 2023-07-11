@@ -68,7 +68,6 @@ void	Server::accept_connection()
 				// pfd.push_back(cfd);
 				
 				client_sock.read_sock();
-				std::cout << "here\n";
 
 				// cout << client_sock.get_request_str() << endl;
 				handle(n, client_sock);
@@ -83,16 +82,13 @@ void	Server::accept_connection()
 
 void Server::handle( int index, Socket& client_sock )
 {
-    // RequestParser parser( client_sock.get_request_str() ); // COSMO: sometimes this string is empty with Firefox requests, should never be
-	// cout << client_sock.get_request_str() << endl;
-
-    // parser.tokenizeRequest();
 
 	if (client_sock.get_request_str().empty() == true)
 	{
    		close(client_sock.get_sock_fd());
 		return ;
 	}
+	std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());
 	request.printf_all();
 

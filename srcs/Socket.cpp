@@ -89,7 +89,6 @@ void    Socket::read_sock()
 				_request_str += buffer;
 		}
 	}
-	std::cout << _request_str << std::endl;
 }
 
 int	Socket::get_sock_fd(){
