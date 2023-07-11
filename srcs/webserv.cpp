@@ -11,8 +11,20 @@ int ValidatePath(const std::string &path)
     int ret = stat(path.c_str(),&status);
     if(ret == -1)
         std::cout << strerror(errno) << std::endl;
-    else {
-        std::cout << "Success" << std::endl;
-        return (status.st_mode & S_IFMT);
-    }
+    std::cout << "Success" << std::endl;
+    return (status.st_mode & S_IFMT);
+}
+
+std::string MethodEnumToString(int val)
+{
+    std::string ret;
+    if(val & METH_GET)
+        ret += "GET ";
+    if(val & METH_POST)
+        ret += "POST ";
+    if(val & METH_DELETE)
+        ret += "DELETE ";
+    if(val > METH_ALL)
+        ret+= "INVALID METHODS";
+    return ret;
 }

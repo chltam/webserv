@@ -3,17 +3,9 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include "webserv.hpp"
 
 class ConfigServer;
-
-enum AllowedMethods{
-    METH_NONE   = 0,
-    METH_GET    = 1,
-    METH_POST   = 2,
-    METH_DELETE = 4,
-    METH_ALL    = 7
-};
-
 
 
 class ConfigRoute
@@ -21,7 +13,6 @@ class ConfigRoute
 public:
     ConfigRoute();
     ConfigRoute(const ConfigServer& server);
-
 
     friend std::ostream& operator<< (std::ostream& os, const ConfigRoute& cr);
 
@@ -36,5 +27,4 @@ public: //making it public for now, otherwise its a lot of unneccesary function 
     bool m_shouldRedirect;
     std::string m_redirectDir;
 
-    std::string MethodEnumToString(int val) const;
 };

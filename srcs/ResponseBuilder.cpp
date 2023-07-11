@@ -53,15 +53,59 @@ void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 void ResponseBuilder::buildPath( Request& request, const Config& config ) {
 
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
-	cerr << server << endl;
+	// cerr << server << endl;
 
     string path = request.getHeaderValueFromKey( "path" );
-    cerr << "path from request: " << path << endl;
-
+    // cerr << "path from request: " << path << endl;
     const ConfigRoute* configRoute = server->getRouteFromPath( path );
+    // cerr << "HEEEEEEEEEEEEEEE" << endl;
+    // cerr << *configRoute << endl;
 
-    cerr << "HEEEEEEEEEEEEEEE" << endl;
-    cerr << *configRoute << endl;
+    if(configRoute->m_shouldRedirect == true) {
+        PRINT("REDIRECT SIR!");
+        PRINTVAR(configRoute->m_redirectDir);
+    }
+    // if()
+
+    std::string fullpath(configRoute->m_root + path);
+    PRINTVAR(fullpath);
+
+    std::string tempPath(configRoute->m_root);
+    int ret;
+    size_t prev = 0;
+    while(tempPath != fullpath){
+        ret = ValidatePath(tempPath);
+        if(ret == -1) {
+            PRINT("PATH IS INVALID -> ERROR RESPONSE");
+        }
+        else if(ret == S_IFREG){
+            PRINT("FOUND REGULAR FILE, THIS SHOULD BE THE END");
+            //do more checks for CGI as rest could be params
+            break;
+        }
+        else if(ret == S_IFDIR){
+            //append next
+            prev = path.find("/",prev+1);
+            PRINTVAR(prev);
+            if(prev != std::string::npos){
+                tempPath = fullpath.substr(0,prev);
+            }
+            else
+                tempPath = fullpath;
+            continue;
+        }
+        else{
+            PRINT("FOUND SOMETHING THATS NEITHER A DIR OR FILE, more checking?");
+            break;
+        }
+    }
+    if(tempPath == fullpath){
+        PRINT("REQUEST IS VALID DIRECTORY, APPEND index");
+        fullpath += configRoute->m_defaultFile;
+        ret = ValidatePath(tempPath);
+
+    }
+
 
 };
 

@@ -6,7 +6,7 @@ CXXFLAGS = -g #-std=c++98 -g #-Wall -Wextra -Werror
 SRCS = main.cpp Server.cpp RequestParser.cpp ResponseBuilder.cpp \
        AResponse.cpp GetResponse.cpp PostResponse.cpp DeleteResponse.cpp \
        ErrorResponse.cpp MetaVars.cpp Socket.cpp Config.cpp ConfigServer.cpp \
-	   ConfigRoute.cpp Request.cpp
+	   ConfigRoute.cpp Request.cpp webserv.cpp
 SRCDIR = ./srcs
 OBJDIR = objs
 INCDIR = ./includes

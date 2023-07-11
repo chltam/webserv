@@ -44,7 +44,6 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
         prev = path.find("/",prev+1);
         PRINTVAR(prev);
         if(prev != std::string::npos){
-            PRINT("found NPOS");
             tempPath = path.substr(0,prev);
         }
         else
@@ -59,18 +58,6 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
     return route;
 }
 
-std::string ConfigServer::MethodEnumToString(int val) const
-{
-    std::string ret;
-    if(val & METH_GET)
-        ret += "GET ";
-    if(val & METH_POST)
-        ret += "POST ";
-    if(val & METH_DELETE)
-        ret += "DELETE ";
-    return ret;
-}
-
 std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
 {
     os << "-------------Config SERVER-------------" << std::endl;
@@ -78,7 +65,7 @@ std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
 
     os << "Root dir = " << cs.m_root << std::endl;
     os << "Default File = " << cs.m_defaultFile << std::endl;
-    os << "Allowed Methods = " << cs.MethodEnumToString(cs.m_allowedMethods) << std::endl;
+    os << "Allowed Methods = " << MethodEnumToString(cs.m_allowedMethods) << std::endl;
     os << "Client Body Buff Size = " << cs.m_clientBodyBufferSize << std::endl;
     os << "Autoindex = " << cs.m_autoindex << std::endl;
 

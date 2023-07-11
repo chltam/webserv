@@ -39,7 +39,7 @@ std::ostream &operator<<(std::ostream &os, const ConfigRoute &cr)
 
     os << spaces << "Root dir = " << cr.m_root << std::endl;
     os << spaces << "Default File = " << cr.m_defaultFile << std::endl;
-    os << spaces << "Allowed Methods = " << cr.MethodEnumToString(cr.m_allowedMethods) << std::endl;
+    os << spaces << "Allowed Methods = " << MethodEnumToString(cr.m_allowedMethods) << std::endl;
     os << spaces << "Client Body Buff Size = " << cr.m_clientBodyBufferSize << std::endl;
     os << spaces << "Autoindex = " << cr.m_autoindex << std::endl;
 
@@ -52,19 +52,4 @@ std::ostream &operator<<(std::ostream &os, const ConfigRoute &cr)
     if(cr.m_shouldRedirect)
         os << spaces << spaces << "Should Redirect to = " << cr.m_redirectDir << std::endl;
     return os;
-}
-
-//duplicated function needs to be cleaned up
-std::string ConfigRoute::MethodEnumToString(int val) const
-{
-    std::string ret;
-    if(val & METH_GET)
-        ret += "GET ";
-    if(val & METH_POST)
-        ret += "POST ";
-    if(val & METH_DELETE)
-        ret += "DELETE ";
-    if(val > METH_ALL)
-        ret+= "INVALID METHODS";
-    return ret;
 }

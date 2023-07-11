@@ -32,6 +32,4 @@ public: //making it public for now since it will be used a lot
     bool m_autoindex;
     std::vector<std::pair<std::string,std::string>> m_cgi;
 
-    std::string MethodEnumToString(int val) const;
-
 };
