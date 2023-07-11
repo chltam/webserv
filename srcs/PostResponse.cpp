@@ -1,9 +1,7 @@
 #include "../includes/PostResponse.hpp"
 
 PostResponse::PostResponse( string path, string serverName, string contType, string reqBody ):
-    AResponse( path, serverName, contType, reqBody ) {
-
-};
+    AResponse( path, serverName, contType, reqBody ) {};
 
 PostResponse::~PostResponse() {};
 
@@ -28,8 +26,9 @@ int PostResponse::exec() {
 
     } else {
         cout << "Unable to open file\n";
+        _status = "403 Not Allowed";
+        _contLen = lenStr.str();
         return ( EXIT_FAILURE );
     }
     file.close();
-
 };

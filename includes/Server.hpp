@@ -22,10 +22,11 @@
 #include <vector>
 #include <algorithm>
 
-#include "RequestParser.hpp"
+
 #include "ResponseBuilder.hpp"
 #include "AResponse.hpp"
 
+#include "Request.hpp"
 #include "MetaVars.hpp"
 #include "Socket.hpp"
 #include "Request.hpp"
@@ -47,9 +48,7 @@ class Server {
 		void	accept_connection();
 
 
-
     private:
-
 
         std::vector<Socket>	_server_sock;
         Config m_Config;

@@ -1,9 +1,7 @@
 #include "../includes/GetResponse.hpp"
 
 GetResponse::GetResponse( string path, string serverName, string contType, string reqBody ):
-    AResponse( path, serverName, contType, reqBody ) {
-
-};
+    AResponse( path, serverName, contType, reqBody ) {};
 
 GetResponse::~GetResponse() {};
 
@@ -14,7 +12,8 @@ int GetResponse::exec() {
     string filename;
     string bufString;
 
-    filename = "./files/" + _path;
+    filename = "." + _path;
+
     ifstream file( filename );
 
     if ( file.is_open() ) {

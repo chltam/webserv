@@ -7,45 +7,44 @@
 #include <vector>
 #include <ctime>
 
+#include <dirent.h>
 #include <unistd.h>
 
+#include "webserv.hpp"
+#include "Config.hpp"
 #include "AResponse.hpp"
 #include "GetResponse.hpp"
 #include "PostResponse.hpp"
 #include "DeleteResponse.hpp"
 #include "ErrorResponse.hpp"
+#include "Request.hpp"
 
 #define VALID_REQUEST_NUM 3
-
-using namespace std;
 
 class ResponseBuilder {
 
     public:
 
-        ResponseBuilder( vector<pair<string, string> > headerPairs, string body, char **envp );
-
+        ResponseBuilder();
         ~ResponseBuilder();
 
-        void fillReqInfo();
-        AResponse* createResponse();
+        AResponse* createResponse( Request& request, const Config& config );
 
     private:
 
-        vector<pair<string, string> > _reqHeaderPairs;
-        string _reqBody;
+        int fillReqInfo( Request& request, const Config& config );
+        void buildPath( Request& request, const Config& config );
+        bool checkIfDir( const ConfigServer& server, const std::string& path );
 
-        string _reqType;
-        string _path;
-        string _status;
-        string _statusMsg;
-        string _dateTime;
-        string _serverName;
-        string _contType;
-        string _contLen;
+        std::string _reqType;
+        std::string _path;
+        std::string _status;
+        std::string _statusMsg;
+        std::string _dateTime;
+        std::string _serverName;
+        std::string _contType;
+        std::string _contLen;
 
-        string _respHeader;
-        string _respBody;
-
-		char	**_envp;
+        std::string _respHeader;
+        std::string _respBody;
 };

@@ -1,5 +1,6 @@
 #include "../includes/Request.hpp"
 
+
 using namespace std;
 
 Request::Request(std::string request_str)
@@ -47,7 +48,7 @@ Request::Request(std::string request_str)
         tokens.clear();
         it++;
     }
-	set_name_port(); //read the 'Host' pair and split into 'server_name' and 'server_port'
+	// set_name_port(); //read the 'Host' pair and split into 'server_name' and 'server_port'
 
 }
 
@@ -96,23 +97,6 @@ void    Request::set_path_query(string uri)
 
 void	Request::set_name_port()
 {
-	// for (int n = 0; n < _request_pair.size(); n++)
-	// {
-	// 	if (_request_pair[n].first == "Host")
-	// 	{
-	// 		int split = _request_pair[n].second.find(':');
-	// 		if (split != string::npos)
-	// 		{
-	// 			_request_pair.push_back(make_pair("server_name", _request_pair[n].second.substr(0, split)));
-	// 			_request_pair.push_back(make_pair("server_port", _request_pair[n].second.substr(split + 1)));
-	// 		}
-	// 		else
-	// 		{
-	// 			_request_pair.push_back(make_pair("server_name", _request_pair[n].second));
-	// 			_request_pair.push_back(make_pair("server_port", "80"));
-	// 		}
-	// 	}
-	// }
 	vector<pair<string, string> >::iterator	it = _request_pair.begin();
 
 	while (it != _request_pair.end())

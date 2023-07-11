@@ -1,8 +1,9 @@
 #include "../includes/Server.hpp"
 
-Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath)
+Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder()
 {
 	_envp = envp;
+	m_Config.printServers();
 };
 
 Server::~Server() {};
@@ -82,22 +83,24 @@ void	Server::accept_connection()
 
 void Server::handle( int index, Socket& client_sock )
 {
-	Request	request(client_sock.get_request_str());
-    // RequestParser parser( client_sock.get_request_str() );
+    // RequestParser parser( client_sock.get_request_str() ); // COSMO: sometimes this string is empty with Firefox requests, should never be
+	// cout << client_sock.get_request_str() << endl;
+
     // parser.tokenizeRequest();
-	std::cout << "here123\n";
 
-	const ConfigServer& server = m_Config.getConfigServerFromRequest(request.getHeaderValueFromKey("Host"));
+	if (client_sock.get_request_str().empty() == true)
+	{
+   		close(client_sock.get_sock_fd());
+		return ;
+	}
+	Request	request(client_sock.get_request_str());
+	request.printf_all();
 
-	std::cerr << server << std::endl;
-
-    ResponseBuilder builder( request.get_request_pair(), request.getBody(), _envp );
-    builder.fillReqInfo();
-
-
-    AResponse *response = builder.createResponse();
+    //ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
+    AResponse *response = _builder.createResponse( request, m_Config );
 
     response->fillResponse();
+	response->printHeaderInfo();
     string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
 
     // write to socket
@@ -108,70 +111,3 @@ void Server::handle( int index, Socket& client_sock )
     delete response;
 }
 
-/*
-void Server::handle( int index )
-{
-	// std::cout << "hererere\n" << std::endl;
-    // RequestParser parser( m_data[index].request_str.c_str() );
-    // parser.tokenizeRequest();
-
-    // std::cout << m_data[index].m_buffer << std::endl;
-
-    // ResponseBuilder builder( m_data[index].m_newSocket, parser.getHeaderPairs(), parser.getBody() );
-
-    // AResponse *response = builder.createResponse();
-	string respStr;
-	if (index == 1)
-		respStr = "HTTP/1.1 200 OK\r\n"
-						"Content-Type: text/html\r\n"
-						"Content-Length: 465\r\n"
-						"\r\n"
-						"<!DOCTYPE html>\r\n"
-						"<html>\r\n"
-						"<head>\r\n"
-						"  <title>POST Request Example</title>\r\n"
-						"</head>\r\n"
-						"<body>\r\n"
-						"  <h1>POST Request Example</h1>\r\n"
-						"  <form action=\"/api/endpoint\" method=\"post\">\r\n"
-						"    <label for=\"name\">Name:</label>\r\n"
-						"    <input type=\"text\" id=\"name\" name=\"name\" required>\r\n"
-						"    <br>\r\n"
-						"    <label for=\"password\">Password:</label>\r\n"
-						"    <input type=\"password\" id=\"password\" name=\"password\" required>\r\n"
-						"    <br>\r\n"
-						"    <button type=\"submit\">Submit</button>\r\n"
-						"  </form>\r\n"
-						"</body>\r\n"
-						"</html>\r\n";
-	else
-    	respStr = "HTTP/1.1 200 OK\r\n"
-                           "Content-Type: text/html\r\n"
-                           "Content-Length: 178\r\n"
-                           "Date: Mon, 10 Jan 2022 12:34:56 GMT\r\n"
-                           "\r\n"
-                           "<!DOCTYPE html>\r\n"
-                           "<html>\r\n"
-                           "<head>\r\n"
-                           "<title>Example Website</title>\r\n"
-                           "</head>\r\n"
-                           "<body>\r\n"
-                           "<h1>Welcome to Example Website!</h1>\r\n"
-                           "<p>This is a sample HTTP response.</p>\r\n"
-                           "</body>\r\n"
-                           "</html>\r\n";
-
-    write( m_data[index].m_newSocket, ( respStr.c_str()), respStr.size());
-        // ERROR HANDLING: REMOVE CLIENT IF < 0
-
-
-    // read any remaining data from the client
-    // char buf[1024];
-    // while (recv(m_data[index].m_newSocket, buf, sizeof(buf), 0) > 0) {
-    //     printf("BUF: %s\n", buf);  // Keep reading until recv() returns 0, indicating the other side closed the connection
-    //     bzero(buf, sizeof(buf));
-    // }
-
-    close(m_data[index].m_newSocket);
-}
-*/

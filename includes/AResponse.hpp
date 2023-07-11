@@ -22,6 +22,8 @@ class AResponse {
         void printHeaderInfo();
         void printBody();
         string getResponse();
+        int getExecResult();
+        string getStatus();
 
     protected:
 
@@ -36,6 +38,7 @@ class AResponse {
         string _status;
         string _dateTime;
         string _contLen;
+        int    _execResult;
         
         virtual int exec() = 0;
         void buildHeader();

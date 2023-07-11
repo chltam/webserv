@@ -38,7 +38,7 @@ public: //getters
     const std::vector<ConfigServer>& getServers() const;
     void printServers();
 
-    const ConfigServer& getConfigServerFromRequest(std::string hostPort) const;
+    const ConfigServer* getConfigServerFromRequest(std::string hostPort) const;
 private:
     std::vector<ConfigServer> m_servers;
 
