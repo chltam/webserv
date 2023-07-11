@@ -19,7 +19,7 @@ void AResponse::buildHeader() {
     saveDateTime();
 
     // CONTENT TYPE is hard coded because Firefox sends too much info (more parsing needed)
-    _respHeader = "HTTP/1.1 " + _status + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: " + _contType\
+    _respHeader = "HTTP/1.1 " + _status + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: " + "text/html"\
         + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
 }
 
