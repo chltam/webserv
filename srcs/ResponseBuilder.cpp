@@ -60,6 +60,9 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
     const ConfigRoute* configRoute = server->getRouteFromPath( path );
     // cerr << "HEEEEEEEEEEEEEEE" << endl;
     // cerr << *configRoute << endl;
+    if(configRoute == NULL){
+        PRINT("ERROR, could find CONFIGROUTE, this should never happen!");
+    }
 
     if(configRoute->m_shouldRedirect == true) {
         PRINT("REDIRECT SIR!");
@@ -71,12 +74,15 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
     PRINTVAR(fullpath);
 
     std::string tempPath(configRoute->m_root);
+    PRINTVAR(tempPath);
     int ret;
-    size_t prev = 0;
-    while(tempPath != fullpath){
+    size_t prev = tempPath.length() -1;
+    int i = 2; //this is there to allow one more while iteration with the full path to check if the last thing is a file or dir
+    while(i){
         ret = ValidatePath(tempPath);
         if(ret == -1) {
             PRINT("PATH IS INVALID -> ERROR RESPONSE");
+            break; //SHOULD ACTUALLY RETURN!!!!!
         }
         else if(ret == S_IFREG){
             PRINT("FOUND REGULAR FILE, THIS SHOULD BE THE END");
@@ -85,13 +91,17 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
         }
         else if(ret == S_IFDIR){
             //append next
-            prev = path.find("/",prev+1);
+            PRINT("VAR is DIRECTORY");
+            prev = fullpath.find("/",prev+1);
             PRINTVAR(prev);
             if(prev != std::string::npos){
                 tempPath = fullpath.substr(0,prev);
             }
-            else
+            else{
                 tempPath = fullpath;
+                i--;
+            }
+            PRINTVAR(tempPath);
             continue;
         }
         else{
@@ -99,12 +109,22 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
             break;
         }
     }
-    if(tempPath == fullpath){
+    if(ret == S_IFREG){
         PRINT("REQUEST IS VALID DIRECTORY, APPEND index");
-        fullpath += configRoute->m_defaultFile;
-        ret = ValidatePath(tempPath);
-
+        if(tempPath[tempPath.length()-1] != '/' ){
+            fullpath += "/";
+            fullpath += configRoute->m_defaultFile;
+        }
+        else
+            fullpath += configRoute->m_defaultFile;
+        PRINTVAR(fullpath);
+        ret = ValidatePath(fullpath);
     }
+
+    //QUESTION
+    // what happens if the client tries to access a file that is not part of the routes? will we take the global config or is this not allowed?
+
+
 
 
 };

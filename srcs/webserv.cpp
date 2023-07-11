@@ -9,8 +9,10 @@ int ValidatePath(const std::string &path)
     struct stat status;
 
     int ret = stat(path.c_str(),&status);
-    if(ret == -1)
+    if(ret == -1){
         std::cout << strerror(errno) << std::endl;
+        return ret;
+    }
     std::cout << "Success" << std::endl;
     return (status.st_mode & S_IFMT);
 }
