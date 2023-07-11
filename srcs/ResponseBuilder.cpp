@@ -23,7 +23,7 @@ void ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
     // give 301 Code (Moved Permanently) here? Server responds with the new url.
     // Once a client receives that request he will than make a new http request from that location.
 
-    vector<pair<string, string>> reqHeaderPairs = request.getHeaderPairs();
+    vector<pair<string, string>> reqHeaderPairs = request.get_request_pair();
 
     for (vector< pair<string, string> >::const_iterator it = reqHeaderPairs.begin();
         it != reqHeaderPairs.end(); ++it) {

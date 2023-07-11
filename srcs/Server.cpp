@@ -81,14 +81,16 @@ void	Server::accept_connection()
 
 void Server::handle( int index, Socket& client_sock )
 {
-    RequestParser parser( client_sock.get_request_str() ); // COSMO: sometimes this string is empty with Firefox requests, should never be
-	cout << client_sock.get_request_str() << endl;
+    // RequestParser parser( client_sock.get_request_str() ); // COSMO: sometimes this string is empty with Firefox requests, should never be
+	// cout << client_sock.get_request_str() << endl;
 
-    parser.tokenizeRequest();
+    // parser.tokenizeRequest();
+
+	Request	request(client_sock.get_request_str());
 
     //ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
 	ResponseBuilder builder;
-    AResponse *response = builder.createResponse( *parser.createRequest(), m_Config );
+    AResponse *response = builder.createResponse( request, m_Config );
 
     response->fillResponse();
     string respStr = response->getResponse();    // if NULL, REMOVE CLIENT

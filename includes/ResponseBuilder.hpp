@@ -12,7 +12,6 @@
 
 #include "webserv.hpp"
 #include "Config.hpp"
-#include "RequestParser.hpp"
 #include "AResponse.hpp"
 #include "GetResponse.hpp"
 #include "PostResponse.hpp"

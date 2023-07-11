@@ -22,10 +22,11 @@
 #include <vector>
 #include <algorithm>
 
-#include "RequestParser.hpp"
+
 #include "ResponseBuilder.hpp"
 #include "AResponse.hpp"
 
+#include "Request.hpp"
 #include "MetaVars.hpp"
 #include "Socket.hpp"
 

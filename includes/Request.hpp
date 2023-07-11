@@ -1,26 +1,35 @@
-#pragma once
+#ifndef _REQUEST_H_
+#define _REQUEST_H_
 
 #include <iostream>
-#include <fstream>
 #include <sstream>
-#include <string>
+#include <cstring>
 #include <vector>
+#include <map>
 
-using namespace std;
 
-class Request {
 
-    public:
+class Request{
 
-        Request();
-        ~Request();
-        string _body;
-        vector<pair<string, string>> _headerPairs;
-        vector<pair<string, string>> getHeaderPairs();
-        string getBody();
-        string getHeaderValueFromKey(const string& key);
+public:
+    Request(std::string request_str);
+    ~Request();
+    std::string getHeaderValueFromKey(const std::string &key);
+	std::string	get_value(std::string& key);
+    std::string getBody();
+	std::vector<std::pair<std::string, std::string> >&	get_request_pair();
 
-    private:
+	void	printf_all();
+    
+private:
+	std::vector<std::pair<std::string, std::string> >	_request_pair;
+    std::string _body;
 
+    void    set_path_query(std::string uri);
+	void	set_name_port();
 
 };
+
+
+
+#endif
