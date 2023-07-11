@@ -30,7 +30,7 @@ public:
 	Socket(int ipVersion, int service, int protocol);
 	Socket(int listener_fd);
 	~Socket();
-	void	bind_socket(int port);
+	void	bind_socket(std::string ip, int port);
 	void	enable_listener();
 	void	read_sock();
 	void	parse_request();

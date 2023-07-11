@@ -21,18 +21,18 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 	// buildPath( request, config);
 
     // give 301 Code (Moved Permanently) here? Server responds with the new url.
-    // Once a client receives that request he will than make a new http request from that location. 
+    // Once a client receives that request he will than make a new http request from that location.
 
-    vector<pair<string, string>> reqHeaderPairs = request.getHeaderPairs(); 
+    vector<pair<string, string>> reqHeaderPairs = request.get_request_pair();
 
     for (vector< pair<string, string> >::const_iterator it = reqHeaderPairs.begin();
         it != reqHeaderPairs.end(); ++it) {
-        
+
         if ( it->first == "request type" ) {
             _reqType = it->second;
         }
         else if ( it->first == "path" ) { // SHOULD BE REPLACED by buildPath()
-            
+
             if ( it->second == "/" ) {
                 _path = "/files/index.html";
             }
@@ -53,31 +53,78 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
 void ResponseBuilder::buildPath( Request& request, const Config& config ) {
 
-    const ConfigServer& server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
-	cerr << server << endl;
-    // check here? if no server/config route -> ERROR
+    const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
+	// cerr << server << endl;
 
     string path = request.getHeaderValueFromKey( "path" );
-    cerr << "path from request: " << path << endl;
-
-    // if ( !checkIfDir( server, path) ) {
-    //     // do sth to path string?
-    // }
-
-    string tempPath( path.substr( 0,path.rfind('/') ));
-    cerr << "temp path =" << tempPath << endl;
-    // /files/test_dir ->loop over the routes
-
-    string completePath;
-    if ( tempPath.length() != 0 ) {
-
-        const ConfigRoute& configRoute = server.getRouteFromPath( tempPath );
-        completePath = configRoute.m_root + tempPath;
-        cerr << "complete path =" << completePath << endl;
-
-        cerr << "HEEEEEEEEEEEEEEE" << endl;
-        cerr << configRoute << endl;
+    // cerr << "path from request: " << path << endl;
+    const ConfigRoute* configRoute = server->getRouteFromPath( path );
+    // cerr << "HEEEEEEEEEEEEEEE" << endl;
+    // cerr << *configRoute << endl;
+    if(configRoute == NULL){
+        PRINT("ERROR, could find CONFIGROUTE, this should never happen!");
     }
+
+    if(configRoute->m_shouldRedirect == true) {
+        PRINT("REDIRECT SIR!");
+        PRINTVAR(configRoute->m_redirectDir);
+    }
+    // if()
+
+    std::string fullpath(configRoute->m_root + path);
+    PRINTVAR(fullpath);
+
+    std::string tempPath(configRoute->m_root);
+    PRINTVAR(tempPath);
+    int ret;
+    size_t prev = tempPath.length() -1;
+    int i = 2; //this is there to allow one more while iteration with the full path to check if the last thing is a file or dir
+    while(i){
+        ret = ValidatePath(tempPath);
+        if(ret == -1) {
+            PRINT("PATH IS INVALID -> ERROR RESPONSE");
+            break; //SHOULD ACTUALLY RETURN!!!!!
+        }
+        else if(ret == S_IFREG){
+            PRINT("FOUND REGULAR FILE, THIS SHOULD BE THE END");
+            //do more checks for CGI as rest could be params
+            break;
+        }
+        else if(ret == S_IFDIR){
+            //append next
+            PRINT("VAR is DIRECTORY");
+            prev = fullpath.find("/",prev+1);
+            PRINTVAR(prev);
+            if(prev != std::string::npos){
+                tempPath = fullpath.substr(0,prev);
+            }
+            else{
+                tempPath = fullpath;
+                i--;
+            }
+            PRINTVAR(tempPath);
+            continue;
+        }
+        else{
+            PRINT("FOUND SOMETHING THATS NEITHER A DIR OR FILE, more checking?");
+            break;
+        }
+    }
+    if(ret == S_IFREG){
+        PRINT("REQUEST IS VALID DIRECTORY, APPEND index");
+        if(tempPath[tempPath.length()-1] != '/' ){
+            fullpath += "/";
+            fullpath += configRoute->m_defaultFile;
+        }
+        else
+            fullpath += configRoute->m_defaultFile;
+        PRINTVAR(fullpath);
+        ret = ValidatePath(fullpath);
+    }
+
+    //QUESTION
+    // what happens if the client tries to access a file that is not part of the routes? will we take the global config or is this not allowed?
+
 };
 
 bool ResponseBuilder::checkIfDir( const ConfigServer& server, const string& path ) {
@@ -86,7 +133,7 @@ bool ResponseBuilder::checkIfDir( const ConfigServer& server, const string& path
     struct dirent* ent;
 
     dir = opendir((server.m_root + path).c_str());
-    if (dir == NULL) { 
+    if (dir == NULL) {
         cerr << "NOT A DIR" << endl;
         return ( false );
     } else {

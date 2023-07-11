@@ -14,7 +14,7 @@ public:
 
     void AddRoute(std::string path, ConfigRoute& route); //not used yet
     friend std::ostream& operator<< (std::ostream& stream, const ConfigServer& cs);
-    const ConfigRoute& getRouteFromPath(const std::string& path) const;
+    const ConfigRoute* getRouteFromPath(const std::string& path) const;
 public: //getters, setters
 
 
@@ -31,7 +31,5 @@ public: //making it public for now since it will be used a lot
     size_t m_clientBodyBufferSize;
     bool m_autoindex;
     std::vector<std::pair<std::string,std::string>> m_cgi;
-
-    std::string MethodEnumToString(int val) const;
 
 };
