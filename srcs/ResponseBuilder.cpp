@@ -1,5 +1,5 @@
 #include "../includes/ResponseBuilder.hpp"
-#include "../includes/MetaVars.hpp"
+#include "ResponseBuilder.hpp"
 
 using namespace std;
 
@@ -19,11 +19,11 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
         //if CGI valid -> run CGI
         //else do the rest her
 
-	// buildPath( request, config);
 
     // give 301 Code (Moved Permanently) here? Server responds with the new url.
     // Once a client receives that request he will than make a new http request from that location.
-
+    _header["Status"] = "200 OK";
+    _header["Date"] = saveDateTime();
     vector<pair<string, string>> reqHeaderPairs = request.get_request_pair();
 
     for (vector< pair<string, string> >::const_iterator it = reqHeaderPairs.begin();
@@ -31,29 +31,27 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
         if ( it->first == "request type" ) {
             _reqType = it->second;
-			
-        }
-        else if ( it->first == "path" ) { // SHOULD BE REPLACED by buildPath()
-
-            if ( it->second == "/" ) {
-                _path = "/files/index.html";
-            }
-            else {
-                _path = it->second; // return the path from pathBuilder ft (which takes it->second)
-            }
         }
         else if ( it->first == "Host" ) {
             _serverName = it->second;
+            _header["Server"] = it->second;
         }
         else if ( it->first == "Accept" ) {
             _contType = it->second;     // media-type = type "/" subtype * (NO whitespace between)
+            _header["Content-Type"] = it->second;
+            // _header["Content-Type"] = "text/html";
         }
     };
+	int ret = buildPath( request, config);
 
-    return ( EXIT_SUCCESS );
+    _header["Content-Length"] = std::to_string(getFileSize(_path));
+    if(_header["Content-Length"] == "-1")
+        _header["Content-Length"] = "0";
+
+    return ( ret );
 };
 
-void ResponseBuilder::buildPath( Request& request, const Config& config ) {
+int ResponseBuilder::buildPath( Request& request, const Config& config ) {
 
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 	// cerr << server << endl;
@@ -69,7 +67,10 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
 
     if(configRoute->m_shouldRedirect == true) {
         PRINT("REDIRECT SIR!");
+        _header["Location"] = configRoute->m_redirectDir;
+        _header["Status"] = "301 Moved Permanently";
         PRINTVAR(configRoute->m_redirectDir);
+        return 2;
     }
     // if()
 
@@ -80,16 +81,15 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
     PRINTVAR(tempPath);
     int ret;
     size_t prev = tempPath.length() -1;
-    int i = 2; //this is there to allow one more while iteration with the full path to check if the last thing is a file or dir
-    while(i){
+    while(true){
         ret = ValidatePath(tempPath);
         if(ret == -1) {
             PRINT("PATH IS INVALID -> ERROR RESPONSE");
-            break; //SHOULD ACTUALLY RETURN!!!!!
+            break;
         }
         else if(ret == S_IFREG){
             PRINT("FOUND REGULAR FILE, THIS SHOULD BE THE END");
-            //do more checks for CGI as rest could be params
+            fullpath = configRoute->m_root + tempPath;
             break;
         }
         else if(ret == S_IFDIR){
@@ -102,7 +102,9 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
             }
             else{
                 tempPath = fullpath;
-                i--;
+                PRINTVAR(tempPath);
+                ret = ValidatePath(tempPath);
+                break;
             }
             PRINTVAR(tempPath);
             continue;
@@ -112,7 +114,12 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
             break;
         }
     }
-    if(ret == S_IFREG){
+    PRINT("AFTER LOOP");
+
+    if(ret == -1){
+        PRINT("CREATE ERROR RESPONSE");
+    }
+    else if(ret == S_IFDIR){
         PRINT("REQUEST IS VALID DIRECTORY, APPEND index");
         if(tempPath[tempPath.length()-1] != '/' ){
             fullpath += "/";
@@ -122,53 +129,85 @@ void ResponseBuilder::buildPath( Request& request, const Config& config ) {
             fullpath += configRoute->m_defaultFile;
         PRINTVAR(fullpath);
         ret = ValidatePath(fullpath);
+        if(ret != S_IFREG){
+            PRINT("CREATE ERROR RESPONSE, default file is not a file, or non existent");
+        }
     }
 
+    //just for debugging checking if the final result has been captured correctly
+    PRINT("");
+    PRINT("");
+    if(ret != S_IFREG){
+        PRINT("AN ERROR OCCURED, COULDNT FIND FILE");
+        _status = "403 File not found";
+        return (EXIT_FAILURE);
+    }
+
+    else{
+        PRINT("FINAL PATH AFTER ALL TRANSFORMATION:");
+        PRINTVAR(fullpath);
+        _path = fullpath;
+    }
+    PRINT("");
+    PRINT("");
+
+    return (EXIT_SUCCESS);
     //QUESTION
     // what happens if the client tries to access a file that is not part of the routes? will we take the global config or is this not allowed?
 
 };
 
-bool ResponseBuilder::checkIfDir( const ConfigServer& server, const string& path ) {
+std::string ResponseBuilder::headerToString()
+{
+    // _respHeader = "HTTP/1.1 " + _status + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: " + "text/html"\
+    //     + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
 
-    DIR* dir;
-    struct dirent* ent;
+    std::string ret("HTTP/1.1 " + _header["Status"]+ "\r\nConnection: keep-alive\r\n");
 
-    dir = opendir((server.m_root + path).c_str());
-    if (dir == NULL) {
-        cerr << "NOT A DIR" << endl;
-        return ( false );
-    } else {
-        cerr << "IT IS A DIR" << endl;
-        return ( true );
+    std::map<std::string,std::string>::const_iterator it = _header.begin();
+    for (; it != _header.end(); it++) {
+        if(it->first != "Status"){
+            ret += it->first + ": " + it->second + "\r\n";
+        }
     }
-};
+    ret += "\r\n";
 
-static AResponse* makeGetResponse( string path, string serverName, string contType, string reqBody ) {
-	    return (new GetResponse( path, serverName, contType, reqBody ));
-    }
-
-static AResponse* makePostResponse( string path, string serverName, string contType, string reqBody ) {
-    return (new PostResponse( path, serverName, contType, reqBody ));
+    return ret;
+}
+static AResponse *makeGetResponse(std::string path,std::string header, string reqBody)
+{
+    return (new GetResponse(path,header, reqBody));
 }
 
-static AResponse* makeDeleteResponse( string path, string serverName, string contType, string reqBody ) {
-    return (new DeleteResponse( path, serverName, contType, reqBody ));
+static AResponse* makePostResponse(std::string path, std::string header, string reqBody ) {
+    return (new PostResponse(path,header, reqBody ));
 }
 
-static AResponse* makeErrorResponse( string path, string serverName, string contType, string reqBody, string status ) {
-    return (new ErrorResponse( path, serverName, contType, reqBody, status ));
+static AResponse* makeDeleteResponse(std::string path, std::string header, string reqBody ) {
+    return (new DeleteResponse(path,header, reqBody ));
+}
+
+static AResponse* makeErrorResponse(std::string path, std::string header, string reqBody) {
+    return (new ErrorResponse(path, header, reqBody));
+}
+
+static AResponse* makeRedirResponse(std::string path, std::string header, string reqBody) {
+    return (new RedirResponse(path, header, reqBody));
 }
 
 AResponse* ResponseBuilder::createResponse(Request& request, const Config& config) {
 
-    int checker = 0;
+    int checker = fillReqInfo(request,config);
 
-    if ( fillReqInfo(request,config) == EXIT_FAILURE ) {
-        makeErrorResponse ( _path, _serverName, _contType, request.getBody(), _status);
-    };
+    if ( checker == EXIT_FAILURE ) {
+       return makeErrorResponse (_path, headerToString(), request.getBody());
+    }
+    else if(checker == 2){
+        PRINT("ENTERED REDIR REPSONSE ");
+       return makeRedirResponse (_path, headerToString(), request.getBody());
 
-    AResponse* ( *allResponses[] )( string _path, string _serverName, string _contType,
+    }
+    AResponse* ( *allResponses[] )( std::string path, string _header,
         string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse };
     string responses[] = { "GET", "POST", "DELETE" };
 
@@ -176,14 +215,14 @@ AResponse* ResponseBuilder::createResponse(Request& request, const Config& confi
 
         if ( _reqType == responses[ i ] ) {
 
-            AResponse* response = allResponses[ i ]( _path, _serverName, _contType, request.getBody() );
+            AResponse* response = allResponses[ i ](_path, headerToString(), request.getBody() );
 			if ( response->getExecResult() == 1 ) {
 
                 string status = response->getStatus();
                 cout << _reqType << "Response could not be created" << endl;
                 delete response;
-                return ( makeErrorResponse( _path, _serverName, _contType, request.getBody(), status ));
-            
+                return ( makeErrorResponse(_path, headerToString(), request.getBody()));
+
             } else {
                 cout << _reqType << "Response created" << endl;
                 return ( response );
@@ -191,5 +230,6 @@ AResponse* ResponseBuilder::createResponse(Request& request, const Config& confi
         }
     }
     cout << _reqType << "Response could not be created" << endl;
-    return ( makeErrorResponse( _path, _serverName, _contType, request.getBody(), "501 Not Implemented" ));
+    _header["Status"] = "501 Not Implemented";
+    return ( makeErrorResponse(_path, headerToString(), request.getBody()));
 };

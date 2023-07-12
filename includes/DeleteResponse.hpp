@@ -6,7 +6,7 @@ class DeleteResponse : public AResponse {
 
     public:
 
-        DeleteResponse( string path, string serverName, string contType, string reqBody );
+        DeleteResponse(string path, string header, string reqBody);
         ~DeleteResponse();
 
     private:

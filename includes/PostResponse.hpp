@@ -4,7 +4,7 @@ class PostResponse : public AResponse {
 
     public:
 
-        PostResponse( string path, string serverName, string contType, string reqBody );
+        PostResponse(string path, string header, string reqBody);
         ~PostResponse();
 
     private:

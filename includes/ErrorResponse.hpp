@@ -15,7 +15,7 @@ class ErrorResponse : public AResponse {
 
     public:
 
-        ErrorResponse( string path, string serverName, string contType, string reqBody, string status );
+        ErrorResponse(string path, string header, string reqBody);
         ~ErrorResponse();
 
     private:

@@ -1,10 +1,9 @@
 #include "ErrorResponse.hpp"
 
 // one more field for the status
-ErrorResponse::ErrorResponse( string path, string serverName, string contType, string reqBody, string status ):
-    AResponse( path, serverName, contType, reqBody ) {
+ErrorResponse::ErrorResponse(string path,  string header, string reqBody):
+    AResponse(path, header, reqBody ) {
 
-    _status = status;
 };
 
 ErrorResponse::~ErrorResponse() {};
