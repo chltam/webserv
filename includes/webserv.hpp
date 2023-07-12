@@ -7,6 +7,8 @@
 
 #define PRINTVAR(x) std::cerr << #x <<": " << x  << std::endl
 #define PRINT(x) std::cerr << x  << std::endl
+#define PRINT_MORE(x) std::cerr << "'" << x << "'" << std::endl
+
 
 enum AllowedMethods{
     METH_NONE   = 0,
@@ -18,4 +20,6 @@ enum AllowedMethods{
 
 
 int ValidatePath(const std::string& path);
+int getFileSize(const std::string &path);
 std::string MethodEnumToString(int val);
+std::string saveDateTime();

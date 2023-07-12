@@ -1,7 +1,7 @@
 #include "../includes/GetResponse.hpp"
 
-GetResponse::GetResponse( string path, string serverName, string contType, string reqBody ):
-    AResponse( path, serverName, contType, reqBody ) {};
+GetResponse::GetResponse(string path,  string header, string reqBody):
+    AResponse(path, header, reqBody ) {};
 
 GetResponse::~GetResponse() {};
 
@@ -12,7 +12,7 @@ int GetResponse::exec() {
     string filename;
     string bufString;
 
-    filename = "." + _path;
+    filename = _path;
 
     ifstream file( filename );
 
@@ -26,8 +26,8 @@ int GetResponse::exec() {
         cout << "Unable to open file\n";
         _respBody = "COULD NOT OPEN FILE\n";
         _status = "404 File Not Found";
-        lenStr << _respBody.length();
-        _contLen = lenStr.str();
+        // lenStr << _respBody.length();
+        // _contLen = lenStr.str();
         return ( EXIT_FAILURE );
     }
     file.close();
@@ -40,8 +40,8 @@ int GetResponse::exec() {
         _respBody = "EMPTY FILE\n";
     }
 
-    lenStr << _respBody.length();
-    _contLen = lenStr.str();
+    // lenStr << _respBody.length();
+    // _contLen = lenStr.str();
 
     return ( EXIT_SUCCESS );
 };

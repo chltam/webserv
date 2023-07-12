@@ -11,12 +11,12 @@
 
 #include "AResponse.hpp"
 
-class GetResponse : public AResponse {
+class RedirResponse : public AResponse {
 
     public:
 
-        GetResponse(string path, string header, string reqBody);
-        ~GetResponse();
+        RedirResponse(string path, string header, string reqBody);
+        ~RedirResponse();
 
     private:
 

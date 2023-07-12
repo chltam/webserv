@@ -17,6 +17,7 @@
 #include "PostResponse.hpp"
 #include "DeleteResponse.hpp"
 #include "ErrorResponse.hpp"
+#include "RedirResponse.hpp"
 #include "Request.hpp"
 
 #define VALID_REQUEST_NUM 3
@@ -33,8 +34,7 @@ class ResponseBuilder {
     private:
 
         int fillReqInfo( Request& request, const Config& config );
-        void buildPath( Request& request, const Config& config );
-        bool checkIfDir( const ConfigServer& server, const std::string& path );
+        int buildPath( Request& request, const Config& config );
 
         std::string _reqType;
         std::string _path;
@@ -47,4 +47,8 @@ class ResponseBuilder {
 
         std::string _respHeader;
         std::string _respBody;
+        std::map<std::string,std::string>_header;
+
+        std::string headerToString();
+
 };
