@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <string.h>
+#include <fstream>
+#include <sstream>
 
 #define PRINTVAR(x) std::cerr << #x <<": " << x  << std::endl
 #define PRINT(x) std::cerr << x  << std::endl
@@ -23,3 +25,4 @@ int ValidatePath(const std::string& path);
 int getFileSize(const std::string &path);
 std::string MethodEnumToString(int val);
 std::string saveDateTime();
+std::string getFileContent( const std::string& filename );

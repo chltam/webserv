@@ -59,3 +59,17 @@ std::string saveDateTime() {
     std::string str( buffer );
     return str;
 };
+
+std::string getFileContent( const std::string& filename ) {
+
+    std::stringstream buffer;
+    std::string bufString;
+
+    std::ifstream file( filename );
+
+    if ( file.is_open() ) {
+        buffer << file.rdbuf();
+    }
+    file.close();
+    return ( buffer.str() );
+}

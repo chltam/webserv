@@ -43,6 +43,4 @@ class AResponse {
         string _header;
 
         virtual int exec() = 0;
-        void buildHeader();
-        void saveDateTime();
 };

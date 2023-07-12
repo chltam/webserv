@@ -20,15 +20,6 @@ int GetResponse::exec() {
 
         buffer << file.rdbuf();
         _status = "200 OK";
-
-    } else {
-
-        cout << "Unable to open file\n";
-        _respBody = "COULD NOT OPEN FILE\n";
-        _status = "404 File Not Found";
-        // lenStr << _respBody.length();
-        // _contLen = lenStr.str();
-        return ( EXIT_FAILURE );
     }
     file.close();
 
@@ -40,8 +31,14 @@ int GetResponse::exec() {
         _respBody = "EMPTY FILE\n";
     }
 
-    // lenStr << _respBody.length();
-    // _contLen = lenStr.str();
-
     return ( EXIT_SUCCESS );
 };
+
+
+    // } else {
+
+    //     cout << "Unable to open file\n";
+    //     _respBody = "COULD NOT OPEN FILE\n";
+    //     _status = "404 File Not Found";
+    //     return ( EXIT_FAILURE );
+    // }

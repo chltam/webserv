@@ -15,7 +15,6 @@ int ErrorResponse::exec() {
 
     _respBody = "<!doctype html><html><head><title>Error</title></head>\
 <body><p>" + _status + "</p></body></html>";
-    lenStr << _respBody.length();
-    _contLen = lenStr.str();
+    
     return ( EXIT_SUCCESS );
 };

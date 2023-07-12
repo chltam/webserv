@@ -9,19 +9,6 @@ ResponseBuilder::~ResponseBuilder() {};
 
 int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
 
-    //find server based on port
-    //check the directory (valid route) -> if not exist == error
-        //use open dir
-    //if file in directory if file exists? + access rights
-    //check if GET/POST/DELETE etc is allowed? -> if not == error
-    //do we need to check what the client accepts?
-    //check actual file for extensions
-        //if CGI valid -> run CGI
-        //else do the rest her
-
-
-    // give 301 Code (Moved Permanently) here? Server responds with the new url.
-    // Once a client receives that request he will than make a new http request from that location.
     _header["Status"] = "200 OK";
     _header["Date"] = saveDateTime();
     vector<pair<string, string>> reqHeaderPairs = request.get_request_pair();
@@ -37,9 +24,15 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
             _header["Server"] = it->second;
         }
         else if ( it->first == "Accept" ) {
-            _contType = it->second;     // media-type = type "/" subtype * (NO whitespace between)
-            _header["Content-Type"] = it->second;
-            // _header["Content-Type"] = "text/html";
+    
+            std::string::size_type pos = it->second.find(',');
+            if (pos != std::string::npos) {
+                _header["Content-Type"] = it->second.substr(0, pos); // cutting it after first given item given by browser 
+            }
+            else {
+                _header["Content-Type"] = it->second;
+            }
+            // _header["Content-Type"] = "text/html";  // media-type = type "/" subtype * (NO whitespace between)
         }
     };
 	int ret = buildPath( request, config);
@@ -139,7 +132,11 @@ int ResponseBuilder::buildPath( Request& request, const Config& config ) {
     PRINT("");
     if(ret != S_IFREG){
         PRINT("AN ERROR OCCURED, COULDNT FIND FILE");
-        _status = "403 File not found";
+        _header["Status"] = "404 Not Found";
+
+        // std::string fileCont = getFileContent( "./files/error/404error.html");
+        // _respBody = fileCont;
+        // _header["Content-Length"] = std::to_string(getFileSize(fileCont));
         return (EXIT_FAILURE);
     }
 
@@ -159,9 +156,6 @@ int ResponseBuilder::buildPath( Request& request, const Config& config ) {
 
 std::string ResponseBuilder::headerToString()
 {
-    // _respHeader = "HTTP/1.1 " + _status + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: " + "text/html"\
-    //     + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
-
     std::string ret("HTTP/1.1 " + _header["Status"]+ "\r\nConnection: keep-alive\r\n");
 
     std::map<std::string,std::string>::const_iterator it = _header.begin();
@@ -200,7 +194,7 @@ AResponse* ResponseBuilder::createResponse(Request& request, const Config& confi
     int checker = fillReqInfo(request,config);
 
     if ( checker == EXIT_FAILURE ) {
-       return makeErrorResponse (_path, headerToString(), request.getBody());
+       return makeErrorResponse (_path, headerToString(), _respBody);
     }
     else if(checker == 2){
         PRINT("ENTERED REDIR REPSONSE ");

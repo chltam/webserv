@@ -9,18 +9,8 @@ void AResponse::fillResponse() {
 
     _execResult = exec();
     if ( _execResult == 0 ) { // exec success
-        buildHeader();
         _response = _header + _respBody;
     }
-}
-
-void AResponse::buildHeader() {
-
-    // saveDateTime();
-
-    // CONTENT TYPE is hard coded because Firefox sends too much info (more parsing needed)
-    // _respHeader = "HTTP/1.1 " + _status + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: " + "text/html"\
-        // + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
 }
 
 // void AResponse::saveDateTime() {
