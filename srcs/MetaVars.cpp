@@ -42,7 +42,7 @@ std::string	MetaVars::get_value(std::string key)
 		return ("");
 }
 
-void	MetaVars::set_content_length(std::string& body)
+int	MetaVars::set_content_length(std::string& body)
 {
 	set_value("CONTENT_LENGTH", to_string(body.length()));
 }

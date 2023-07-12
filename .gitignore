@@ -2,4 +2,3 @@ files/
 objs/
 .vscode/
 *.conf
-cgi_test/

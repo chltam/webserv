@@ -85,6 +85,7 @@ void Server::handle( int index, Socket& client_sock )
 
 	if (client_sock.get_request_str().empty() == true)
 	{
+		//status = 408 Request Timeout
    		close(client_sock.get_sock_fd());
 		return ;
 	}

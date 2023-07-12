@@ -34,8 +34,6 @@
 #include "Config.hpp"
 
 
-using namespace std;
-
 
 class Server {
 
@@ -55,8 +53,6 @@ class Server {
         Config m_Config;
         ResponseBuilder _builder;
 
-        void test_connection(int);
-        void accepter(int index);
         void handle(int index, Socket& client_sock);
 
 };
