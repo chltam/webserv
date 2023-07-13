@@ -128,6 +128,9 @@ void Config::Parser()
                 m_servers[currServerId].m_allowedMethods = 0; //reset value to be overwritten
                 i++;
                 while(m_rawData[i].second == T_VALUE){
+                    if(m_rawData[i].first == "NONE"){
+                         m_servers[currServerId].m_allowedMethods = METH_NONE;
+                    }
                     if(m_rawData[i].first == "GET"){
                          m_servers[currServerId].m_allowedMethods |= METH_GET;
                     }
@@ -168,7 +171,10 @@ void Config::Parser()
                         m_servers[currServerId].m_routes[key].m_allowedMethods = 0;
                         i++;
                         while(m_rawData[i].second == T_VALUE){
-                            if(m_rawData[i].first == "GET"){
+                            if(m_rawData[i].first == "NONE"){
+                                m_servers[currServerId].m_routes[key].m_allowedMethods = METH_NONE;
+                            }
+                            else if(m_rawData[i].first == "GET"){
                                 m_servers[currServerId].m_routes[key].m_allowedMethods |= METH_GET;
                             }
                             else if(m_rawData[i].first == "POST"){

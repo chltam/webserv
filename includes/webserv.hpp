@@ -24,5 +24,6 @@ enum AllowedMethods{
 int ValidatePath(const std::string& path);
 int getFileSize(const std::string &path);
 std::string MethodEnumToString(int val);
+int StringToMethodEnum(const std::string& method);
 std::string saveDateTime();
 std::string getFileContent( const std::string& filename );

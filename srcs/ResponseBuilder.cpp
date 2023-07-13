@@ -24,10 +24,10 @@ int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
             _header["Server"] = it->second;
         }
         else if ( it->first == "Accept" ) {
-    
+
             std::string::size_type pos = it->second.find(',');
             if (pos != std::string::npos) {
-                _header["Content-Type"] = it->second.substr(0, pos); // cutting it after first given item given by browser 
+                _header["Content-Type"] = it->second.substr(0, pos); // cutting it after first given item given by browser
             }
             else {
                 _header["Content-Type"] = it->second;
@@ -65,90 +65,137 @@ int ResponseBuilder::buildPath( Request& request, const Config& config ) {
         PRINTVAR(configRoute->m_redirectDir);
         return 2;
     }
-    // if()
 
-    std::string fullpath(configRoute->m_root + path);
-    PRINTVAR(fullpath);
-
-    std::string tempPath(configRoute->m_root);
-    PRINTVAR(tempPath);
-    int ret;
-    size_t prev = tempPath.length() -1;
-    while(true){
-        ret = ValidatePath(tempPath);
-        if(ret == -1) {
-            PRINT("PATH IS INVALID -> ERROR RESPONSE");
-            break;
-        }
-        else if(ret == S_IFREG){
-            PRINT("FOUND REGULAR FILE, THIS SHOULD BE THE END");
-            fullpath = configRoute->m_root + tempPath;
-            break;
-        }
-        else if(ret == S_IFDIR){
-            //append next
-            PRINT("VAR is DIRECTORY");
-            prev = fullpath.find("/",prev+1);
-            PRINTVAR(prev);
-            if(prev != std::string::npos){
-                tempPath = fullpath.substr(0,prev);
-            }
-            else{
-                tempPath = fullpath;
-                PRINTVAR(tempPath);
-                ret = ValidatePath(tempPath);
-                break;
-            }
-            PRINTVAR(tempPath);
-            continue;
-        }
-        else{
-            PRINT("FOUND SOMETHING THATS NEITHER A DIR OR FILE, more checking?");
-            break;
-        }
-    }
-    PRINT("AFTER LOOP");
-
-    if(ret == -1){
-        PRINT("CREATE ERROR RESPONSE");
-    }
-    else if(ret == S_IFDIR){
-        PRINT("REQUEST IS VALID DIRECTORY, APPEND index");
-        if(tempPath[tempPath.length()-1] != '/' ){
-            fullpath += "/";
-            fullpath += configRoute->m_defaultFile;
-        }
-        else
-            fullpath += configRoute->m_defaultFile;
-        PRINTVAR(fullpath);
-        ret = ValidatePath(fullpath);
-        if(ret != S_IFREG){
-            PRINT("CREATE ERROR RESPONSE, default file is not a file, or non existent");
-        }
-    }
-
-    //just for debugging checking if the final result has been captured correctly
-    PRINT("");
-    PRINT("");
-    if(ret != S_IFREG){
-        PRINT("AN ERROR OCCURED, COULDNT FIND FILE");
+    std::string newfullPath(configRoute->m_root + path);
+    int ret1 = ValidatePath(newfullPath);
+    int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
+    if(ret1 == -1){
+        PRINT("ERROR, Path is invalid!");
         _header["Status"] = "404 Not Found";
 
-        // std::string fileCont = getFileContent( "./files/error/404error.html");
-        // _respBody = fileCont;
-        // _header["Content-Length"] = std::to_string(getFileSize(fileCont));
-        return (EXIT_FAILURE);
+        _respBody = getFileContent( "./errorpages/error404.html");
+        _path = "./errorpages/error404.html"; //should not be here
+        return EXIT_FAILURE;
+    }
+    else if(ret1 == S_IFDIR) {
+        //only check this for a get request
+        if(method == METH_GET){
+            if(newfullPath[newfullPath.length()-1] != '/' ){
+                newfullPath += "/";
+                newfullPath += configRoute->m_defaultFile;
+            }
+            else
+                newfullPath += configRoute->m_defaultFile;
+            ret1 = ValidatePath(newfullPath);
+            if(ret1 != S_IFREG) {
+                PRINT("ERROR, Path is invalid!");
+                _header["Status"] = "404 Not Found";
+                return EXIT_FAILURE;
+            }
+        }
     }
 
-    else{
-        PRINT("FINAL PATH AFTER ALL TRANSFORMATION:");
-        PRINTVAR(fullpath);
-        _path = fullpath;
-    }
-    PRINT("");
-    PRINT("");
+    if(!(method & configRoute->m_allowedMethods)){ //if you are not allowed to access the resource with GET POST or DELETE
+        PRINT("ERROR,you have no rights to access this resource with the Method provided");
+        _header["Status"] = "403 Forbidden";
 
-    return (EXIT_SUCCESS);
+        //needs to be refactored
+        _respBody = getFileContent( "./errorpages/error403.html");
+        _path = "./errorpages/error403.html"; //should not be here
+        return EXIT_FAILURE;
+    }
+
+    if(method == METH_GET)
+        _path = newfullPath;
+    else
+        _path = path;
+    return EXIT_SUCCESS;
+
+
+
+
+    // std::string fullpath(configRoute->m_root + path);
+    // PRINTVAR(fullpath);
+
+    // std::string tempPath(configRoute->m_root);
+    // PRINTVAR(tempPath);
+    // int ret;
+    // size_t prev = tempPath.length() -1;
+    // while(true){
+    //     ret = ValidatePath(tempPath);
+    //     if(ret == -1) {
+    //         PRINT("PATH IS INVALID -> ERROR RESPONSE");
+    //         break;
+    //     }
+    //     else if(ret == S_IFREG){
+    //         PRINT("FOUND REGULAR FILE, THIS SHOULD BE THE END");
+    //         fullpath = configRoute->m_root + tempPath;
+    //         break;
+    //     }
+    //     else if(ret == S_IFDIR){
+    //         //append next
+    //         PRINT("VAR is DIRECTORY");
+    //         prev = fullpath.find("/",prev+1);
+    //         PRINTVAR(prev);
+    //         if(prev != std::string::npos){
+    //             tempPath = fullpath.substr(0,prev);
+    //         }
+    //         else{
+    //             tempPath = fullpath;
+    //             PRINTVAR(tempPath);
+    //             ret = ValidatePath(tempPath);
+    //             break;
+    //         }
+    //         PRINTVAR(tempPath);
+    //         continue;
+    //     }
+    //     else{
+    //         PRINT("FOUND SOMETHING THATS NEITHER A DIR OR FILE, more checking?");
+    //         break;
+    //     }
+    // }
+    // PRINT("AFTER LOOP");
+
+    // if(ret == -1){
+    //     PRINT("CREATE ERROR RESPONSE");
+    // }
+    // else if(ret == S_IFDIR){
+    //     PRINT("REQUEST IS VALID DIRECTORY, APPEND index");
+    //     if(tempPath[tempPath.length()-1] != '/' ){
+    //         fullpath += "/";
+    //         fullpath += configRoute->m_defaultFile;
+    //     }
+    //     else
+    //         fullpath += configRoute->m_defaultFile;
+    //     PRINTVAR(fullpath);
+    //     ret = ValidatePath(fullpath);
+    //     if(ret != S_IFREG){
+    //         PRINT("CREATE ERROR RESPONSE, default file is not a file, or non existent");
+    //     }
+    // }
+
+    // //just for debugging checking if the final result has been captured correctly
+    // PRINT("");
+    // PRINT("");
+    // if(ret != S_IFREG){
+    //     PRINT("AN ERROR OCCURED, COULDNT FIND FILE");
+    //     _header["Status"] = "404 Not Found";
+
+    //     // std::string fileCont = getFileContent( "./files/error/404error.html");
+    //     // _respBody = fileCont;
+    //     // _header["Content-Length"] = std::to_string(getFileSize(fileCont));
+    //     return (EXIT_FAILURE);
+    // }
+
+    // else{
+    //     PRINT("FINAL PATH AFTER ALL TRANSFORMATION:");
+    //     PRINTVAR(fullpath);
+    //     _path = fullpath;
+    // }
+    // PRINT("");
+    // PRINT("");
+
+    // return (EXIT_SUCCESS);
     //QUESTION
     // what happens if the client tries to access a file that is not part of the routes? will we take the global config or is this not allowed?
 

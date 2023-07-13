@@ -26,7 +26,7 @@ int getFileSize(const std::string &path)
         std::cout << strerror(errno) << std::endl;
         return ret;
     }
-    std::cout << "Success" << std::endl;
+    std::cout << "Successfully getting file size" << std::endl;
     return (status.st_size);
 }
 
@@ -34,6 +34,8 @@ int getFileSize(const std::string &path)
 std::string MethodEnumToString(int val)
 {
     std::string ret;
+    if(val == METH_NONE)
+        return "NONE";
     if(val & METH_GET)
         ret += "GET ";
     if(val & METH_POST)
@@ -43,6 +45,17 @@ std::string MethodEnumToString(int val)
     if(val > METH_ALL)
         ret+= "INVALID METHODS";
     return ret;
+}
+
+int StringToMethodEnum(const std::string &method)
+{
+    if(method == "GET")
+        return METH_GET;
+    if(method == "POST")
+        return METH_POST;
+    if(method == "DELETE")
+        return METH_DELETE;
+    return METH_NONE;
 }
 
 std::string saveDateTime() {
