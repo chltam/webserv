@@ -7,229 +7,105 @@ ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
-int ResponseBuilder::fillReqInfo( Request& request, const Config& config ) {
+Response* ResponseBuilder::createNewResponse(Request &request, const Config& config  )
+{
+    Response* response = new Response();
+    response->_headerFields["Server"] = request.getHeaderValueFromKey("Host");
 
-    //find server based on port
-    //check the directory (valid route) -> if not exist == error
-        //use open dir
-    //if file in directory if file exists? + access rights
-    //check if GET/POST/DELETE etc is allowed? -> if not == error
-    //do we need to check what the client accepts?
-    //check actual file for extensions
-        //if CGI valid -> run CGI
-        //else do the rest her
+    std::string contType= request.getHeaderValueFromKey("Host");
+    std::string::size_type pos = contType.find(',');
+    response->_headerFields["Content-Type"] = contType.substr(0, pos); 
 
+    response->setStatus(setResponseStatus(request,config,*response));
 
-    // give 301 Code (Moved Permanently) here? Server responds with the new url.
-    // Once a client receives that request he will than make a new http request from that location.
-    _header["Status"] = "200 OK";
-    _header["Date"] = saveDateTime();
-    vector<pair<string, string>> reqHeaderPairs = request.get_request_pair();
+    return response;
+}
 
-    for (vector< pair<string, string> >::const_iterator it = reqHeaderPairs.begin();
-        it != reqHeaderPairs.end(); ++it) {
-
-        if ( it->first == "request type" ) {
-            _reqType = it->second;
-        }
-        else if ( it->first == "Host" ) {
-            _serverName = it->second;
-            _header["Server"] = it->second;
-        }
-        else if ( it->first == "Accept" ) {
-            _contType = it->second;     // media-type = type "/" subtype * (NO whitespace between)
-            _header["Content-Type"] = it->second;
-            // _header["Content-Type"] = "text/html";
-        }
-    };
-	int ret = buildPath( request, config);
-
-    _header["Content-Length"] = std::to_string(getFileSize(_path));
-    if(_header["Content-Length"] == "-1")
-        _header["Content-Length"] = "0";
-
-    return ( ret );
-};
-
-int ResponseBuilder::buildPath( Request& request, const Config& config ) {
-
+int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response )
+{
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
-	// cerr << server << endl;
 
     string path = request.getHeaderValueFromKey( "path" );
-    // cerr << "path from request: " << path << endl;
     const ConfigRoute* configRoute = server->getRouteFromPath( path );
-    // cerr << "HEEEEEEEEEEEEEEE" << endl;
-    // cerr << *configRoute << endl;
+   
     if(configRoute == NULL){
         PRINT("ERROR, could find CONFIGROUTE, this should never happen!");
     }
 
     if(configRoute->m_shouldRedirect == true) {
         PRINT("REDIRECT SIR!");
-        _header["Location"] = configRoute->m_redirectDir;
-        _header["Status"] = "301 Moved Permanently";
-        PRINTVAR(configRoute->m_redirectDir);
-        return 2;
+        response._headerFields["Location"] = configRoute->m_redirectDir;
+        return 301;
     }
-    // if()
 
-    std::string fullpath(configRoute->m_root + path);
-    PRINTVAR(fullpath);
+    std::string newfullPath(configRoute->m_root + path);
+    int ret1 = ValidatePath(newfullPath);
+    int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
 
-    std::string tempPath(configRoute->m_root);
-    PRINTVAR(tempPath);
-    int ret;
-    size_t prev = tempPath.length() -1;
-    while(true){
-        ret = ValidatePath(tempPath);
-        if(ret == -1) {
-            PRINT("PATH IS INVALID -> ERROR RESPONSE");
-            break;
-        }
-        else if(ret == S_IFREG){
-            PRINT("FOUND REGULAR FILE, THIS SHOULD BE THE END");
-            fullpath = configRoute->m_root + tempPath;
-            break;
-        }
-        else if(ret == S_IFDIR){
-            //append next
-            PRINT("VAR is DIRECTORY");
-            prev = fullpath.find("/",prev+1);
-            PRINTVAR(prev);
-            if(prev != std::string::npos){
-                tempPath = fullpath.substr(0,prev);
+    if(ret1 == -1 && method != METH_POST){
+        PRINT("ERROR, Path is invalid!");
+        response.setPath("./errorpages/error404.html");
+        return 404;
+    }
+    else if(ret1 == S_IFDIR && method == METH_GET) {
+        //only check this for a get request
+            if(newfullPath[newfullPath.length()-1] != '/' ){
+                newfullPath += "/";
+                newfullPath += configRoute->m_defaultFile;
             }
-            else{
-                tempPath = fullpath;
-                PRINTVAR(tempPath);
-                ret = ValidatePath(tempPath);
-                break;
+            else
+                newfullPath += configRoute->m_defaultFile;
+            ret1 = ValidatePath(newfullPath);
+            if(ret1 != S_IFREG) {
+                PRINT("ERROR, Path is invalid!");
+                response.setPath("./errorpages/error404.html");
+                return 404;
             }
-            PRINTVAR(tempPath);
-            continue;
         }
-        else{
-            PRINT("FOUND SOMETHING THATS NEITHER A DIR OR FILE, more checking?");
-            break;
-        }
-    }
-    PRINT("AFTER LOOP");
 
-    if(ret == -1){
-        PRINT("CREATE ERROR RESPONSE");
-    }
-    else if(ret == S_IFDIR){
-        PRINT("REQUEST IS VALID DIRECTORY, APPEND index");
-        if(tempPath[tempPath.length()-1] != '/' ){
-            fullpath += "/";
-            fullpath += configRoute->m_defaultFile;
-        }
-        else
-            fullpath += configRoute->m_defaultFile;
-        PRINTVAR(fullpath);
-        ret = ValidatePath(fullpath);
-        if(ret != S_IFREG){
-            PRINT("CREATE ERROR RESPONSE, default file is not a file, or non existent");
-        }
+    if(!(method & configRoute->m_allowedMethods)){ //if you are not allowed to access the resource with GET POST or DELETE
+        PRINT("ERROR,you have no rights to access this resource with the Method provided");
+        response.setPath("./errorpages/error403.html");
+        return 403;
     }
 
-    //just for debugging checking if the final result has been captured correctly
-    PRINT("");
-    PRINT("");
-    if(ret != S_IFREG){
-        PRINT("AN ERROR OCCURED, COULDNT FIND FILE");
-        _status = "403 File not found";
-        return (EXIT_FAILURE);
+    if(method == METH_DELETE){
+
+        // if path is root on delete, send which response?
+        deleteResource(newfullPath);
     }
-
-    else{
-        PRINT("FINAL PATH AFTER ALL TRANSFORMATION:");
-        PRINTVAR(fullpath);
-        _path = fullpath;
+    else if(method == METH_POST){
+        uploadResource(newfullPath,request.getBody());
     }
-    PRINT("");
-    PRINT("");
+    else //only for get
+        response.setPath(newfullPath);
+    return 200;
+}
 
-    return (EXIT_SUCCESS);
-    //QUESTION
-    // what happens if the client tries to access a file that is not part of the routes? will we take the global config or is this not allowed?
 
-};
 
-std::string ResponseBuilder::headerToString()
+void ResponseBuilder::deleteResource(const std::string& newfullPath)
 {
-    // _respHeader = "HTTP/1.1 " + _status + /* "\r\nConnection: keep-alive" + */ "\r\nContent-Type: " + "text/html"\
-    //     + "\r\nContent-Length: " + _contLen + "\r\nDate: " + _dateTime + "\r\nServer: " + _serverName + "\r\n\r\n";
-
-    std::string ret("HTTP/1.1 " + _header["Status"]+ "\r\nConnection: keep-alive\r\n");
-
-    std::map<std::string,std::string>::const_iterator it = _header.begin();
-    for (; it != _header.end(); it++) {
-        if(it->first != "Status"){
-            ret += it->first + ": " + it->second + "\r\n";
-        }
-    }
-    ret += "\r\n";
-
-    return ret;
+    remove( newfullPath.c_str());
 }
-static AResponse *makeGetResponse(std::string path,std::string header, string reqBody)
+
+void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string resourceData)
 {
-    return (new GetResponse(path,header, reqBody));
-}
+    string filename;
+    stringstream lenStr;
 
-static AResponse* makePostResponse(std::string path, std::string header, string reqBody ) {
-    return (new PostResponse(path,header, reqBody ));
-}
+    cout << "POST received" << endl;
 
-static AResponse* makeDeleteResponse(std::string path, std::string header, string reqBody ) {
-    return (new DeleteResponse(path,header, reqBody ));
-}
+    filename = newfullPath;
+    ofstream file( filename, std::ios::app);
 
-static AResponse* makeErrorResponse(std::string path, std::string header, string reqBody) {
-    return (new ErrorResponse(path, header, reqBody));
-}
+    if ( file.is_open() ) {
 
-static AResponse* makeRedirResponse(std::string path, std::string header, string reqBody) {
-    return (new RedirResponse(path, header, reqBody));
-}
+        file << resourceData;
 
-AResponse* ResponseBuilder::createResponse(Request& request, const Config& config) {
-
-    int checker = fillReqInfo(request,config);
-
-    if ( checker == EXIT_FAILURE ) {
-       return makeErrorResponse (_path, headerToString(), request.getBody());
+    } else {
+        cout << "Unable to open file\n";
+        // _status = "403 Not Allowed";
     }
-    else if(checker == 2){
-        PRINT("ENTERED REDIR REPSONSE ");
-       return makeRedirResponse (_path, headerToString(), request.getBody());
-
-    }
-    AResponse* ( *allResponses[] )( std::string path, string _header,
-        string _reqBody ) = { &makeGetResponse , &makePostResponse , &makeDeleteResponse };
-    string responses[] = { "GET", "POST", "DELETE" };
-
-    for ( int i = 0; i < VALID_REQUEST_NUM; i++ ) {
-
-        if ( _reqType == responses[ i ] ) {
-
-            AResponse* response = allResponses[ i ](_path, headerToString(), request.getBody() );
-			if ( response->getExecResult() == 1 ) {
-
-                string status = response->getStatus();
-                cout << _reqType << "Response could not be created" << endl;
-                delete response;
-                return ( makeErrorResponse(_path, headerToString(), request.getBody()));
-
-            } else {
-                cout << _reqType << "Response created" << endl;
-                return ( response );
-            }
-        }
-    }
-    cout << _reqType << "Response could not be created" << endl;
-    _header["Status"] = "501 Not Implemented";
-    return ( makeErrorResponse(_path, headerToString(), request.getBody()));
-};
+    file.close();
+}

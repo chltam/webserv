@@ -20,7 +20,7 @@ void	Server::set_server_sock(/*config info*/)
 	for(int i = 0; i < servers.size(); i++){
 		for(int j = 0;j < servers[i].m_ports.size(); j++){
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-			cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << endl;
+			std::cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << std::endl;
 			sock.bind_socket(servers[i].m_ports[j].first, servers[i].m_ports[j].second);
 			_server_sock.push_back(sock);
 
@@ -40,7 +40,7 @@ void	Server::start_listening()//need to add poll later
 
 void	Server::accept_connection()
 {
-	vector<pollfd> pfd;
+	std::vector<pollfd> pfd;
 
 	for (int n = 0; n < _server_sock.size(); n++)
 	{
@@ -57,7 +57,7 @@ void	Server::accept_connection()
 			perror("poll failed");
 			exit(EXIT_FAILURE); // REMOVE CLIENT ACCORDING TO EVAL SHEET
 		}
-		cout << "result = " << result << endl;
+		std::cout << "result = " << result << std::endl;
 		for (int n = 0; n < pfd.size(); n++)
 		{
 			if (pfd[n].revents & POLLIN)
@@ -80,9 +80,9 @@ void	Server::accept_connection()
 
 }
 
+
 void Server::handle( int index, Socket& client_sock )
 {
-
 	if (client_sock.get_request_str().empty() == true)
 	{
 		//status = 408 Request Timeout
@@ -93,18 +93,15 @@ void Server::handle( int index, Socket& client_sock )
 	Request	request(client_sock.get_request_str());
 	request.printf_all();
 
-    //ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
-    AResponse *response = _builder.createResponse( request, m_Config );
 
-    response->fillResponse();
-	response->printHeaderInfo();
-    string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
+	Response* resp = _builder.createNewResponse(request,m_Config);
 
+	std::string respString = resp->build();
+	PRINT(respString);
     // write to socket
-    write( client_sock.get_sock_fd(), ( respStr.c_str()), respStr.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
+    write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
 
     close(client_sock.get_sock_fd());
 
-    delete response;
+    delete resp;
 }
-

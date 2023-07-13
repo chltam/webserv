@@ -24,7 +24,6 @@
 
 
 #include "ResponseBuilder.hpp"
-#include "AResponse.hpp"
 
 #include "Request.hpp"
 #include "MetaVars.hpp"
