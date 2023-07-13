@@ -86,3 +86,31 @@ std::string getFileContent( const std::string& filename ) {
     file.close();
     return ( buffer.str() );
 }
+
+
+std::string getStringFromStatus(int status)
+{
+    switch (status)
+    {
+    case 200:
+        return "200 OK";
+        break;
+    case 404:
+        return "404 Not Found";
+        break;   
+    case 408:
+        return "408 Timeout";
+        break;   
+    case 403:
+        return "403 Forbidden";
+        break;
+    case 301:
+        return "301 Moved Permanently";
+        break; 
+    default:
+        return "INVALID";
+        break;
+    }
+
+    return "ERROR";
+}

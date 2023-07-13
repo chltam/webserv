@@ -79,13 +79,9 @@ void	Server::accept_connection()
 
 }
 
+
 void Server::handle( int index, Socket& client_sock )
 {
-    // RequestParser parser( client_sock.get_request_str() ); // COSMO: sometimes this string is empty with Firefox requests, should never be
-	// cout << client_sock.get_request_str() << endl;
-
-    // parser.tokenizeRequest();
-
 	if (client_sock.get_request_str().empty() == true)
 	{
    		close(client_sock.get_sock_fd());
@@ -94,18 +90,15 @@ void Server::handle( int index, Socket& client_sock )
 	Request	request(client_sock.get_request_str());
 	request.printf_all();
 
-    //ResponseBuilder builder( parser.getHeaderPairs(), parser.getBody() );
-    AResponse *response = _builder.createResponse( request, m_Config );
 
-    response->fillResponse();
-	response->printHeaderInfo();
-    string respStr = response->getResponse();    // if NULL, REMOVE CLIENT
+	Response* resp = _builder.createNewResponse(request,m_Config);
 
+	std::string respString = resp->build();
+	PRINT(respString);
     // write to socket
-    write( client_sock.get_sock_fd(), ( respStr.c_str()), respStr.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
+    write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
 
     close(client_sock.get_sock_fd());
 
-    delete response;
+    delete resp;
 }
-
