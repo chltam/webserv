@@ -7,12 +7,6 @@ ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
-/***  ISSUES
-- DELETE on localhost:8080, Response has 200 OK
-- all the lines where _path is assigned: can they just be deleted?
-- should status be ints for the response to build its own status field?
-***/
-
 Response* ResponseBuilder::createNewResponse(Request &request, const Config& config  )
 {
     Response* response = new Response();
@@ -76,6 +70,8 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     }
 
     if(method == METH_DELETE){
+
+        // if path is root on delete, send which response?
         deleteResource(newfullPath);
     }
     else if(method == METH_POST){
