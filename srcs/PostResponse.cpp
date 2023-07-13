@@ -13,7 +13,9 @@ int PostResponse::exec() {
     cout << "POST received" << endl;
 
     filename = _path;
-    ofstream file( filename );
+    ofstream file( filename, std::ios::app);
+
+    PRINT_MORE(_path);
 
     if ( file.is_open() ) {
 
@@ -31,4 +33,6 @@ int PostResponse::exec() {
         return ( EXIT_FAILURE );
     }
     file.close();
+
+    return ( EXIT_SUCCESS );
 };

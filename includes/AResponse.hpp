@@ -8,6 +8,7 @@
 #include <ctime>
 
 #include <unistd.h>
+#include "webserv.hpp"
 
 using namespace std;
 

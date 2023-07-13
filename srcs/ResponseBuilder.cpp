@@ -67,9 +67,10 @@ int ResponseBuilder::buildPath( Request& request, const Config& config ) {
     }
 
     std::string newfullPath(configRoute->m_root + path);
+    PRINT(newfullPath);
     int ret1 = ValidatePath(newfullPath);
     int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
-    if(ret1 == -1){
+    if(ret1 == -1 && method != METH_POST){
         PRINT("ERROR, Path is invalid!");
         _header["Status"] = "404 Not Found";
 
@@ -90,6 +91,9 @@ int ResponseBuilder::buildPath( Request& request, const Config& config ) {
             if(ret1 != S_IFREG) {
                 PRINT("ERROR, Path is invalid!");
                 _header["Status"] = "404 Not Found";
+
+                _respBody = getFileContent( "./errorpages/error404.html");
+                _path = "./errorpages/error404.html"; //should not be here
                 return EXIT_FAILURE;
             }
         }
@@ -105,12 +109,13 @@ int ResponseBuilder::buildPath( Request& request, const Config& config ) {
         return EXIT_FAILURE;
     }
 
-    if(method == METH_GET)
-        _path = newfullPath;
-    else
-        _path = path;
-    return EXIT_SUCCESS;
+    _path = newfullPath;
+    //check if we have executable that can handle this extension if CGI
+    //configRoute->m_cgi
+    //cosmo stuff will be attached here
+    //if CGI, call CGI
 
+    return EXIT_SUCCESS;
 
 
 
@@ -257,17 +262,17 @@ AResponse* ResponseBuilder::createResponse(Request& request, const Config& confi
         if ( _reqType == responses[ i ] ) {
 
             AResponse* response = allResponses[ i ](_path, headerToString(), request.getBody() );
-			if ( response->getExecResult() == 1 ) {
+			// if ( response->getExecResult() == 1 ) {
 
-                string status = response->getStatus();
-                cout << _reqType << "Response could not be created" << endl;
-                delete response;
-                return ( makeErrorResponse(_path, headerToString(), request.getBody()));
+            //     string status = response->getStatus();
+            //     cout << _reqType << "Response could not be created" << endl;
+            //     delete response;
+            //     return ( makeErrorResponse(_path, headerToString(), request.getBody()));
 
-            } else {
-                cout << _reqType << "Response created" << endl;
+            // } else {
+            //     cout << _reqType << "Response created" << endl;
+            // }
                 return ( response );
-            }
         }
     }
     cout << _reqType << "Response could not be created" << endl;
