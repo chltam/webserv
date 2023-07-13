@@ -42,7 +42,10 @@ void	MetaVars::set_executor(std::string executor)
 	_executor = executor;
 }
 
-void	MetaVars::update_envp(Request& request) //need rework, update from request and more
+/**
+ * @brief get info from Request, set MetaVars accordingly 
+*/
+void	MetaVars::update_envp(Request& request)
 {
 	//read request, set value needed
 
@@ -54,6 +57,8 @@ void	MetaVars::update_envp(Request& request) //need rework, update from request 
 
 	set_value("PATH_INFO", request.getHeaderValueFromKey("path")); //depends on our approach
 	set_value("QUERY_STRING", request.getHeaderValueFromKey("query"));
+
+	set_value("REDIRECT_STATUS", "200");
 }
 
 std::string	MetaVars::get_value(std::string key)
@@ -86,6 +91,26 @@ char	**MetaVars::get_envp()
 	new_envp[_envp_size + _meta_map.size()] = NULL;
 
 	return(new_envp);
+}
+
+bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, string& path)
+{
+	int	dpos = path.rfind('.');
+	if (dpos == std::string::npos)
+		return (false);
+	vector<pair<string , string> >::const_iterator it = cgi_pair.begin();
+	while (it != cgi_pair.end())
+	{
+		if (path.substr(dpos) == it->first)
+		{
+			set_value("SCRIPT_NAME", path);
+			set_value("SCRIPT_FILENAME", path);
+			set_executor(it->second);
+			return (true);
+		}
+		it++;
+	}
+	return (false);
 }
 
 std::string	MetaVars::cgi_caller()
@@ -160,10 +185,6 @@ int	MetaVars::count_envp_size(char **envp)
 char	**MetaVars::copy_envp(char **envp, int& _envp_size)
 {
 	char **new_envp;
-
-	// _envp_size = 0;
-	// while (envp[_envp_size])
-	// 	_envp_size++;
 	
 	new_envp = new char*[_envp_size + 1];
 	for (int n = 0; n < _envp_size; n++){

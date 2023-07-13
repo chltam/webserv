@@ -1,8 +1,7 @@
 #include "../includes/Server.hpp"
 
-Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder()
+Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder(), _mvars(envp)
 {
-	_envp = envp;
 	m_Config.printServers();
 };
 
@@ -63,16 +62,8 @@ void	Server::accept_connection()
 			if (pfd[n].revents & POLLIN)
 			{
 				Socket	client_sock(pfd[n].fd);
-				
-				// pollfd cfd = {client_sock.get_sock_fd(), POLL_IN, 0};
-				// pfd.push_back(cfd);
-				
 				client_sock.read_sock();
-
-				// cout << client_sock.get_request_str() << endl;
 				handle(n, client_sock);
-				// cout << client_sock.get_request_str() << endl;
-				// pfd.pop_back();
 			}
 		}
 
@@ -94,10 +85,10 @@ void Server::handle( int index, Socket& client_sock )
 	request.printf_all();
 
 
-	Response* resp = _builder.createNewResponse(request,m_Config);
+	Response* resp = _builder.createNewResponse(request, m_Config, _mvars);
 
 	std::string respString = resp->build();
-	PRINT(respString);
+	// PRINT(respString);
     // write to socket
     write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
 

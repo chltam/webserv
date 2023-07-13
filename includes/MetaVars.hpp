@@ -11,6 +11,7 @@
 #include <map>
 
 #include "Request.hpp"
+#include "ConfigRoute.hpp"
 
 
 class MetaVars{
@@ -23,9 +24,13 @@ public:
 	void	set_value(std::string key, std::string value);
 	void	set_content_length(std::string& body);
 	void	set_executor(std::string executor);
+
 	void	update_envp(Request& request);
 	std::string get_value(std::string key);
 	char	**get_envp();
+	bool	check_extension(const std::vector<std::pair<std::string,std::string>>& cgi_pair, std::string& path);
+
+
 	std::string	cgi_caller();
 	void	print_envp(void);
 	void	clean_meta_map();

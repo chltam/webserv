@@ -7,7 +7,7 @@ ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
-Response* ResponseBuilder::createNewResponse(Request &request, const Config& config  )
+Response* ResponseBuilder::createNewResponse(Request &request, const Config& config, MetaVars& mvars  )
 {
     Response* response = new Response();
     response->_headerFields["Server"] = request.getHeaderValueFromKey("Host");
@@ -16,12 +16,12 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
     std::string::size_type pos = contType.find(',');
     response->_headerFields["Content-Type"] = contType.substr(0, pos); 
 
-    response->setStatus(setResponseStatus(request,config,*response));
+    response->setStatus(setResponseStatus(request,config,*response,mvars));
 
     return response;
 }
 
-int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response )
+int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
 {
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 
@@ -68,6 +68,17 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         response.setPath("./errorpages/error403.html");
         return 403;
     }
+
+	/*if cgi*/
+	// PRINT(configRoute);
+
+	if (mvars.check_extension(configRoute->m_cgi, newfullPath) == true)
+	{
+		mvars.update_envp(request);
+		PRINT("HELLLLLLO");
+		std::cout << mvars.cgi_caller() << std::endl;
+		
+	}
 
     if(method == METH_DELETE){
 

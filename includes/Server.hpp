@@ -47,7 +47,7 @@ class Server {
 
     private:
 
-        char **_envp;
+		MetaVars	_mvars;
         std::vector<Socket>	_server_sock;
         Config m_Config;
         ResponseBuilder _builder;
