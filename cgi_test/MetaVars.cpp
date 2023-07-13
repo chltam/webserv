@@ -1,4 +1,5 @@
-#include "MetaVars.hpp"
+#include "../includes/MetaVars.hpp"
+using namespace	std;
 
 MetaVars::MetaVars()
 {
@@ -31,25 +32,19 @@ void	MetaVars::set_value(std::string key, std::string value)
 		it->second = value;
 }
 
-std::string	MetaVars::get_value(std::string key)
-{
-	std::map<std::string, std::string>::iterator it;
-
-	it = _meta_map.find(key);
-	if (it != _meta_map.end())
-		return (it->second);
-	else
-		return ("");
-}
-
 void	MetaVars::set_content_length(std::string& body)
 {
 	set_value("CONTENT_LENGTH", to_string(body.length()));
 }
 
-void	MetaVars::update_envp()
+void	MetaVars::set_executor(std::string executor)
 {
-	// cout << "size = " <<_meta_map.size() << endl;
+	_executor = executor;
+}
+
+void	MetaVars::update_envp() //need rework, update from request and more
+{
+	cout << "size = " <<_meta_map.size() << endl;
 	char **new_envp = new char*[_envp_size + _meta_map.size() + 1];
 	for (int n = 0; n < _envp_size; n++){
 		new_envp[n] = strdup(_envp[n]);
@@ -62,9 +57,82 @@ void	MetaVars::update_envp()
 	_envp = new_envp;
 }
 
+std::string	MetaVars::get_value(std::string key)
+{
+	std::map<std::string, std::string>::iterator it;
+
+	it = _meta_map.find(key);
+	if (it != _meta_map.end())
+		return (it->second);
+	else
+		return ("");
+}
+
+/**
+ * @brief create a new envp by combining original one and _meta_map
+*/
 char	**MetaVars::get_envp()
 {
-	return(_envp);
+	char	**new_envp = new char*[_envp_size + _meta_map.size() + 1];
+
+	for (int n = 0; n < _envp_size; n++){
+		new_envp[n] = strdup(_envp[n]);
+	}
+	
+	int	n = 0;
+	for (map<string, string>::iterator it = _meta_map.begin(); it != _meta_map.end(); it++){
+		new_envp[_envp_size  + n] = strdup((it->first + "=" + it->second).c_str());
+		n++;
+	}
+	new_envp[_envp_size + _meta_map.size()] = NULL;
+
+	return(new_envp);
+}
+
+std::string	MetaVars::cgi_caller()
+{
+	char	*arg[3];
+	arg[0] = (char *)_executor.c_str();
+	arg[1] = (char *)get_value("SCRIPT_NAME").c_str();
+	arg[2] = NULL;
+
+	std::string	ret;
+	int	pid;
+	int fd[2];
+
+	if (pipe(fd) == -1)
+		exit(EXIT_FAILURE); // dc from client?
+
+	pid = fork();
+	if (pid == -1)
+		exit(EXIT_FAILURE); // dc from client?
+
+	if (pid == 0)
+	{
+		dup2(fd[1], 1);
+		close(fd[0]);
+		close(fd[1]);
+		execve(arg[0], arg, get_envp());
+			//if failed do sth
+	}
+	else
+	{
+
+		close(fd[1]);
+		waitpid(pid, NULL, 0);
+		char	buffer[100];
+		int	bread;
+		
+		while((bread = read(fd[0], buffer, 100)) != 0)
+		{
+			buffer[bread] = '\0';
+			ret += buffer;
+		}
+		close(fd[0]);
+	}
+	
+	return (ret);
+
 }
 
 void	MetaVars::print_envp()
@@ -104,6 +172,11 @@ char	**MetaVars::copy_envp(char **envp, int& _envp_size)
 	}
 	new_envp[_envp_size] = NULL;
 	return (new_envp);
+}
+
+void	MetaVars::clean_meta_map()
+{
+	_meta_map.clear();
 }
 
 void	MetaVars::free_envp(char **envp)

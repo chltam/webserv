@@ -29,53 +29,77 @@ int main(int argc, char **argv, char **envp)
 	mvars.set_value("SERVER_PROTOCOL", "HTTP/1.1");
 	mvars.set_value("SERVER_PORT", "8080");
 	mvars.set_value("REDIRECT_STATUS", "0");
-	mvars.update_envp();
+
+	mvars.set_executor("/usr/bin/php-cgi");
+	
+	std::string str = mvars.cgi_caller();
+
+	std::cout << str << std::endl;
+
+	// char **new_envp = mvars.get_envp();
+	// int n = 0;
+	// while (new_envp[n])
+	// {
+	// 	std::cout << new_envp[n] << std::endl;
+	// 	n++;
+	// }
+	
+	
+	// n = 0;
+	// while (new_envp[n])
+	// {
+	// 	free(new_envp[n]);
+	// 	n++;
+	// }
+	// delete [] (new_envp);
 	// mvars.print_envp();
 
+	
+	
 	// std::string	cgi = "/usr/bin/python3";
-	std::string	cgi = "/usr/bin/php-cgi";
+	// std::string	cgi = "/usr/bin/php-cgi";
 	// std::string	cgi = "./php-cgi8.2";
 
-	char *arg[3];
-	arg[0] = (char *)cgi.c_str();
-	arg[1] = (char *)mvars.get_value("SCRIPT_NAME").c_str();
-	arg[2] = NULL;
-	std::cout << arg[0] << std::endl;
-	std::cout << arg[1] << std::endl;
-	int	fd[2];
-	// int backup = dup(STDOUT_FILENO);
-	pipe(fd);
-	int pid = fork();
-	if (pid == 0)
-	{
-		dup2(fd[1], 1);
-		close(fd[0]);
-		// close(fd[1]);
-		// execve(arg[0], arg, mvars.get_envp());
-		execve(arg[0], arg, mvars.get_envp());
-		// std::cout << "here" << std::endl;
-	}
-	else
-	{
-		waitpid(pid, NULL, 0);
-		char buffer[500];
-		int bread = 1;
-		std::string	ret;
-		// close(fd[1]);
-		while (bread != 0)
-		{
-			std::cout << "1123" << std::endl;
+	// char *arg[3];
+	// arg[0] = (char *)cgi.c_str();
+	// arg[1] = (char *)mvars.get_value("SCRIPT_NAME").c_str();
+	// arg[2] = NULL;
+	// std::cout << arg[0] << std::endl;
+	// std::cout << arg[1] << std::endl;
+	// int	fd[2];
 
-			read(fd[0], buffer, 500);
-			std::cout << "1" << std::endl;
-			ret += buffer;
-		}
-		// close(fd[0]);
-		// buffer[bread] = '\0';
-		std::cout << ret << std::endl;
-	}
+	// pipe(fd);
+	// std::string	ret;
+	// int pid = fork();
+	// if (pid == 0)
+	// {
+	// 	dup2(fd[1], 1);
+	// 	close(fd[0]);
+	// 	close(fd[1]);
 
-	std::string str = "Hello\0World";
+	// 	execve(arg[0], arg, new_envp);
+
+	// }
+	// else
+	// {
+	// 	close(fd[1]);
+	// 	waitpid(pid, NULL, 0);
+	// 	char buffer[20];
+	// 	int bread = 1;
+	// 	// while (bread != 0)
+	// 	// {
+	// 	// 	bread = read(fd[0], buffer, 20);
+	// 	// 	buffer[bread] = '\0';
+	// 	// 	ret += buffer;
+	// 	// }
+	// 	while ((bread = read(fd[0], buffer, 20)) != 0)
+	// 	{
+	// 		buffer[bread] = '\0';
+	// 		ret += buffer;
+	// 	}
+	// 	close(fd[0]);
+	// }
+	// std::cout << ret << std::endl;
 
 
 
