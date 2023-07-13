@@ -33,12 +33,3 @@ int GetResponse::exec() {
 
     return ( EXIT_SUCCESS );
 };
-
-
-    // } else {
-
-    //     cout << "Unable to open file\n";
-    //     _respBody = "COULD NOT OPEN FILE\n";
-    //     _status = "404 File Not Found";
-    //     return ( EXIT_FAILURE );
-    // }
