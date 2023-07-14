@@ -95,6 +95,9 @@ std::string getStringFromStatus(int status)
     case 200:
         return "200 OK";
         break;
+    case -200:
+        return "200 OK";
+        break;
     case 404:
         return "404 Not Found";
         break;   

@@ -20,6 +20,7 @@ class Response {
         std::map<std::string,std::string> _headerFields;
         void setStatus(int);
         void setPath(const std::string& path);
+        void setBody(const std::string& body);
         const std::string& getResponseBody();
         std::string build();
     private:    

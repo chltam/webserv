@@ -154,6 +154,9 @@ std::string	MetaVars::cgi_caller()
 		}
 		close(fd[0]);
 	}
+
+	int start = ret.find("<!DOCTYPE html>");
+	ret = ret.substr(start);
 	
 	return (ret);
 

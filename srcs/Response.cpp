@@ -27,6 +27,9 @@ void Response::bodyToString()
 
     std::ifstream file( _path );
 
+    if (_status == -200)
+        return ;
+
     if ( file.is_open() ) {
         buffer << file.rdbuf();
     }
@@ -38,8 +41,11 @@ void Response::bodyToString()
 
 void Response::headerToString()
 {
-
-    std::string size = std::to_string(getFileSize(_path));
+    std::string size;
+    if (_status == -200)
+        size = std::to_string(_respBody.size());
+    else
+        size = std::to_string(getFileSize(_path));
     if(size == "-1")
         _headerFields["Content-Length"] = "0";
     else
@@ -66,6 +72,11 @@ void Response::setStatus(int status)
 void Response::setPath(const std::string& path)
 {
     _path = path;
+}
+
+void    Response::setBody(const std::string& body)
+{
+    _respBody = body;
 }
 
 const std::string& Response::getResponseBody()
