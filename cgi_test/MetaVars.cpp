@@ -1,4 +1,4 @@
-#include "../includes/MetaVars.hpp"
+#include "MetaVars.hpp"
 using namespace	std;
 
 MetaVars::MetaVars()
@@ -42,20 +42,20 @@ void	MetaVars::set_executor(std::string executor)
 	_executor = executor;
 }
 
-void	MetaVars::update_envp() //need rework, update from request and more
-{
-	cout << "size = " <<_meta_map.size() << endl;
-	char **new_envp = new char*[_envp_size + _meta_map.size() + 1];
-	for (int n = 0; n < _envp_size; n++){
-		new_envp[n] = strdup(_envp[n]);
-	}
-	for (map<string, string>::iterator it = _meta_map.begin(); it != _meta_map.end(); it++){
-		new_envp[_envp_size++] = strdup((it->first + "=" + it->second).c_str());
-	}
-	new_envp[_envp_size] = NULL;
-	free_envp(_envp);
-	_envp = new_envp;
-}
+// void	MetaVars::update_envp() //need rework, update from request and more
+// {
+// 	cout << "size = " <<_meta_map.size() << endl;
+// 	char **new_envp = new char*[_envp_size + _meta_map.size() + 1];
+// 	for (int n = 0; n < _envp_size; n++){
+// 		new_envp[n] = strdup(_envp[n]);
+// 	}
+// 	for (map<string, string>::iterator it = _meta_map.begin(); it != _meta_map.end(); it++){
+// 		new_envp[_envp_size++] = strdup((it->first + "=" + it->second).c_str());
+// 	}
+// 	new_envp[_envp_size] = NULL;
+// 	free_envp(_envp);
+// 	_envp = new_envp;
+// }
 
 std::string	MetaVars::get_value(std::string key)
 {
@@ -96,9 +96,15 @@ std::string	MetaVars::cgi_caller()
 	arg[1] = (char *)get_value("SCRIPT_NAME").c_str();
 	arg[2] = NULL;
 
+
+	std::cout << arg[0] << std::endl;
+	std::cout << arg[1] << std::endl;
+	// std::cout << arg[2] << std::endl;
+	std::string request_body = "HEY THIS IS THE REQUEST BODY\n";
 	std::string	ret;
 	int	pid;
 	int fd[2];
+
 
 	if (pipe(fd) == -1)
 		exit(EXIT_FAILURE); // dc from client?
@@ -109,6 +115,7 @@ std::string	MetaVars::cgi_caller()
 
 	if (pid == 0)
 	{
+		// dup2(fd[0], 0);
 		dup2(fd[1], 1);
 		close(fd[0]);
 		close(fd[1]);
@@ -117,7 +124,7 @@ std::string	MetaVars::cgi_caller()
 	}
 	else
 	{
-
+		// write(fd[1], request_body.c_str(), request_body.length());
 		close(fd[1]);
 		waitpid(pid, NULL, 0);
 		char	buffer[100];

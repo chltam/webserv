@@ -21,12 +21,15 @@ class Response {
         void setStatus(int);
         void setPath(const std::string& path);
         void setBody(const std::string& body);
+		void setCgi(bool state);
         const std::string& getResponseBody();
+		bool	getCgi();
         std::string build();
     private:    
         
         std::string _respHeader;
         int _status;
+		bool	_cgi;
         std::string _path;
         std::string _respBody;
         void headerToString();

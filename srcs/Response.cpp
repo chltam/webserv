@@ -6,6 +6,7 @@ Response::Response() {
     _headerFields["Server"] = "UNKNOWN";
     _headerFields["Content-Type"] = "UNKNOWN";
     _headerFields["Content-Length"] = "UNKNOWN";
+	_cgi = false;
 };
 
 Response::~Response() {};
@@ -27,7 +28,7 @@ void Response::bodyToString()
 
     std::ifstream file( _path );
 
-    if (_status == -200)
+    if (_cgi == true)
         return ;
 
     if ( file.is_open() ) {
@@ -42,7 +43,7 @@ void Response::bodyToString()
 void Response::headerToString()
 {
     std::string size;
-    if (_status == -200)
+    if (_cgi == true)
         size = std::to_string(_respBody.size());
     else
         size = std::to_string(getFileSize(_path));
@@ -77,6 +78,16 @@ void Response::setPath(const std::string& path)
 void    Response::setBody(const std::string& body)
 {
     _respBody = body;
+}
+
+void	Response::setCgi(bool state)
+{
+	_cgi = state;
+}
+
+bool	Response::getCgi()
+{
+	return (_cgi);
 }
 
 const std::string& Response::getResponseBody()

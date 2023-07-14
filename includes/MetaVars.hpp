@@ -28,10 +28,10 @@ public:
 	void	update_envp(Request& request);
 	std::string get_value(std::string key);
 	char	**get_envp();
-	bool	check_extension(const std::vector<std::pair<std::string,std::string>>& cgi_pair, std::string& path);
+	bool	check_extension(const std::vector<std::pair<std::string,std::string>>& cgi_pair, std::string path);
 
 
-	std::string	cgi_caller();
+	std::string	cgi_caller(std::string request_body);
 	void	print_envp(void);
 	void	clean_meta_map();
 
@@ -43,6 +43,7 @@ private:
 
 	int	count_envp_size(char **envp);
 	char	**copy_envp(char **envp, int& _envp_size);
+	char	*to_cstring(std::string str);
 	void	free_envp(char **envp);
 
 

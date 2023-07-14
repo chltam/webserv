@@ -73,16 +73,6 @@ std::vector<std::pair<std::string, std::string> >& Request::get_request_pair()
 	return (_request_pair);
 }
 
-std::string	Request::get_value(std::string& key)
-{
-
-	for (vector<pair<string, string> >::iterator it = _request_pair.begin();
-			it != _request_pair.end(); it++)
-		if (it->first == key)
-			return (it->second);
-	return ("");
-}
-
 void    Request::set_path_query(string uri)
 {
     int split = uri.find('?');

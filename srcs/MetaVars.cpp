@@ -50,6 +50,9 @@ void	MetaVars::update_envp(Request& request)
 	//read request, set value needed
 
 	set_value("REQUEST_METHOD", request.getHeaderValueFromKey("request type"));
+	// set_value("SCRIPT_FILENAME", request.getHeaderValueFromKey("path"));
+	// set_value("SCRIPT_NAME", request.getHeaderValueFromKey("path"));
+
 	
 	set_value("SERVER_PROTOCOL", request.getHeaderValueFromKey("protocol"));
 	set_value("SERVER_NAME", request.getHeaderValueFromKey("server_name"));
@@ -61,7 +64,7 @@ void	MetaVars::update_envp(Request& request)
 	set_value("REDIRECT_STATUS", "200");
 }
 
-std::string	MetaVars::get_value(std::string key)
+std::string MetaVars::get_value(std::string key)
 {
 	std::map<std::string, std::string>::iterator it;
 
@@ -93,32 +96,51 @@ char	**MetaVars::get_envp()
 	return(new_envp);
 }
 
-bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, string& path)
+bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, string path)
 {
 	int	dpos = path.rfind('.');
 	if (dpos == std::string::npos)
 		return (false);
-	vector<pair<string , string> >::const_iterator it = cgi_pair.begin();
-	while (it != cgi_pair.end())
+	// vector<pair<string , string> >::const_iterator it = cgi_pair.begin();
+	// while (it != cgi_pair.end())
+	// {
+	// 	if (path.substr(dpos) == it->first)
+	// 	{
+	// 		set_value("SCRIPT_NAME", path);
+	// 		set_value("SCRIPT_FILENAME", path);
+	// 		set_executor(it->second);
+	// 		return (true);
+	// 	}
+	// 	it++;
+	// }
+	for (int n = 0; n < cgi_pair.size(); n++)
 	{
-		if (path.substr(dpos) == it->first)
+		PRINTVAR(cgi_pair[n].first);
+		PRINTVAR(cgi_pair[n].second);
+		PRINTVAR(path);
+		if (path.substr(dpos) == cgi_pair[n].first)
 		{
 			set_value("SCRIPT_NAME", path);
 			set_value("SCRIPT_FILENAME", path);
-			set_executor(it->second);
+			set_executor(cgi_pair[n].second);
 			return (true);
 		}
-		it++;
 	}
 	return (false);
 }
 
-std::string	MetaVars::cgi_caller()
+std::string	MetaVars::cgi_caller(std::string request_body)
 {
 	char	*arg[3];
-	arg[0] = (char *)_executor.c_str();
-	arg[1] = (char *)get_value("SCRIPT_NAME").c_str();
+	std::string script = get_value("SCRIPT_NAME");
+	// arg[0] = to_cstring(_executor);
+	// arg[1] = to_cstring(get_value("SCRIPT_NAME"));
+	arg[0] = (char* )_executor.c_str();
+	arg[1] = (char* )script.c_str();
 	arg[2] = NULL;
+
+	PRINTVAR(arg[0]);
+	PRINTVAR(arg[1]);
 
 	std::string	ret;
 	int	pid;
@@ -132,16 +154,17 @@ std::string	MetaVars::cgi_caller()
 		exit(EXIT_FAILURE); // dc from client?
 
 	if (pid == 0)
-	{
-		dup2(fd[1], 1);
+	{	
+		dup2(fd[0], STDIN_FILENO);
 		close(fd[0]);
+		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
 		execve(arg[0], arg, get_envp());
-			//if failed do sth
+			PRINT("HERERERE\n");
 	}
 	else
 	{
-
+		write(fd[1], request_body.c_str(), request_body.length());
 		close(fd[1]);
 		waitpid(pid, NULL, 0);
 		char	buffer[100];
@@ -154,10 +177,14 @@ std::string	MetaVars::cgi_caller()
 		}
 		close(fd[0]);
 	}
+	// delete[] arg[0];
+	// delete[] arg[1];
 
+	PRINTVAR(ret);
 	int start = ret.find("<!DOCTYPE html>");
+	if (start == std::string::npos)
+		return (string());
 	ret = ret.substr(start);
-	
 	return (ret);
 
 }
@@ -195,6 +222,13 @@ char	**MetaVars::copy_envp(char **envp, int& _envp_size)
 	}
 	new_envp[_envp_size] = NULL;
 	return (new_envp);
+}
+
+char*	MetaVars::to_cstring(std::string str)
+{
+	char* cstr = new char[str.length() + 1];
+    std::strcpy(cstr, str.c_str());
+    return (cstr);
 }
 
 void	MetaVars::clean_meta_map()

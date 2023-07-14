@@ -80,9 +80,9 @@ void Server::handle( int index, Socket& client_sock )
    		close(client_sock.get_sock_fd());
 		return ;
 	}
-	std::cout << client_sock.get_request_str() << std::endl;
+	// std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());
-	request.printf_all();
+	// request.printf_all();
 
 
 	Response* resp = _builder.createNewResponse(request, m_Config, _mvars);

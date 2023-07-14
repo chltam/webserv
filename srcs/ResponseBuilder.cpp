@@ -70,14 +70,15 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     }
 
 	/*if cgi*/
-
 	if (mvars.check_extension(configRoute->m_cgi, newfullPath) == true)
 	{
+		PRINTVAR(newfullPath);
+		response.setCgi(true);
 		mvars.update_envp(request);
-		// std::cout << mvars.cgi_caller() << std::endl;
-        response.setBody(mvars.cgi_caller());
+		PRINT(mvars.get_value("REQUEST_METHOD"));
+        response.setBody(mvars.cgi_caller(request.getBody()));
         mvars.clean_meta_map();
-        return -200;
+        return 200;//not always 200
 		
 	}
 
