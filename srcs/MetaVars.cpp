@@ -57,6 +57,7 @@ void	MetaVars::update_envp(Request& request)
 	set_value("SERVER_PROTOCOL", request.getHeaderValueFromKey("protocol"));
 	set_value("SERVER_NAME", request.getHeaderValueFromKey("server_name"));
 	set_value("SERVER_PORT", request.getHeaderValueFromKey("server_port"));
+	
 	set_content_length(request.getBody());
 
 	set_value("PATH_INFO", request.getHeaderValueFromKey("path")); //depends on our approach
