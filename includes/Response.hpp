@@ -7,6 +7,8 @@
 #include <map>
 
 #include <unistd.h>
+#include <dirent.h>
+
 #include "webserv.hpp"
 
 class Response {
@@ -18,17 +20,22 @@ class Response {
         void insertHeaderField(const std::string& key, const std::string& value);
         void setStatus(int);
         void setPath(const std::string& path);
+        void setAutoIndex(bool val);
+        void setPathFromErrorCode(int errorCode);
         const std::string& getResponseBody();
 
         std::string build();
     private:
-
-        std::string _respHeader;
+        void headerToString();
+        void bodyToString();
+        std::string buildIndexPage();
+        std::string createIndexingElement(const std::string& fileType,const std::string& relPath);
+        std::string filetypeToString(int type);
         std::map<std::string,std::string> _headerFields;
         int _status;
         std::string _path;
+        std::string _respHeader;
         std::string _respBody;
-        void headerToString();
-        void bodyToString();
+        bool _autoindex;
 
 };

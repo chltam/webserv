@@ -41,14 +41,18 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     std::string newfullPath(configRoute->m_root + path);
     int ret1 = ValidatePath(newfullPath);
     int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
-
+    PRINTVAR(newfullPath);
+    PRINTVAR(ret1);
+    PRINTVAR(S_IFREG);
+    PRINTVAR(S_IFDIR);
     if(ret1 == -1 && method != METH_POST){
         PRINT("ERROR, Path is invalid!");
-        response.setPath("./errorpages/error404.html");
+        response.setPathFromErrorCode(404);
         return 404;
     }
-    else if(ret1 == S_IFDIR && method == METH_GET) {
+    else if(ret1 == S_IFDIR && method == METH_GET) { //find,append,validate index file, if not, check for autoindex, else error
         //only check this for a get request
+            std::string tempPath(newfullPath);
             if(newfullPath[newfullPath.length()-1] != '/' ){
                 newfullPath += "/";
                 newfullPath += configRoute->m_defaultFile;
@@ -56,16 +60,22 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
             else
                 newfullPath += configRoute->m_defaultFile;
             ret1 = ValidatePath(newfullPath);
-            if(ret1 != S_IFREG) {
-                PRINT("ERROR, Path is invalid!");
-                response.setPath("./errorpages/error404.html");
+            PRINTVAR(ret1);
+            if((ret1 == -1 || ret1 == S_IFDIR) && configRoute->m_autoindex == true) { //check for autoindex if default file is missing
+                response.setPath(tempPath);
+                response.setAutoIndex(configRoute->m_autoindex);
+                return 200;
+            }
+            else if(ret1 != S_IFREG) {
+                PRINT("ERROR, Path is invalid! COuldn't find default file");
+                response.setPathFromErrorCode(404);
                 return 404;
             }
         }
 
     if(!(method & configRoute->m_allowedMethods)){ //if you are not allowed to access the resource with GET POST or DELETE
         PRINT("ERROR,you have no rights to access this resource with the Method provided");
-        response.setPath("./errorpages/error403.html");
+        response.setPathFromErrorCode(403);
         return 403;
     }
 
@@ -77,8 +87,9 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     else if(method == METH_POST){
         uploadResource(newfullPath,request.getBody());
     }
-    else //only for get
+    else {
         response.setPath(newfullPath);
+    }
     return 200;
 }
 
