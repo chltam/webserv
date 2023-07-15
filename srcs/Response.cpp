@@ -72,3 +72,8 @@ const std::string& Response::getResponseBody()
 {
     return _respBody;
 }
+
+void Response::insertHeaderField(const std::string& key, const std::string& value)
+{
+    _headerFields[key] = value;
+}

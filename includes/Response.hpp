@@ -4,7 +4,6 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <vector>
 #include <map>
 
 #include <unistd.h>
@@ -16,15 +15,16 @@ class Response {
 
         Response();
         ~Response();
-
-        std::map<std::string,std::string> _headerFields;
+        void insertHeaderField(const std::string& key, const std::string& value);
         void setStatus(int);
         void setPath(const std::string& path);
         const std::string& getResponseBody();
+
         std::string build();
-    private:    
-        
+    private:
+
         std::string _respHeader;
+        std::map<std::string,std::string> _headerFields;
         int _status;
         std::string _path;
         std::string _respBody;

@@ -10,12 +10,12 @@ ResponseBuilder::~ResponseBuilder() {};
 Response* ResponseBuilder::createNewResponse(Request &request, const Config& config  )
 {
     Response* response = new Response();
-    response->_headerFields["Server"] = request.getHeaderValueFromKey("Host");
+    response->insertHeaderField("Server",request.getHeaderValueFromKey("Host"));
 
     std::string contType= request.getHeaderValueFromKey("Host");
     std::string::size_type pos = contType.find(',');
-    response->_headerFields["Content-Type"] = contType.substr(0, pos); 
 
+    response->insertHeaderField("Content-Type",contType.substr(0, pos));
     response->setStatus(setResponseStatus(request,config,*response));
 
     return response;
@@ -27,14 +27,14 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
 
     string path = request.getHeaderValueFromKey( "path" );
     const ConfigRoute* configRoute = server->getRouteFromPath( path );
-   
+
     if(configRoute == NULL){
         PRINT("ERROR, could find CONFIGROUTE, this should never happen!");
     }
 
     if(configRoute->m_shouldRedirect == true) {
         PRINT("REDIRECT SIR!");
-        response._headerFields["Location"] = configRoute->m_redirectDir;
+        response.insertHeaderField("Location",configRoute->m_redirectDir);
         return 301;
     }
 
