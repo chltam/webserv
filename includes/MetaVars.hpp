@@ -22,7 +22,7 @@ public:
 	~MetaVars();
 	// void	insert_pair(std::string key, std::string value);
 	void	set_value(std::string key, std::string value);
-	void	set_content_length(std::string& body);
+	void	set_content_length(std::string body);
 	void	set_executor(std::string executor);
 
 	void	update_envp(Request& request);
