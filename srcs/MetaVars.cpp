@@ -133,8 +133,6 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 {
 	char	*arg[3];
 	std::string script = get_value("SCRIPT_NAME");
-	// arg[0] = to_cstring(_executor);
-	// arg[1] = to_cstring(get_value("SCRIPT_NAME"));
 	arg[0] = (char* )_executor.c_str();
 	arg[1] = (char* )script.c_str();
 	arg[2] = NULL;
@@ -177,8 +175,6 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 		}
 		close(fd[0]);
 	}
-	// delete[] arg[0];
-	// delete[] arg[1];
 
 	PRINTVAR(ret);
 	int start = ret.find("<!DOCTYPE html>");
@@ -222,13 +218,6 @@ char	**MetaVars::copy_envp(char **envp, int& _envp_size)
 	}
 	new_envp[_envp_size] = NULL;
 	return (new_envp);
-}
-
-char*	MetaVars::to_cstring(std::string str)
-{
-	char* cstr = new char[str.length() + 1];
-    std::strcpy(cstr, str.c_str());
-    return (cstr);
 }
 
 void	MetaVars::clean_meta_map()

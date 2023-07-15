@@ -43,9 +43,7 @@ private:
 
 	int	count_envp_size(char **envp);
 	char	**copy_envp(char **envp, int& _envp_size);
-	char	*to_cstring(std::string str);
 	void	free_envp(char **envp);
-
 
 };
 
