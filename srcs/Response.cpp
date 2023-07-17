@@ -129,6 +129,7 @@ std::string Response::buildIndexPage()
         ret += createIndexingElement(filetypeToString(entry->d_type),entry->d_name);
 
     ret += "</ul></body></html>";
+    closedir(directory);
     return ret;
 }
 
