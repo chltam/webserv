@@ -63,6 +63,7 @@ void	Server::accept_connection()
 			{
 				Socket	client_sock(pfd[n].fd);
 				client_sock.read_sock();
+				PRINTVAR(client_sock.get_request_str());
 				handle(n, client_sock);
 			}
 		}
