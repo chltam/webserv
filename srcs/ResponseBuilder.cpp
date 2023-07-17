@@ -112,39 +112,6 @@ void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string 
     filename = newfullPath;
     ofstream file( filename, std::ios::app);
 
-	/*test*/
-	
-// 	std::size_t start = resourceData.find("boundary=") + 9;
-//     std::size_t end = resourceData.find("\r\n", start);
-//     std::string boundary = resourceData.substr(start, end - start);
-
-// std::size_t boundaryPos = resourceData.find(boundary);
-//     std::size_t headerEnd = resourceData.find("\r\n\r\n", boundaryPos) + 4;
-
-//     std::size_t nextBoundaryPos = resourceData.find(boundary, boundaryPos + boundary.length());
-//     while (nextBoundaryPos != std::string::npos) {
-//         std::size_t dataStart = headerEnd;
-//         std::size_t dataEnd = nextBoundaryPos - 2;
-//         std::size_t filenameStart = resourceData.find("filename=\"", headerEnd) + 10;
-//         std::size_t filenameEnd = resourceData.find("\"", filenameStart);
-//         std::string filename = resourceData.substr(filenameStart, filenameEnd - filenameStart);
-
-//         std::ofstream outputFile(filename, std::ios::binary);
-//         if (!outputFile) {
-//             std::cerr << "Failed to open file for writing: " << filename << "\n";
-//             return;
-//         }
-
-//         outputFile.write(resourceData.c_str() + dataStart, dataEnd - dataStart);
-//         outputFile.close();
-
-//         headerEnd = resourceData.find("\r\n\r\n", nextBoundaryPos) + 4;
-//         nextBoundaryPos = resourceData.find(boundary, nextBoundaryPos + boundary.length());
-//     }
-
-
-	/*test*/
-
     if ( file.is_open() ) {
 
         file << resourceData;
