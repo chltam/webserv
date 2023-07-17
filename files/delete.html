@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Delete Request Example</title>
+	<script>
+		function sendDeleteRequest() {
+			var xhr = new XMLHttpRequest();
+			xhr.open("DELETE", "UserData.txt", true);
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState === 4 && xhr.status === 200) {
+					// Request successful, do something
+				}
+			};
+			xhr.send();
+		}
+	</script>
+</head>
+<body>
+	<h1>Delete Request Example</h1>
+	<button onclick="sendDeleteRequest()">Delete Resource</button>
+</body>
+</html>

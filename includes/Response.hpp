@@ -22,7 +22,10 @@ class Response {
         void setPath(const std::string& path);
         void setAutoIndex(bool val);
         void setPathFromErrorCode(int errorCode);
+        void setBody(const std::string& body);
+		void setCgi(bool state);
         const std::string& getResponseBody();
+		bool	getCgi();
 
         std::string build();
     private:
@@ -33,6 +36,7 @@ class Response {
         std::string filetypeToString(int type);
         std::map<std::string,std::string> _headerFields;
         int _status;
+		bool	_cgi;
         std::string _path;
         std::string _respHeader;
         std::string _respBody;

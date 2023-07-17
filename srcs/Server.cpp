@@ -1,20 +1,11 @@
 #include "../includes/Server.hpp"
 
-Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder()
+Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder(), _mvars(envp)
 {
-	_envp = envp;
 	m_Config.printServers();
 };
 
 Server::~Server() {};
-
-void Server::test_connection(int item)
-{
-    if(item < 0){
-        perror("Failed to Connect...");
-        exit(EXIT_FAILURE); // we CANT USE EXIT!
-    }
-}
 
 /**
  * @brief setup the vector of server socket, according to config info
@@ -28,7 +19,7 @@ void	Server::set_server_sock(/*config info*/)
 	for(int i = 0; i < servers.size(); i++){
 		for(int j = 0;j < servers[i].m_ports.size(); j++){
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-			cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << endl;
+			std::cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << std::endl;
 			sock.bind_socket(servers[i].m_ports[j].first, servers[i].m_ports[j].second);
 			_server_sock.push_back(sock);
 
@@ -36,7 +27,8 @@ void	Server::set_server_sock(/*config info*/)
 	}
 }
 
-void	Server::start_listening()
+
+void	Server::start_listening()//need to add poll later
 {
 	for (int n = 0; n < _server_sock.size(); n++)
 	{
@@ -47,7 +39,7 @@ void	Server::start_listening()
 
 void	Server::accept_connection()
 {
-	vector<pollfd> pfd;
+	std::vector<pollfd> pfd;
 
 	for (int n = 0; n < _server_sock.size(); n++)
 	{
@@ -64,17 +56,18 @@ void	Server::accept_connection()
 			perror("poll failed");
 			exit(EXIT_FAILURE); // REMOVE CLIENT ACCORDING TO EVAL SHEET
 		}
-		cout << "result = " << result << endl;
+		std::cout << "result = " << result << std::endl;
 		for (int n = 0; n < pfd.size(); n++)
 		{
 			if (pfd[n].revents & POLLIN)
 			{
 				Socket	client_sock(pfd[n].fd);
 				client_sock.read_sock();
+				PRINTVAR(client_sock.get_request_str());
 				handle(n, client_sock);
-				// cout << client_sock.get_request_str() << endl;
 			}
 		}
+
 	}
 
 }
@@ -84,17 +77,19 @@ void Server::handle( int index, Socket& client_sock )
 {
 	if (client_sock.get_request_str().empty() == true)
 	{
+		//status = 408 Request Timeout
    		close(client_sock.get_sock_fd());
 		return ;
 	}
+	// std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());
-	request.printf_all();
+	// request.printf_all();
 
 
-	Response* resp = _builder.createNewResponse(request,m_Config);
+	Response* resp = _builder.createNewResponse(request, m_Config, _mvars);
 
 	std::string respString = resp->build();
-	PRINT(respString);
+	// PRINT(respString);
     // write to socket
     write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
 

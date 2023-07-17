@@ -28,11 +28,11 @@
 #include "Request.hpp"
 #include "MetaVars.hpp"
 #include "Socket.hpp"
+#include "Request.hpp"
 
 #include "Config.hpp"
 
 
-using namespace std;
 
 class Server {
 
@@ -47,14 +47,13 @@ class Server {
 
     private:
 
-		char **_envp;
+		MetaVars	_mvars;
         std::vector<Socket>	_server_sock;
         Config m_Config;
         ResponseBuilder _builder;
 
-        void test_connection(int);
-        void accepter(int index);
         void handle(int index, Socket& client_sock);
+
 };
 
 #endif
