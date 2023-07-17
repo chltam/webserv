@@ -53,7 +53,7 @@ void    Socket::bind_socket(std::string ip, int port)
 
 void	Socket::enable_listener()
 {
-	if (listen(_sock, 10) == -1){
+	if (listen(_sock, 25) == -1){
 		perror("listen error");
 		exit(EXIT_FAILURE);
 	}
@@ -70,7 +70,7 @@ void    Socket::read_sock()
 	while (1)
 	{
 		// char *buffer = new char*[BUFFER_SIZE];
-		int	poll_result = poll(&pfd, 1, 1000);
+		int	poll_result = poll(&pfd, 1, 10);
 		if (poll_result == -1){
 			perror("poll error");
 			break;

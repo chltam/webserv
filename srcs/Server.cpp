@@ -58,7 +58,7 @@ void	Server::accept_connection()
 	while (true)
 	{
         std::cout << "========= WAITING ========" << std::endl;
-		int	result = poll(pfd.data(), pfd.size(), 1000);
+		int	result = poll(pfd.data(), pfd.size(), 100);
 
 		if (result < 0){
 			perror("poll failed");
