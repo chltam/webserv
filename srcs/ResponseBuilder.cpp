@@ -12,7 +12,7 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
     Response* response = new Response();
     response->insertHeaderField("Server",request.getHeaderValueFromKey("Host"));
 
-    std::string contType= request.getHeaderValueFromKey("Host");
+    std::string contType= request.getHeaderValueFromKey("Accept");
     std::string::size_type pos = contType.find(',');
     // response->_headerFields["Content-Type"] = contType; /*content type*/
 
@@ -99,7 +99,7 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         deleteResource(newfullPath);
     }
     else if(method == METH_POST){
-        uploadResource(newfullPath,request.getBody());
+        uploadResource(newfullPath,request.getBody(), request.getHeaderValueFromKey("Content-Type"));
     }
     else {
         response.setPath(newfullPath);
@@ -114,14 +114,47 @@ void ResponseBuilder::deleteResource(const std::string& newfullPath)
     remove( newfullPath.c_str());
 }
 
-void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string resourceData)
+void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string resourceData, std::string contentType)
 {
     string filename;
     stringstream lenStr;
 
     cout << "POST received" << endl;
+	
+	std::string	boundary;
+	int pos = contentType.find(';');
+	if (pos != std::string::npos)
+	{
+		boundary = contentType.substr(pos + 11);
+		contentType = contentType.substr(0, pos);
+		PRINTVAR(boundary);
+	}
+	if (contentType == "multipart/form-data")
+	{
+		pos = resourceData.find("filename") + 10;
+		resourceData = resourceData.substr(pos);
+		pos = resourceData.find("\"");
+		filename = "upload/" + resourceData.substr(0, pos);
+		int start = resourceData.find("\n");
+		int end	= resourceData.rfind(boundary) - 3;
+		PRINTVAR(end);
+		resourceData = resourceData.substr(start, end);
 
-    filename = newfullPath;
+		ofstream file( filename );
+
+		if ( file.is_open() ) {
+
+			file << resourceData;
+
+		} else {
+			cout << "Unable to open file\n";
+			// _status = "403 Not Allowed";
+		}
+		file.close();
+		return ;
+	}
+
+	filename = newfullPath;
     ofstream file( filename, std::ios::app);
 
     if ( file.is_open() ) {
