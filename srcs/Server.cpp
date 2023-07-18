@@ -76,9 +76,7 @@ void	Server::accept_connection()
 			}
 		}
 	}
-
 }
-
 
 void Server::handle( int index, Socket& client_sock )
 {
@@ -86,6 +84,8 @@ void Server::handle( int index, Socket& client_sock )
 	{
    		close(client_sock.get_sock_fd());
 		return ;
+
+		// FROM HERE, WE NEED TO GET TO TIMEOUT ERROR AS WELL (see getStringFromStatus(int status) in webserv.cpp)
 	}
 	Request	request(client_sock.get_request_str());
 	request.printf_all();
