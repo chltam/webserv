@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include "../includes/webserv.hpp"
-// #include "ConfigServer.hpp"
+#include "ConfigServer.hpp"
 
 enum NodeType
 {
@@ -38,14 +38,13 @@ class Config
 public:
     Config(char* filepath);
 
-
 public: //getters
-    // const std::vector<ConfigServer>& getServers() const;
-    void printServers();
+    const std::vector<ConfigServer>& getServers() const;
+    void AddServer(const ConfigServer& server);
     friend std::ostream& operator<< (std::ostream& os, const Config& config);
     // const ConfigServer* getConfigServerFromRequest(std::string hostPort) const;
+    std::vector<ConfigServer> m_servers;
 private:
-    // std::vector<ConfigServer> m_servers;
 
     //parsing data
     void Tokenizer(const std::string& filepath, TokenQueue& tokens);
@@ -55,13 +54,19 @@ private:
     void ParseConfig(TokenQueue& tokens, Node& head);
     void ParseStatement(TokenQueue& tokens, Node& currNode);
     void ParseDirective(TokenQueue& tokens, Node& currNode);
-    void ParseBlock(TokenQueue& tokens, Node& currNode);
 
+    void Executioner( Node& head);
+
+    void createConfigServer(Node &serverNode);
+
+    //utils
     bool isValidChar(char c);
     std::string TokenToString(int tokenVal);
 
-    //rando utils
+    //rando utils maybe get rid of this
     int m_brackCount;
+
+
 };
 
 unsigned int calcAllowedValues(const std::string& key);

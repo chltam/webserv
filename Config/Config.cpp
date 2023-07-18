@@ -50,9 +50,16 @@ Config::Config(char *filepath):m_brackCount(0)
     Parser(tokens,head);
 
     printNode(head);
+
+    Executioner(head);
 }
 
-void Config::Tokenizer(const std::string& filepath, TokenQueue& tokens)
+void Config::AddServer(const ConfigServer &server)
+{
+    m_servers.emplace_back(server);
+}
+
+void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 {
     PRINT("STARTED TOKENIZING");
 
@@ -230,11 +237,43 @@ void Config::ParseDirective(TokenQueue& tokens, Node& currNode)
     }
 }
 
-void Config::ParseBlock(TokenQueue& tokens, Node& currNode)
+void Config::Executioner(Node &head)
 {
+    //set default root route foreach Server
+
+    for (int i = 0; i < head.children.size(); i++) {
+        createConfigServer(head.children[i]);
+    }
+    
+
 
 }
 
+void Config::createConfigServer(Node &serverNode)
+{
+    m_servers.emplace_back(ConfigServer());
+    for (int i = 0; i < serverNode.children.size(); i++) { //loop over all directive nodes to create a default route
+        if (serverNode.children[i].type == NODE_DIRECTIVE){
+            updateConfigRoute();
+        }
+    }
+    for (int i = 0; i < serverNode.children.size(); i++) {
+        if (serverNode.children[i].type == NODE_BLOCK_LOCATION)
+            const ConfigServer& lastServer = m_servers.back();
+            
+            // .emplace_back(ConfigRoute(m_servers.back().getClosestConfigRoute(serverNode.children[i].values[0])));
+            for (int i = 0; i < 3; i++)
+            {
+                updateConfigRoute();
+            }
+            
+    }
+}
+
+// void Config::updateConfigRoute(ConfigRoute& route, )
+// {
+
+// }
 
 
 bool Config::isValidChar(char c)
@@ -249,10 +288,10 @@ bool Config::isValidChar(char c)
 }
 
 
-// const std::vector<ConfigServer> &Config::getServers() const
-// {
-//     return m_servers;
-// }
+const std::vector<ConfigServer> &Config::getServers() const
+{
+    return m_servers;
+}
 
 // const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) const
 // {
@@ -276,11 +315,11 @@ bool Config::isValidChar(char c)
 
 std::ostream &operator<<(std::ostream &os, const Config &config)
 {
-    // for (int i = 0; i < config.m_servers.size(); i++) {
-    //     os << "Server Nr: " << i << std::endl;
-    //     os << config.m_servers[i] << std::endl;
-    // }
-    os << "-------PRINTING---------"<< std::endl;
+    os << "-------PRINTING CONFIG---------"<< std::endl;
+    for (int i = 0; i < config.m_servers.size(); i++) {
+        os << "Server Nr: " << i << std::endl;
+        os << config.m_servers[i] << std::endl;
+    }
 
     return os;
 }

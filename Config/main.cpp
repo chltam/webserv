@@ -1,4 +1,6 @@
 #include "Config.hpp"
+#include "ConfigServer.hpp"
+#include "ConfigRoute.hpp"
 
 int main(int ac, char** av)
 {
@@ -6,5 +8,8 @@ int main(int ac, char** av)
 
     std::cout << conf << std::endl;
     PRINT("THE END");
+
+    ConfigRoute route;
+    PRINTVAR(route);
     return 0;
 }
