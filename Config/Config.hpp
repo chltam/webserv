@@ -50,10 +50,9 @@ private:
     //parsing data
     void Tokenizer(const std::string& filepath, TokenQueue& tokens);
     void Lexer(TokenQueue& tokens);
-    void Parser(TokenQueue& tokens);
+    void Parser(TokenQueue& tokens, Node& head);
+    
     void ParseConfig(TokenQueue& tokens, Node& head);
-
-
     void ParseStatement(TokenQueue& tokens, Node& currNode);
     void ParseDirective(TokenQueue& tokens, Node& currNode);
     void ParseBlock(TokenQueue& tokens, Node& currNode);
@@ -62,7 +61,7 @@ private:
     std::string TokenToString(int tokenVal);
 
     //rando utils
-   
+    int m_brackCount;
 };
 
 unsigned int calcAllowedValues(const std::string& key);

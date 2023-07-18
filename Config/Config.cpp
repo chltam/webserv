@@ -29,7 +29,7 @@ enum ConfigToken
 };
 
 
-Config::Config(char *filepath)
+Config::Config(char *filepath):m_brackCount(0)
 {
     std::string path;
     if(filepath == NULL){
@@ -42,11 +42,14 @@ Config::Config(char *filepath)
     TokenQueue tokens;
     Tokenizer(path,tokens);
     Lexer(tokens);
+    
     // for (int i = 0; i < tokens.size(); i++)
     //     printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
-    
-    
-    Parser(tokens);
+
+    Node head;
+    Parser(tokens,head);
+
+    printNode(head);
 }
 
 void Config::Tokenizer(const std::string& filepath, TokenQueue& tokens)
@@ -61,7 +64,7 @@ void Config::Tokenizer(const std::string& filepath, TokenQueue& tokens)
         fileContents = buffer.str();
         inputFile.close();
     } else {
-        std::cout << "Failed to open the file." << std::endl;
+        PRINT("Failed to open the file.");
         exit(1);
     }
 
@@ -69,7 +72,7 @@ void Config::Tokenizer(const std::string& filepath, TokenQueue& tokens)
     size_t prev = 0;
     int flag = 0; //1 = completed word, 2 = quotes, 3 = comment
     char quoteType;
-    for (size_t i = 0; i < fileContents.length(); i++) {
+    for (size_t i = 0; i <= fileContents.length(); i++) {
         if ((fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}') && flag == 0) {
             tokens.push_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
             prev = i;
@@ -98,7 +101,7 @@ void Config::Tokenizer(const std::string& filepath, TokenQueue& tokens)
         }
         else if(!isValidChar(fileContents[i]) && flag == 1) {
             tokens.push_back(std::pair<std::string,int>(fileContents.substr(prev,i - prev),-1));
-            if(fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}')
+            if(fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}' )
                 tokens.push_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
             flag = 0;
             prev = i;
@@ -135,24 +138,25 @@ void Config::Lexer(TokenQueue& tokens)
 
 }
 
-void Config::Parser(TokenQueue& tokens)
+void Config::Parser(TokenQueue& tokens, Node& head)
 {
-    Node head;
-    head.type = NODE_CONFIGURATION;
-    head.name = "HEAD";
     ParseConfig(tokens,head);
-    for (int i = 0; i < tokens.size(); i++)
-        printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
-    printNode(head);
+    if(m_brackCount != 0) {
+        PRINT("ERROR, NOT MATCHING BRACKETS");
+        PRINTVAR(m_brackCount);
+        exit(1);
+    }
 }
 
 void Config::ParseConfig(TokenQueue& tokens, Node& currNode)
 {
     while (tokens.size()){
-        if(tokens[0].second == T_CONF_BLOCKEND){
+        if(tokens[0].second == T_CONF_BLOCKEND && m_brackCount > 0){
             tokens.pop_front();
+            m_brackCount--;
             return;
         }
+
         ParseStatement(tokens,currNode);
     }
 }
@@ -161,28 +165,36 @@ void Config::ParseStatement(TokenQueue& tokens, Node& currNode)
 {
     if(tokens[0].second == T_CONF_BLOCK_SERVER && tokens[1].second == T_CONF_BLOCKSTART && currNode.type == NODE_CONFIGURATION){
         currNode.children.emplace_back(Node(NODE_BLOCK_SERVER,tokens[0].first));
-        tokens.pop_front(); 
-        tokens.pop_front(); 
+        for (int i = 0; i < 2; i++)
+            tokens.pop_front(); 
+        m_brackCount++;
         ParseConfig(tokens,currNode.children.back());
     }
     else if(tokens[0].second == T_CONF_BLOCK_LOCATION && tokens[1].second == T_CONF_LITERAL
      && tokens[2].second == T_CONF_BLOCKSTART && currNode.type == NODE_BLOCK_SERVER){
-        ParseStatement(tokens,currNode.children.back());
+        currNode.children.emplace_back(Node(NODE_BLOCK_LOCATION,tokens[0].first));
+        currNode.children.back().values.emplace_back(tokens[1].first);
+        m_brackCount++;
+        for (int i = 0; i < 3; i++)
+            tokens.pop_front(); 
+        ParseConfig(tokens,currNode.children.back());
     }
     else if(tokens[0].second == T_CONF_KEYWORD){
-        PRINT("IN HERE");
         currNode.children.emplace_back(Node(NODE_DIRECTIVE,tokens[0].first));
         tokens.pop_front();
         ParseDirective(tokens, currNode.children.back());
     }
-    else if( tokens[0].second == T_CONF_SEMICOLON)
-        tokens.pop_front();
-    else if(tokens[0].second == T_CONF_BLOCKEND){
+    else if( tokens[0].second == T_CONF_SEMICOLON 
+        && (tokens[1].second == T_CONF_KEYWORD || tokens[1].second == T_CONF_BLOCKEND || tokens[1].second == T_CONF_BLOCK_LOCATION)){
+            tokens.pop_front();
+        }
+    else if(tokens[0].second == T_CONF_BLOCKEND && tokens[1].second == T_CONF_KEYWORD){
         return;
     }
     else{
         PRINT("PARSE ERROR, IN PARSE STATEMENT!!!!");
-        PRINTVAR(tokens[0].first);
+        // PRINTVAR(tokens[0].first);
+        // PRINTVAR(tokens[1].first);
         exit(1);
     }
 
@@ -278,8 +290,14 @@ void printNode(const Node &node,int inset)
     std::string offset;
     for (int i = 0; i < inset; i++)
         offset += " ";
-    
-    std::cout << offset << "Type: " << nodetypeToString(node.type) << std::endl;
+
+    std::string type = nodetypeToString(node.type);
+    if(node.type == NODE_BLOCK_SERVER)
+        printf("%s\x1B[31m%s\033[0m\n",offset.c_str(),type.c_str());
+    else if(node.type == NODE_BLOCK_LOCATION)
+        printf("%s\x1B[32m%s\033[0m\n",offset.c_str(),type.c_str());
+    else 
+        printf("%s\x1B[36m%s\033[0m\n",offset.c_str(),type.c_str());
     std::cout << offset << "Directive: " << node.name << std::endl;
     std::cout << offset << "tot Values: " << node.totalAllowedValues << std::endl;
     std::cout << offset << "bool: " << node.requireSpecificArgs << std::endl;
@@ -330,7 +348,8 @@ unsigned int calcAllowedValues(const std::string &key)
 
 Node::Node()
 {
-
+    type = NODE_CONFIGURATION;
+    name = "HEAD";
 }
 
 Node::Node(NodeType type, std::string name)
