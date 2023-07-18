@@ -1,10 +1,16 @@
 #include "../includes/Request.hpp"
+#include "Request.hpp"
 
 
 using namespace std;
 
 Request::Request(std::string request_str)
 {
+    if ( request_str.empty() ) {
+        _timeout = true;        
+        return ;
+    }
+
     std::istringstream   str_iss(request_str);
     vector<string>    lines;
     string getline_buffer;
@@ -135,5 +141,9 @@ void	Request::printf_all()
 	}
 
 	cout << _body;
-	
+}
+
+bool Request::getTimeout()
+{
+    return _timeout;
 }

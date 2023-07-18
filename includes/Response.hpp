@@ -28,7 +28,9 @@ class Response {
 		bool	getCgi();
 
         std::string build();
+
     private:
+    
         void headerToString();
         void bodyToString();
         std::string buildIndexPage();

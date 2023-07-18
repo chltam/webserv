@@ -79,6 +79,10 @@ void    Socket::read_sock()
 			break;
 		else{
 			int bread = read( _sock,  buffer, BUFFER_SIZE );
+			/* if ( bread == -1 ) {
+
+				// return with err value and close sock outside
+			} */
 			buffer[bread] = 0;
 			if (bread == 0)
 				break;

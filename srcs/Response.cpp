@@ -115,6 +115,9 @@ void Response::setPathFromErrorCode(int errorCode)
     case 404:
         _path = "./errorpages/error404.html";
         return;
+    case 408:
+        _path = "./errorpages/error408.html";
+        return;
     default:
         _path = "ERROR";
         PRINT("Error, path from error code is incorrect");

@@ -19,11 +19,13 @@ public:
 	std::vector<std::pair<std::string, std::string> >&	get_request_pair();
 
 	void	printf_all();
+    bool    getTimeout();
     
 private:
 	std::vector<std::pair<std::string, std::string> >	_request_pair;
     std::string _body;
 
+    bool    _timeout;
     void    set_path_query(std::string uri);
 	void	set_name_port();
 
