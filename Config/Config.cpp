@@ -21,6 +21,8 @@ enum ConfigToken
     T_CONF_IDENTIFIER,
     T_CONF_LITERAL,
     T_CONF_SEMICOLON,
+    T_CONF_BLOCK_SERVER,
+    T_CONF_BLOCK_LOCATION,
     T_CONF_BLOCKSTART,
     T_CONF_BLOCKEND,
     
@@ -37,15 +39,17 @@ Config::Config(char *filepath)
     else
         path = filepath;
 
-    std::vector<std::pair<std::string, int>> tokens;
+    TokenQueue tokens;
     Tokenizer(path,tokens);
     Lexer(tokens);
-
-    for (int i = 0; i < tokens.size(); i++)
-        printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
+    // for (int i = 0; i < tokens.size(); i++)
+    //     printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
+    
+    
+    Parser(tokens);
 }
 
-void Config::Tokenizer(const std::string& filepath, std::vector<std::pair<std::string, int>>& tokens)
+void Config::Tokenizer(const std::string& filepath, TokenQueue& tokens)
 {
     PRINT("STARTED TOKENIZING");
 
@@ -67,7 +71,7 @@ void Config::Tokenizer(const std::string& filepath, std::vector<std::pair<std::s
     char quoteType;
     for (size_t i = 0; i < fileContents.length(); i++) {
         if ((fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}') && flag == 0) {
-            tokens.emplace_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
+            tokens.push_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
             prev = i;
         }
         else if(fileContents[i] == '#' && flag == 0){ // found comments
@@ -84,7 +88,7 @@ void Config::Tokenizer(const std::string& filepath, std::vector<std::pair<std::s
             prev = i;
         }
         else if(quoteType == fileContents[i] && flag == 2) { // quote end
-            tokens.emplace_back(std::pair<std::string,int>(fileContents.substr(prev,i - prev + 1),-1));
+            tokens.push_back(std::pair<std::string,int>(fileContents.substr(prev,i - prev + 1),-1));
             flag = 0;
             prev = i;
         }
@@ -93,9 +97,9 @@ void Config::Tokenizer(const std::string& filepath, std::vector<std::pair<std::s
             prev = i;
         }
         else if(!isValidChar(fileContents[i]) && flag == 1) {
-            tokens.emplace_back(std::pair<std::string,int>(fileContents.substr(prev,i - prev),-1));
+            tokens.push_back(std::pair<std::string,int>(fileContents.substr(prev,i - prev),-1));
             if(fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}')
-                tokens.emplace_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
+                tokens.push_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
             flag = 0;
             prev = i;
         }
@@ -103,10 +107,10 @@ void Config::Tokenizer(const std::string& filepath, std::vector<std::pair<std::s
     return ;
 }
 
-void Config::Lexer(std::vector<std::pair<std::string, int>>& tokens)
+void Config::Lexer(TokenQueue& tokens)
 {
-    std::vector<std::string> keywords = {"server","location","listen","server_name","auto_index",
-            "client_body_buffer_size","root","index","allow_methods","cgi"};
+    std::vector<std::string> keywords = {"listen","server_name","auto_index",
+            "client_body_buffer_size","root","index","allow_methods","cgi","return"};
 
     for (size_t i = 0; i < tokens.size(); i++) {
         if(tokens[i].first == ";")
@@ -119,6 +123,10 @@ void Config::Lexer(std::vector<std::pair<std::string, int>>& tokens)
             tokens[i].second = T_CONF_LITERAL;
             tokens[i].first = tokens[i].first.substr(1,tokens[i].first.length() -2);
         }
+        else if(tokens[i].first == "server")
+            tokens[i].second = T_CONF_BLOCK_SERVER;
+        else if(tokens[i].first == "location")
+            tokens[i].second = T_CONF_BLOCK_LOCATION;
         else if(std::find(keywords.begin(),keywords.end(),tokens[i].first) != keywords.end())
             tokens[i].second = T_CONF_KEYWORD;
         else
@@ -126,6 +134,97 @@ void Config::Lexer(std::vector<std::pair<std::string, int>>& tokens)
     }
 
 }
+
+void Config::Parser(TokenQueue& tokens)
+{
+    Node head;
+    head.type = NODE_CONFIGURATION;
+    head.name = "HEAD";
+    ParseConfig(tokens,head);
+    for (int i = 0; i < tokens.size(); i++)
+        printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
+    printNode(head);
+}
+
+void Config::ParseConfig(TokenQueue& tokens, Node& currNode)
+{
+    while (tokens.size()){
+        if(tokens[0].second == T_CONF_BLOCKEND){
+            tokens.pop_front();
+            return;
+        }
+        ParseStatement(tokens,currNode);
+    }
+}
+
+void Config::ParseStatement(TokenQueue& tokens, Node& currNode)
+{
+    if(tokens[0].second == T_CONF_BLOCK_SERVER && tokens[1].second == T_CONF_BLOCKSTART && currNode.type == NODE_CONFIGURATION){
+        currNode.children.emplace_back(Node(NODE_BLOCK_SERVER,tokens[0].first));
+        tokens.pop_front(); 
+        tokens.pop_front(); 
+        ParseConfig(tokens,currNode.children.back());
+    }
+    else if(tokens[0].second == T_CONF_BLOCK_LOCATION && tokens[1].second == T_CONF_LITERAL
+     && tokens[2].second == T_CONF_BLOCKSTART && currNode.type == NODE_BLOCK_SERVER){
+        ParseStatement(tokens,currNode.children.back());
+    }
+    else if(tokens[0].second == T_CONF_KEYWORD){
+        PRINT("IN HERE");
+        currNode.children.emplace_back(Node(NODE_DIRECTIVE,tokens[0].first));
+        tokens.pop_front();
+        ParseDirective(tokens, currNode.children.back());
+    }
+    else if( tokens[0].second == T_CONF_SEMICOLON)
+        tokens.pop_front();
+    else if(tokens[0].second == T_CONF_BLOCKEND){
+        return;
+    }
+    else{
+        PRINT("PARSE ERROR, IN PARSE STATEMENT!!!!");
+        PRINTVAR(tokens[0].first);
+        exit(1);
+    }
+
+    return;    
+}
+
+void Config::ParseDirective(TokenQueue& tokens, Node& currNode)
+{
+    if(tokens[0].second == T_CONF_LITERAL && tokens[1].second == T_CONF_LITERAL && currNode.totalAllowedValues > 0){
+        currNode.values.emplace_back(tokens[0].first);
+        tokens.pop_front();
+        currNode.totalAllowedValues--;
+        ParseDirective(tokens,currNode);
+    }
+    else if(tokens[0].second == T_CONF_LITERAL && tokens[1].second == T_CONF_SEMICOLON
+         && currNode.totalAllowedValues == 1 && currNode.requireSpecificArgs){
+        currNode.values.emplace_back(tokens[0].first);
+        tokens.pop_front();
+        currNode.totalAllowedValues--;
+        return;
+    }
+    else if(tokens[0].second == T_CONF_LITERAL && tokens[1].second == T_CONF_SEMICOLON && !currNode.requireSpecificArgs){
+            currNode.values.emplace_back(tokens[0].first);
+            tokens.pop_front();
+            currNode.totalAllowedValues--;
+            return;
+         }
+    else{
+         PRINT("PARSE ERROR, IN PARSE DIRECTIVE!!!!");
+         PRINTVAR(currNode.name);
+         PRINTVAR(tokens[0].first);
+         exit(1);
+    }
+}
+
+void Config::ParseBlock(TokenQueue& tokens, Node& currNode)
+{
+
+}
+
+
+
 bool Config::isValidChar(char c)
 {
     char forbidded[] = " \n\r\t;{}\0";
@@ -169,9 +268,30 @@ std::ostream &operator<<(std::ostream &os, const Config &config)
     //     os << "Server Nr: " << i << std::endl;
     //     os << config.m_servers[i] << std::endl;
     // }
-    os << "PRINTING"<< std::endl;
+    os << "-------PRINTING---------"<< std::endl;
 
     return os;
+}
+
+void printNode(const Node &node,int inset)
+{
+    std::string offset;
+    for (int i = 0; i < inset; i++)
+        offset += " ";
+    
+    std::cout << offset << "Type: " << nodetypeToString(node.type) << std::endl;
+    std::cout << offset << "Directive: " << node.name << std::endl;
+    std::cout << offset << "tot Values: " << node.totalAllowedValues << std::endl;
+    std::cout << offset << "bool: " << node.requireSpecificArgs << std::endl;
+
+    for (int i = 0; i < node.values.size(); i++)
+        std::cout << offset << node.values[i] << std::endl;
+    std::cout << offset << "-----Node Children-----" << std::endl;
+    for (int i = 0; i < node.children.size(); i++){
+        std::cout << offset << "Child: " << i << std::endl;
+        printNode(node.children[i],inset+5);
+    }
+    
 }
 
 std::string Config::TokenToString(int tokenVal)
@@ -190,6 +310,53 @@ std::string Config::TokenToString(int tokenVal)
         return "BLOCKSTART";
     case T_CONF_BLOCKEND:
         return "BLOCKEND";
+    case T_CONF_BLOCK_SERVER:
+        return "SERVER";
+    case T_CONF_BLOCK_LOCATION:
+        return "LOCATION";
     }
     return "INVALID TOKEN";
+}
+
+unsigned int calcAllowedValues(const std::string &key)
+{
+    std::vector<std::string> infititeKeywords = {"index","allow_methods","server_name"};
+    if(std::find(infititeKeywords.begin(),infititeKeywords.end(),key) != infititeKeywords.end())
+        return -1; // will be unsigned int max
+    else if(key == "cgi")
+        return 2;
+    return 1;
+}
+
+Node::Node()
+{
+
+}
+
+Node::Node(NodeType type, std::string name)
+{
+    this->type = type;
+    this->name = name;
+    this->totalAllowedValues = calcAllowedValues(name);
+    unsigned int val = -1;
+    if(totalAllowedValues != val)
+        this->requireSpecificArgs = true;
+    else
+         this->requireSpecificArgs = false;
+}
+
+std::string nodetypeToString(int type)
+{
+    switch (type)
+    {
+    case NODE_CONFIGURATION:
+        return "NODE_CONFIGURATION";
+    case NODE_BLOCK_SERVER:
+        return "NODE_BLOCK_SERVER";
+    case NODE_BLOCK_LOCATION:
+        return "NODE_BLOCK_LOCATION";
+    case NODE_DIRECTIVE:
+        return "NODE_DIRECTIVE";
+    }
+    return "ERROR";
 }
