@@ -41,7 +41,7 @@ Socket::~Socket()
 
 void    Socket::bind_socket(std::string ip, int port)
 {
-    sockaddr_in sockaddr;
+    sockaddr_in sockaddr{};
     sockaddr.sin_family = AF_INET;
     sockaddr.sin_port = htons(port);
     sockaddr.sin_addr.s_addr = inet_addr(ip.c_str());
@@ -61,33 +61,31 @@ void	Socket::enable_listener()
 
 void    Socket::read_sock()
 {
-    pollfd	pfd;
+    pollfd	pfd{};
     char    buffer[BUFFER_SIZE];
 	pfd.fd = _sock;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
 	_request_str.clear();
+	
 	while (1)
 	{
-		// char *buffer = new char*[BUFFER_SIZE];
-		int	poll_result = poll(&pfd, 1, 10);
+		int	poll_result = poll(&pfd, 1, 100);
 		if (poll_result == -1){
 			perror("poll error");
 			break;
 		}
-		else if (poll_result == 0)
+		if (poll_result == 0)
 			break;
 		else{
 			int bread = read( _sock,  buffer, BUFFER_SIZE );
 			buffer[bread] = 0;
-			std::cout << bread << std::endl;
 			if (bread == 0)
 				break;
 			else
 				_request_str += buffer;
 		}
 	}
-	// std::cout << _request_str << std::endl;
 }
 
 int	Socket::get_sock_fd(){

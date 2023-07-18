@@ -1,7 +1,6 @@
 #ifndef _SOCKET_H_
 #define _SOCKET_H_
 
-// #include "Server.hpp"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -21,7 +20,7 @@
 #include <vector>
 #include <algorithm>
 #include <MetaVars.hpp>
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 500
 
 class Socket {
 
@@ -37,7 +36,7 @@ public:
 	void	call_cgi();
 	void	parse_response();
 	int		get_sock_fd();
-	string	get_request_str();
+	std::string	get_request_str();
 private:
 	int	_sock;
 	std::string	_request_str; 

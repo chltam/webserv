@@ -7,21 +7,22 @@ ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
-Response* ResponseBuilder::createNewResponse(Request &request, const Config& config  )
+Response* ResponseBuilder::createNewResponse(Request &request, const Config& config, MetaVars& mvars  )
 {
     Response* response = new Response();
     response->insertHeaderField("Server",request.getHeaderValueFromKey("Host"));
 
     std::string contType= request.getHeaderValueFromKey("Host");
     std::string::size_type pos = contType.find(',');
+    // response->_headerFields["Content-Type"] = contType; /*content type*/
 
     response->insertHeaderField("Content-Type",contType.substr(0, pos));
-    response->setStatus(setResponseStatus(request,config,*response));
+    response->setStatus(setResponseStatus(request,config,*response,mvars));
 
     return response;
 }
 
-int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response )
+int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
 {
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 
@@ -78,6 +79,19 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         response.setPathFromErrorCode(403);
         return 403;
     }
+
+	/*if cgi*/
+	if (mvars.check_extension(configRoute->m_cgi, newfullPath) == true)
+	{
+		PRINTVAR(newfullPath);
+		response.setCgi(true);
+		mvars.update_envp(request);
+		PRINT(mvars.get_value("REQUEST_METHOD"));
+        response.setBody(mvars.cgi_caller(request.getBody()));
+        mvars.clean_meta_map();
+        return 200;//not always 200
+		
+	}
 
     if(method == METH_DELETE){
 

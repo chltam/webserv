@@ -14,6 +14,7 @@
 #include "Config.hpp"
 #include "Request.hpp"
 #include "Response.hpp"
+#include "MetaVars.hpp"
 
 #define VALID_REQUEST_NUM 3
 
@@ -24,10 +25,10 @@ class ResponseBuilder {
         ResponseBuilder();
         ~ResponseBuilder();
 
-        Response* createNewResponse( Request& request, const Config& config );
+        Response* createNewResponse( Request& request, const Config& config, MetaVars& m_vars );
     private:
 
-        int setResponseStatus( Request& request, const Config& config, Response& response  );
+        int setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars  );
         void deleteResource(const std::string& newfullPath);
         void uploadResource(const std::string& newfullPath,std::string resourceData);
 };

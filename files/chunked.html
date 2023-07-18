@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chunked POST Request Example</title>
+</head>
+<body>
+    <h1>Chunked POST Request Example</h1>
+    <form id="myForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br>
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea>
+        <br>
+        <button type="button" onclick="sendChunkedRequest()">Submit</button>
+    </form>
+
+    <script>
+        function sendChunkedRequest() {
+            var form = document.getElementById("myForm");
+            var formData = new FormData(form);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/your-endpoint-url", true);
+            xhr.setRequestHeader("Transfer-Encoding", "chunked");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Request completed successfully
+                    console.log(xhr.responseText);
+                }
+            };
+
+            xhr.send(formData);
+        }
+    </script>
+</body>
+</html>
+

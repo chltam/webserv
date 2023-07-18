@@ -8,6 +8,7 @@ Response::Response() {
     _headerFields["Content-Type"] = "UNKNOWN";
     _headerFields["Content-Length"] = "UNKNOWN";
     _autoindex = false;
+	_cgi = false;
 };
 
 Response::~Response() {};
@@ -27,23 +28,23 @@ void Response::bodyToString()
     std::stringstream lenStr;
     std::string bufString;
 
-
+	if (_cgi)
+		return ;
     if(_autoindex) {
         _respBody = buildIndexPage();
     }
     else{
 
         std::ifstream file( _path );
+		if ( file.is_open() ) {
+			buffer << file.rdbuf();
+		}
+		file.close();
 
-        if ( file.is_open() ) {
-            buffer << file.rdbuf();
-        }
-        file.close();
-        _respBody = buffer.str();
-    }
+		_respBody = buffer.str();
+	}
 
 }
-
 
 void Response::headerToString()
 {
@@ -70,6 +71,22 @@ void Response::setStatus(int status)
 void Response::setPath(const std::string& path)
 {
     _path = path;
+}
+
+
+void    Response::setBody(const std::string& body)
+{
+    _respBody = body;
+}
+
+void	Response::setCgi(bool state)
+{
+	_cgi = state;
+}
+
+bool	Response::getCgi()
+{
+	return (_cgi);
 }
 
 void Response::setAutoIndex(bool val)

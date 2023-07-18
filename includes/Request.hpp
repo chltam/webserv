@@ -15,7 +15,6 @@ public:
     Request(std::string request_str);
     ~Request();
     std::string getHeaderValueFromKey(const std::string &key);
-	std::string	get_value(std::string& key);
     std::string getBody();
 	std::vector<std::pair<std::string, std::string> >&	get_request_pair();
 
