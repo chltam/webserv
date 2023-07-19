@@ -54,7 +54,7 @@ class Server {
         Config m_Config;
         ResponseBuilder _builder;
 
-        void handle(int index, Socket& client_sock);
+        void handle(Socket& client_sock);
 		bool	isClientSock(int fdToCheck);
 		void	removeFromVec(int fdToRemove);
 		Socket&	getClientSockFromVec(int fdToFind);

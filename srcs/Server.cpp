@@ -61,18 +61,52 @@ void	Server::accept_connection()
 			{
 				Socket	client_sock(m_pfdVec[n].fd);
 				m_clientSockVec.push_back(client_sock);
-				m_pfdVec.push_back({client_sock.get_sock_fd(), POLLIN , 0});
+				m_pfdVec.push_back({client_sock.get_sock_fd(), POLLIN | POLLOUT , 0});
 				
-				client_sock.read_sock();
+				// client_sock.read_sock();
 
-				handle(n, client_sock);
+				// handle(client_sock);
 			}
-			// if ((m_pfdVec[n].revents & POLLIN) && isClientSock(m_pfdVec[n].fd))
+
+			else if ((m_pfdVec[n].revents & POLLIN) && isClientSock(m_pfdVec[n].fd))
+			{
+				//read the socket
+				Socket&	readSock = getClientSockFromVec(m_pfdVec[n].fd);
+				readSock.read_test();
+
+			}
+
+			else if ((m_pfdVec[n].revents & POLLOUT) && isClientSock(m_pfdVec[n].fd) && !getClientSockFromVec(m_pfdVec[n].fd).get_request_str().empty())
+			{
+				Socket&	writeSock = getClientSockFromVec(m_pfdVec[n].fd);
+					handle(writeSock);
+				
+			}
+			// if ((m_pfdVec[n].revents & POLLOUT) && isClientSock(m_pfdVec[n].fd) && getClientSockFromVec(m_pfdVec[n].fd).get_request_str().empty())
 			// {
-			// 	//read the socket
-			// 	Socket&	refSock = getClientSockFromVec(m_pfdVec[n].fd);
-			// 	std::cout << "here\n";
-			// 	removeFromVec(refSock.get_sock_fd());
+			// 	Socket&	sockToWrite = getClientSockFromVec(m_pfdVec[n].fd);
+			// 		handle(sockToWrite);
+			// }
+
+
+
+			// if ((m_pfdVec[n].revents & POLLOUT) && isClientSock(m_pfdVec[n].fd))
+			// {
+			// 	std::string	str = "HTTP/1.1 200 OK\r\n"
+            //                    "Content-Type: text/html\r\n"
+            //                    "Content-Length: 64\r\n"
+            //                    "\r\n"
+            //                    "<html>\r\n"
+            //                    "<body>\r\n"
+            //                    "<h1>Hello, World!</h1>\r\n"
+            //                    "<p>This is a simple HTML response.</p>\r\n"
+            //                    "</body>\r\n"
+            //                    "</html>\r\n";
+			// 		// handle(m_clientSockVec[n]);	
+			// 		// std::cout << n << " hererererererererer\n";
+			// 		write(m_pfdVec[n].fd, str.c_str(), str.size());
+			// 		close(m_pfdVec[n].fd);
+			// 		removeFromVec(m_pfdVec[n].fd);
 
 			// }
 		}
@@ -80,7 +114,7 @@ void	Server::accept_connection()
 	}
 }
 
-void Server::handle( int index, Socket& client_sock )
+void Server::handle( Socket& client_sock )
 {
 	// std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());

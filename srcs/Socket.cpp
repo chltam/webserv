@@ -59,6 +59,14 @@ void	Socket::enable_listener()
 	}
 }
 
+void	Socket::read_test()
+{
+	char	buffer[BUFFER_SIZE];
+
+	read (_sock, buffer, BUFFER_SIZE);
+	_request_str += buffer;
+}
+
 void    Socket::read_sock()
 {
     pollfd	pfd{};

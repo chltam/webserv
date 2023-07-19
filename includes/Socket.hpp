@@ -32,9 +32,7 @@ public:
 	void	bind_socket(std::string ip, int port);
 	void	enable_listener();
 	void	read_sock();
-	void	parse_request();
-	void	call_cgi();
-	void	parse_response();
+	void	read_test();
 	int		get_sock_fd();
 	std::string	get_request_str();
 private:
