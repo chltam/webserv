@@ -54,11 +54,6 @@ Config::Config(char *filepath):m_brackCount(0)
     Executioner(head);
 }
 
-void Config::AddServer(const ConfigServer &server)
-{
-    m_servers.emplace_back(server);
-}
-
 void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 {
     PRINT("STARTED TOKENIZING");
@@ -252,29 +247,117 @@ void Config::Executioner(Node &head)
 void Config::createConfigServer(Node &serverNode)
 {
     m_servers.emplace_back(ConfigServer());
+    ConfigServer& lastServer = m_servers.back();
+    ConfigRoute* defaultRoute = new ConfigRoute("/","./files","index.html",METH_GET,100000000,false,""); // setting up default file
     for (int i = 0; i < serverNode.children.size(); i++) { //loop over all directive nodes to create a default route
-        if (serverNode.children[i].type == NODE_DIRECTIVE){
-            updateConfigRoute();
+        if(serverNode.children[i].name == "server_name" || serverNode.children[i].name == "listen")
+            updateConfigServer(lastServer,serverNode.children[i]);
+        else if (serverNode.children[i].type == NODE_DIRECTIVE){
+            updateConfigRoute(*defaultRoute,serverNode.children[i],NODE_BLOCK_SERVER);
+        }
+        else{
+            PRINT("ERROR HAPPENED SOMEWHERE, in create config Server ");
         }
     }
+    lastServer.AddConfigRoute(defaultRoute);
+
+    PRINT("-----------CREATING NEW CONFIGROUTES!!!!---------------");
     for (int i = 0; i < serverNode.children.size(); i++) {
-        if (serverNode.children[i].type == NODE_BLOCK_LOCATION)
-            const ConfigServer& lastServer = m_servers.back();
-            
-            // .emplace_back(ConfigRoute(m_servers.back().getClosestConfigRoute(serverNode.children[i].values[0])));
-            for (int i = 0; i < 3; i++)
-            {
-                updateConfigRoute();
+        if (serverNode.children[i].type == NODE_BLOCK_LOCATION) {
+            ConfigRoute* newRoute = new ConfigRoute(*(lastServer.getRouteFromPath(serverNode.children[i].values[0]))); //might need error checking? what if NULL?
+            PRINT("newroute should exist");
+            newRoute->setPath(serverNode.children[i].values[0]);
+            PRINTVAR(serverNode.children[i].values[0]);
+            for (int j = 0; j < serverNode.children[i].children.size(); j++) {
+                updateConfigRoute(*newRoute,serverNode.children[i].children[j],NODE_BLOCK_LOCATION);
             }
+            lastServer.AddConfigRoute(newRoute);
+        }
             
     }
 }
 
-// void Config::updateConfigRoute(ConfigRoute& route, )
-// {
+void Config::updateConfigServer(ConfigServer& server,Node &currNode)
+{
+    PRINT("UPDATING SERVER");
+    if(currNode.name == "server_name"){
+        for (int i = 0; i < currNode.values.size(); i++){
+            AddServerName(server,currNode.values[i]);
+        }
+        
+    }
+    else if(currNode.name == "listen"){
+            AddServerPort(server,currNode.values[0]);
+    }
+    else
+        PRINT("PARSE ERROR in update Config Server");
+}
 
-// }
+void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type )
+{
+    PRINT("UPDATING ROUTE");
+    //switch statement with loads of functions to update a route
+    // allow_methods index root
 
+    if(currNode.name == "allow_methods"){
+        int allowedMethods = METH_NONE;
+        for (int i = 0; i < currNode.values.size(); i++) {
+           allowedMethods |= StringToMethodEnum(currNode.values[i]);
+        }
+        route.setAllowedMethods(allowedMethods);
+    }
+    else if(currNode.name == "index"){
+        for (int i = 0; i < currNode.values.size(); i++) {
+            route.AddIndexFile(currNode.values[i]); // behavior unclear for overwriting
+        }
+    }
+    else if(currNode.name == "root"){
+        route.setRoot(currNode.values[0]);
+    }
+    else if(currNode.name == "auto_index"){
+        if(currNode.values[0] == "on" || currNode.values[0] == "1" )
+            route.setAutoindex(true);
+        else if(currNode.values[0] == "off" || currNode.values[0] == "0" )
+            route.setAutoindex(false);
+        else
+            PRINT("Error! autoindex read invalid value, val will not be changed");
+    }
+    else if(currNode.name == "return"){
+        route.setRedirectDir(currNode.values[0]);
+    }
+    else if(currNode.name == "client_body_buffer_size"){
+        std::stringstream sstream(currNode.values[0]);
+        size_t result;
+        sstream >> result; 
+        route.setClientBodyBufferSize(result);
+    }
+    else if(currNode.name == "cgi"){
+        route.addCGI(currNode.values[0],currNode.values[1]);
+    }
+    else
+        PRINT("Error, node name was not recognized.");
+
+}
+
+
+void Config::AddServerPort(ConfigServer& server,const std::string& value)
+{
+    if(ValidateServerPortNamePairs(server,value)){
+
+    }
+}
+
+void Config::AddServerName(ConfigServer& server,const std::string& value)
+{
+    if(ValidateServerPortNamePairs(server,value)){
+        server.AddServerName(value);
+    };
+}
+
+bool Config::ValidateServerPortNamePairs(ConfigServer& server,const std::string& newvalue)
+{
+    return true;
+}
 
 bool Config::isValidChar(char c)
 {

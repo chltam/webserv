@@ -9,7 +9,5 @@ int main(int ac, char** av)
     std::cout << conf << std::endl;
     PRINT("THE END");
 
-    ConfigRoute route;
-    PRINTVAR(route);
     return 0;
 }

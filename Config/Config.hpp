@@ -40,7 +40,6 @@ public:
 
 public: //getters
     const std::vector<ConfigServer>& getServers() const;
-    void AddServer(const ConfigServer& server);
     friend std::ostream& operator<< (std::ostream& os, const Config& config);
     // const ConfigServer* getConfigServerFromRequest(std::string hostPort) const;
     std::vector<ConfigServer> m_servers;
@@ -56,9 +55,13 @@ private:
     void ParseDirective(TokenQueue& tokens, Node& currNode);
 
     void Executioner( Node& head);
+    void updateConfigServer(ConfigServer& server,Node &currNode);
+    void updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type);
 
     void createConfigServer(Node &serverNode);
-
+    void AddServerPort(ConfigServer& server,const std::string& value);
+    void AddServerName(ConfigServer& server,const std::string& value);
+    bool ValidateServerPortNamePairs(ConfigServer& server,const std::string& newvalue);
     //utils
     bool isValidChar(char c);
     std::string TokenToString(int tokenVal);
