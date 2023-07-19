@@ -80,7 +80,6 @@ void Server::handle( int index, Socket& client_sock )
 	Response* resp = _builder.createNewResponse(request, m_Config, _mvars);
 
 	std::string respString = resp->build();
-	PRINT(respString);
 
     // write to socket
 	write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() );
