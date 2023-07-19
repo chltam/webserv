@@ -120,42 +120,18 @@ void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string 
     stringstream lenStr;
 
     cout << "POST received" << endl;
-	
-	std::string	boundary;
-	int pos = contentType.find(';');
-	if (pos != std::string::npos)
+	ofstream	file;
+	if (isFileUploading(contentType))
 	{
-		boundary = contentType.substr(pos + 11);
-		contentType = contentType.substr(0, pos);
-		PRINTVAR(boundary);
+		filename = "upload/" + extractFileName(resourceData);
+		resourceData = extractFileData(resourceData);
+		file.open(filename);
 	}
-	if (contentType == "multipart/form-data")
+	else
 	{
-		pos = resourceData.find("filename") + 10;
-		resourceData = resourceData.substr(pos);
-		pos = resourceData.find("\"");
-		filename = "upload/" + resourceData.substr(0, pos);
-		int start = resourceData.find("\n");
-		int end	= resourceData.rfind(boundary) - 3;
-		PRINTVAR(end);
-		resourceData = resourceData.substr(start, end);
-
-		ofstream file( filename );
-
-		if ( file.is_open() ) {
-
-			file << resourceData;
-
-		} else {
-			cout << "Unable to open file\n";
-			// _status = "403 Not Allowed";
-		}
-		file.close();
-		return ;
+		filename = newfullPath;
+		file.open(filename, std::ios::app);
 	}
-
-	filename = newfullPath;
-    ofstream file( filename, std::ios::app);
 
     if ( file.is_open() ) {
 
@@ -166,4 +142,50 @@ void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string 
         // _status = "403 Not Allowed";
     }
     file.close();
+}
+
+bool	ResponseBuilder::isFileUploading(std::string& contenType)
+{
+	size_t	pos;
+	std::string	fileType;
+
+	pos = contenType.find(';');
+	if (pos == std::string::npos)
+		return (false);
+	fileType = contenType.substr(0, pos);
+	if (fileType == "multipart/form-data")
+		return (true);
+	return (false);
+}
+
+std::string	ResponseBuilder::extractFileName(std::string& resourceData)
+{
+	size_t	start;
+	size_t	end;
+	std::string	filename;
+
+	start = resourceData.find("filename") + 10;
+	end = resourceData.find("\"", start);
+
+	filename = resourceData.substr(start, end - start);
+	PRINTVAR(filename);
+	return (filename);
+
+}
+
+std::string	ResponseBuilder::extractFileData(std::string& resourceData)
+{
+	std::string	boundary;
+	size_t	pos;
+	size_t	dataStart;
+	size_t	dataEnd;
+
+	pos = resourceData.find("\r\n");
+	boundary = resourceData.substr(0, pos);
+
+	dataStart = resourceData.find("\r\n\r\n") + 4;
+	dataEnd = resourceData.find(boundary, dataStart) - 2;
+
+	return (resourceData.substr(dataStart, dataEnd - dataStart));
+
 }
