@@ -54,18 +54,11 @@ std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
     os << "----Ports----" << std::endl;
     if(cs.m_ports.size() != 0) {
         for (int i = 0; i < cs.m_ports.size(); i++)
-            os << "elem " << i << ": " << cs.m_ports[i]  << std::endl;
+            os << "elem " << i << ": " << cs.m_ports[i].first << " " << cs.m_ports[i].second << std::endl;
     }
     else
         os << "No Ports found" << std::endl;
 
-    os << "----Server Names----" << std::endl;
-    if(cs.m_serverNames.size() != 0) {
-        for (int i = 0; i < cs.m_serverNames.size(); i++)
-            os << "elem " << i << ": " << cs.m_serverNames[i]  << std::endl;
-    }
-    else
-        os << "No Ports found" << std::endl;
     os << "----Routes----" << std::endl;
     if(cs.m_routes.size() != 0){
         for (std::map<std::string,ConfigRoute *>::const_iterator it = cs.m_routes.begin();it != cs.m_routes.end();it++) {
@@ -79,20 +72,24 @@ std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
     return os;
 }
 
-ConfigServer::ConfigServer(const std::string &defaultName, int defaultPort)
+ConfigServer::ConfigServer(const std::string &defaultName, const std::string &defaultPort)
 {
-    m_ports.emplace_back(defaultPort);
-    m_serverNames.emplace_back(defaultName);
+    m_ports.emplace_back(std::pair<std::string,std::string>(defaultName,defaultPort));
 }
 
-const std::vector<int> &ConfigServer::getPorts() const
+ConfigServer::~ConfigServer()
+{
+    
+    for (std::map<std::string,ConfigRoute*>::const_iterator it = m_routes.begin(); it != m_routes.end(); it++){
+        delete it->second;
+    }
+    
+    
+}
+
+const std::vector<std::pair<std::string,std::string>>& ConfigServer::getPorts() const
 {
     return m_ports;
-}
-
-const std::vector<std::string> &ConfigServer::getServerNames() const
-{
-    return m_serverNames;
 }
 
 const std::map<int, std::string> &ConfigServer::getErrorPages() const
@@ -112,20 +109,7 @@ void ConfigServer::AddConfigRoute(ConfigRoute *config)
     m_routes.emplace(config->getPath(),config);
 }
 
-void ConfigServer::AddServerName(const std::string &name)
+void ConfigServer::AddServerPort(const std::string& serverName,const std::string& port)
 {
-    if(m_serverNames.size() == 0)
-        m_serverNames.emplace_back(name);
-    else if(std::find(m_serverNames.begin(),m_serverNames.end(),name) == m_serverNames.end()){
-        m_serverNames.emplace_back(name);
-    }
-    else{
-        std::cout << "Tried adding: [" <<name << "] but name already exists" << std::endl;
-    }
-
-    
-}
-
-void ConfigServer::AddServerPort(int port)
-{
+    m_ports.emplace_back(std::pair<std::string,std::string>(serverName,port));
 }

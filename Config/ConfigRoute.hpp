@@ -46,4 +46,6 @@ private:
 
     std::string m_redirectDir;
 
+    bool m_clearIndexFiles;
+
 };

@@ -11,6 +11,7 @@ ConfigRoute::ConfigRoute()
     m_autoindex = false;
 
     m_redirectDir= "";
+    m_clearIndexFiles = true;
 }
 
 ConfigRoute::ConfigRoute(const std::string& path,const std::string &root, const std::string &defaultFile, int allowedMethods, size_t bodyBufferSize, bool autoIndex, const std::string &redirectDir)
@@ -23,6 +24,7 @@ ConfigRoute::ConfigRoute(const std::string& path,const std::string &root, const 
     m_autoindex = autoIndex;
 
     m_redirectDir= redirectDir;
+    m_clearIndexFiles = true;
 }
 
 // inheriting configurations except for redirect
@@ -47,6 +49,7 @@ ConfigRoute::ConfigRoute(const ConfigRoute &route)
     }
 
     m_redirectDir = "";
+    m_clearIndexFiles = true;
     PRINT("Created config route from other one");
 
 }
@@ -98,6 +101,11 @@ void ConfigRoute::setAllowedMethods(int methods)
 
 void ConfigRoute::AddIndexFile(const std::string &newIndexFile)
 {
+    if(m_clearIndexFiles){
+        m_indexFiles.clear();
+        m_clearIndexFiles = false;
+    }
+
     if (std::find(m_indexFiles.begin(),m_indexFiles.end(),newIndexFile) == m_indexFiles.end())
         m_indexFiles.emplace_back(newIndexFile);
     else {
