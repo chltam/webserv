@@ -54,7 +54,7 @@ void	Server::accept_connection()
 
 		if (result < 0){
 			perror("poll failed");
-			exit(EXIT_FAILURE); // REMOVE CLIENT ACCORDING TO EVAL SHEET
+			exit(EXIT_FAILURE);
 		}
 		std::cout << "result = " << result << std::endl;
 		for (int n = 0; n < pfd.size(); n++)
@@ -69,31 +69,22 @@ void	Server::accept_connection()
 		}
 
 	}
-
 }
-
 
 void Server::handle( int index, Socket& client_sock )
 {
-	if (client_sock.get_request_str().empty() == true)
-	{
-		//status = 408 Request Timeout
-   		close(client_sock.get_sock_fd());
-		return ;
-	}
 	// std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());
 	// request.printf_all();
 
-
 	Response* resp = _builder.createNewResponse(request, m_Config, _mvars);
 
 	std::string respString = resp->build();
-	// PRINT(respString);
+	PRINT(respString);
+
     // write to socket
-    write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() ); // ERROR HANDLING: REMOVE CLIENT IF < 0
+	write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() );
 
     close(client_sock.get_sock_fd());
-
     delete resp;
 }

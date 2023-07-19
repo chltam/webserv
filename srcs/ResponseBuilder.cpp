@@ -10,20 +10,31 @@ ResponseBuilder::~ResponseBuilder() {};
 Response* ResponseBuilder::createNewResponse(Request &request, const Config& config, MetaVars& mvars  )
 {
     Response* response = new Response();
-    response->insertHeaderField("Server",request.getHeaderValueFromKey("Host"));
 
-    std::string contType= request.getHeaderValueFromKey("Accept");
-    std::string::size_type pos = contType.find(',');
-    // response->_headerFields["Content-Type"] = contType; /*content type*/
+    if ( !request.getTimeout() ) {
 
-    response->insertHeaderField("Content-Type",contType.substr(0)); //substr(0, pos)
+        response->insertHeaderField("Server",request.getHeaderValueFromKey("Host"));
+
+        std::string contType= request.getHeaderValueFromKey("Accept");
+        std::string::size_type pos = contType.find(',');
+        // response->_headerFields["Content-Type"] = contType; /*content type*/
+
+        response->insertHeaderField("Content-Type",contType.substr(0, pos));
+    }
     response->setStatus(setResponseStatus(request,config,*response,mvars));
 
     return response;
 }
 
 int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
-{
+{   
+    if (request.getTimeout())
+    {
+        response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
+        response.insertHeaderField("Content-Type", "text/html");
+        response.setPathFromErrorCode(408);
+        return 408;
+    }
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 
     string path = request.getHeaderValueFromKey( "path" );
