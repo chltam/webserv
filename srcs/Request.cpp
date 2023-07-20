@@ -10,6 +10,8 @@ Request::Request(std::string request_str)
         _timeout = true;        
         return ;
     }
+	else
+        _timeout = false;
 
     std::istringstream   str_iss(request_str);
     vector<string>    lines;

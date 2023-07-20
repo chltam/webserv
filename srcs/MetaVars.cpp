@@ -1,4 +1,5 @@
 #include "../includes/MetaVars.hpp"
+#include "../includes/webserv.hpp"
 using namespace	std;
 
 MetaVars::MetaVars()
@@ -34,7 +35,7 @@ void	MetaVars::set_value(std::string key, std::string value)
 
 void	MetaVars::set_content_length(std::string body)
 {
-	set_value("CONTENT_LENGTH", to_string(body.length()));
+	set_value("CONTENT_LENGTH", toString(body.length()));
 }
 
 void	MetaVars::set_executor(std::string executor)
@@ -117,9 +118,9 @@ bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, st
 	// }
 	for (int n = 0; n < cgi_pair.size(); n++)
 	{
-		PRINTVAR(cgi_pair[n].first);
-		PRINTVAR(cgi_pair[n].second);
-		PRINTVAR(path);
+		// PRINTVAR(cgi_pair[n].first);
+		// PRINTVAR(cgi_pair[n].second);
+		// PRINTVAR(path);
 		if (path.substr(dpos) == cgi_pair[n].first)
 		{
 			set_value("SCRIPT_NAME", path);
@@ -138,9 +139,6 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 	arg[0] = (char* )_executor.c_str();
 	arg[1] = (char* )script.c_str();
 	arg[2] = NULL;
-
-	PRINTVAR(arg[0]);
-	PRINTVAR(arg[1]);
 
 	std::string	ret;
 	int	pid;

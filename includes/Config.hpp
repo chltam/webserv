@@ -48,7 +48,7 @@ private:
     void Lexer();
     void Parser();
     bool isValidChar(char c);
-    std::vector<std::pair<std::string,int>> m_rawData; //want to get rid of this one with just a temp var
+    std::vector<std::pair<std::string,int> > m_rawData; //want to get rid of this one with just a temp var
 
     std::string m_defaultConfig;
 

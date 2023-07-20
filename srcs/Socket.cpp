@@ -32,6 +32,7 @@ Socket::Socket(int listener_fd)
     sockaddr_in client_addr{};
     socklen_t   len = 0;
     _sock = accept(listener_fd, (sockaddr *) &client_addr, &len);
+	update_last_active_time();
 }
 
 Socket::~Socket()
@@ -59,12 +60,17 @@ void	Socket::enable_listener()
 	}
 }
 
-void	Socket::read_test()
+int	Socket::read_test()
 {
 	char	buffer[BUFFER_SIZE];
 
-	read (_sock, buffer, BUFFER_SIZE);
+	int bread = read (_sock, buffer, BUFFER_SIZE);
+	PRINTVAR(bread);
+	if (bread <= 0)
+		return (-1);
+	buffer[bread] = '\0';
 	_request_str += buffer;
+	return (0);
 }
 
 void    Socket::read_sock()
@@ -74,7 +80,7 @@ void    Socket::read_sock()
 	pfd.fd = _sock;
 	pfd.events = POLLIN;
 	pfd.revents = 0;
-	_request_str.clear();
+	// _request_str.clear();
 	
 	while (1)
 	{
@@ -99,6 +105,26 @@ void    Socket::read_sock()
 		}
 	}
 }
+void	Socket::update_last_active_time(){
+
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+	_last_active_time = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
+bool	Socket::is_idle(long timeout)
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	long	now = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+
+	
+	if (now - get_last_active_time() > timeout)
+		return (true);
+	else
+		return (false);
+}
 
 int	Socket::get_sock_fd(){
 	return (_sock);
@@ -106,4 +132,8 @@ int	Socket::get_sock_fd(){
 
 std::string	Socket::get_request_str(){
 	return (_request_str);
+}
+
+time_t	Socket::get_last_active_time(){
+	return (_last_active_time);
 }

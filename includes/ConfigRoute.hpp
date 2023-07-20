@@ -22,7 +22,7 @@ public: //making it public for now, otherwise its a lot of unneccesary function 
     int m_allowedMethods;
     size_t m_clientBodyBufferSize;
     bool m_autoindex;
-    std::vector<std::pair<std::string,std::string>> m_cgi;
+    std::vector<std::pair<std::string,std::string> > m_cgi;
 
     bool m_shouldRedirect;
     std::string m_redirectDir;

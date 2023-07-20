@@ -42,7 +42,7 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
             route = &(m_routes.find(tempPath)->second);
         }
         prev = path.find("/",prev+1);
-        PRINTVAR(prev);
+        // PRINTVAR(prev);
         if(prev != std::string::npos){
             tempPath = path.substr(0,prev);
         }
@@ -52,8 +52,8 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
             break;
         }
     }
-    PRINT("Final CONFIG");
-    PRINTVAR(*route);
+    // PRINT("Final CONFIG");
+    // PRINTVAR(*route);
 
     return route;
 }

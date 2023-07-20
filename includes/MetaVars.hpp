@@ -28,7 +28,7 @@ public:
 	void	update_envp(Request& request);
 	std::string get_value(std::string key);
 	char	**get_envp();
-	bool	check_extension(const std::vector<std::pair<std::string,std::string>>& cgi_pair, std::string path);
+	bool	check_extension(const std::vector<std::pair<std::string,std::string> >& cgi_pair, std::string path);
 
 
 	std::string	cgi_caller(std::string request_body);

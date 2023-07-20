@@ -28,3 +28,4 @@ int StringToMethodEnum(const std::string& method);
 std::string saveDateTime();
 std::string getFileContent( const std::string& filename );
 std::string getStringFromStatus(int status);
+std::string	toString(int number);

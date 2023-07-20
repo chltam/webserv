@@ -78,7 +78,7 @@ std::string getFileContent( const std::string& filename ) {
     std::stringstream buffer;
     std::string bufString;
 
-    std::ifstream file( filename );
+    std::ifstream file( filename.c_str() );
 
     if ( file.is_open() ) {
         buffer << file.rdbuf();
@@ -113,4 +113,11 @@ std::string getStringFromStatus(int status)
     }
 
     return "ERROR";
+}
+
+std::string	toString(int number)
+{
+	std::stringstream ss;
+    ss << number;
+    return ss.str();
 }

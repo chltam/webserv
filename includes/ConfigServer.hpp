@@ -21,7 +21,7 @@ public: //getters, setters
 
 public: //making it public for now since it will be used a lot
     std::string m_serverName;
-    std::vector<std::pair<std::string,int>> m_ports;
+    std::vector<std::pair<std::string,int> > m_ports;
     std::map<std::string,ConfigRoute> m_routes;
     std::map<int,std::string> m_errorPages;
 
@@ -30,6 +30,6 @@ public: //making it public for now since it will be used a lot
     int m_allowedMethods;
     size_t m_clientBodyBufferSize;
     bool m_autoindex;
-    std::vector<std::pair<std::string,std::string>> m_cgi;
+    std::vector<std::pair<std::string,std::string> > m_cgi;
 
 };

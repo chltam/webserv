@@ -18,7 +18,7 @@ void Config::Tokenizer(char* filepath)
     else
         setup = filepath;
 
-    std::ifstream input(setup);
+    std::ifstream input(setup.c_str());
     std::string line;
     if(input.is_open()){
         while(std::getline(input,line)){

@@ -53,10 +53,10 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     std::string newfullPath(configRoute->m_root + path);
     int ret1 = ValidatePath(newfullPath);
     int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
-    PRINTVAR(newfullPath);
-    PRINTVAR(ret1);
-    PRINTVAR(S_IFREG);
-    PRINTVAR(S_IFDIR);
+    // PRINTVAR(newfullPath);
+    // PRINTVAR(ret1);
+    // PRINTVAR(S_IFREG);
+    // PRINTVAR(S_IFDIR);
     if(ret1 == -1 && method != METH_POST){
         PRINT("ERROR, Path is invalid!");
         response.setPathFromErrorCode(404);
@@ -94,10 +94,10 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
 	/*if cgi*/
 	if (mvars.check_extension(configRoute->m_cgi, newfullPath) == true)
 	{
-		PRINTVAR(newfullPath);
+		// PRINTVAR(newfullPath);
 		response.setCgi(true);
 		mvars.update_envp(request);
-		PRINT(mvars.get_value("REQUEST_METHOD"));
+		// PRINT(mvars.get_value("REQUEST_METHOD"));
         response.setBody(mvars.cgi_caller(request.getBody()));
         mvars.clean_meta_map();
         return 200;//not always 200
@@ -136,12 +136,12 @@ void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string 
 	{
 		filename = "upload/" + extractFileName(resourceData);
 		resourceData = extractFileData(resourceData);
-		file.open(filename);
+		file.open(filename.c_str());
 	}
 	else
 	{
 		filename = newfullPath;
-		file.open(filename, std::ios::app);
+		file.open(filename.c_str(), std::ios::app);
 	}
 
     if ( file.is_open() ) {
