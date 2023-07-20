@@ -88,8 +88,8 @@ void	Server::accept_connection()
 			{
 				std::cout << "ready to handle request" << std::endl;
 
-				Socket&	idleSock = getClientSockFromVec(m_pfdVec[n].fd);
-					handle(idleSock);
+				Socket&	writeSock = getClientSockFromVec(m_pfdVec[n].fd);
+					handle(writeSock);
 			}
 		}
 
