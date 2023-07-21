@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include "ConfigRoute.hpp"
 
 
@@ -10,26 +11,20 @@ class ConfigServer
 {
 public:
     ConfigServer();
+    ConfigServer(const std::string& defaultName, const std::string &defaultPort);
+    ~ConfigServer();
 
-
-    void AddRoute(std::string path, ConfigRoute& route); //not used yet
     friend std::ostream& operator<< (std::ostream& stream, const ConfigServer& cs);
     const ConfigRoute* getRouteFromPath(const std::string& path) const;
 public: //getters, setters
+    const std::vector<std::pair<std::string,std::string>>& getPorts() const;
+    const std::map<int,std::string>& getErrorPages() const;
+    const std::map<std::string,ConfigRoute *>& getConfigRoutes() const;
 
-
-
-public: //making it public for now since it will be used a lot
-    std::string m_serverName;
-    std::vector<std::pair<std::string,int>> m_ports;
-    std::map<std::string,ConfigRoute> m_routes;
+    void AddConfigRoute(ConfigRoute * config);
+    void AddServerPort(const std::string& serverName,const std::string& port);
+private: 
+    std::vector<std::pair<std::string,std::string>> m_ports;
     std::map<int,std::string> m_errorPages;
-
-    std::string m_root;
-    std::string m_defaultFile;
-    int m_allowedMethods;
-    size_t m_clientBodyBufferSize;
-    bool m_autoindex;
-    std::vector<std::pair<std::string,std::string>> m_cgi;
-
+    std::map<std::string,ConfigRoute *> m_routes;
 };

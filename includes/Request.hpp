@@ -6,6 +6,7 @@
 #include <cstring>
 #include <vector>
 #include <map>
+#include "webserv.hpp"
 
 
 
@@ -20,7 +21,7 @@ public:
 
 	void	printf_all();
     bool    getTimeout();
-    
+
 private:
 	std::vector<std::pair<std::string, std::string> >	_request_pair;
     std::string _body;

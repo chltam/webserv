@@ -2,7 +2,7 @@
 
 Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder(), _mvars(envp)
 {
-	m_Config.printServers();
+	std::cout << m_Config << std::endl;
 };
 
 Server::~Server() {};
@@ -15,12 +15,13 @@ Server::~Server() {};
 void	Server::set_server_sock(/*config info*/)
 {
 	//slightly less temp, how do we get the right server object from the socket in question?
-	const std::vector<ConfigServer>& servers = m_Config.getServers();
+	const std::vector<ConfigServer>& servers = m_Config.m_servers;
 	for(int i = 0; i < servers.size(); i++){
-		for(int j = 0;j < servers[i].m_ports.size(); j++){
+		const std::vector<std::pair<std::string,std::string>>& ports = m_Config.m_servers[i].getPorts();
+		for(int j = 0;j < ports.size(); j++){
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-			std::cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << std::endl;
-			sock.bind_socket(servers[i].m_ports[j].first, servers[i].m_ports[j].second);
+			std::cout << "i = " << i << "Binding new Socket at: " << ports[j].second  << std::endl;
+			sock.bind_socket(ports[j].first, std::atoi(ports[j].second.c_str()));
 			_server_sock.push_back(sock);
 
 		}

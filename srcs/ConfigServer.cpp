@@ -1,22 +1,11 @@
 #include "ConfigServer.hpp"
-#include "webserv.hpp"
+#include "../includes/webserv.hpp"
 
 ConfigServer::ConfigServer()
 {
-    //setup default values
-    m_root = "/files";
-    m_defaultFile = "index.html";
-    m_allowedMethods = METH_ALL;
-    m_clientBodyBufferSize = 1000000000;
-    m_autoindex = false;
 
 }
 
-
-void ConfigServer::AddRoute(std::string path, ConfigRoute &route)
-{
-    m_routes.emplace(path,route);
-}
 
 //find the best matching path
 // path = /whatever/anotherdir/newdir
@@ -26,8 +15,8 @@ void ConfigServer::AddRoute(std::string path, ConfigRoute &route)
 //  /whatever/anotherdir/newdir
 const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
 {
-    const ConfigRoute* route = &(m_routes.find("/")->second); //guaranteed to be in there
-    std::map<std::string,ConfigRoute>::const_iterator it;
+    const ConfigRoute* route = m_routes.find("/")->second; //guaranteed to be in there
+    std::map<std::string,ConfigRoute*>::const_iterator it;
     std::string tempPath("/");
 
     size_t prev = 0;
@@ -39,7 +28,7 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
         }
         else{
             //std::cout << "Found route with path [" << tempPath << "]" << std::endl;
-            route = &(m_routes.find(tempPath)->second);
+            route = m_routes.find(tempPath)->second;
         }
         prev = path.find("/",prev+1);
         PRINTVAR(prev);
@@ -51,6 +40,7 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
         if(tempPath.empty()){
             break;
         }
+    PRINT_WARNING(tempPath.c_str());
     }
     PRINT("Final CONFIG");
     PRINTVAR(*route);
@@ -61,39 +51,66 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
 std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
 {
     os << "-------------Config SERVER-------------" << std::endl;
-    os << "Server Name = " << cs.m_serverName << std::endl;
-
-    os << "Root dir = " << cs.m_root << std::endl;
-    os << "Default File = " << cs.m_defaultFile << std::endl;
-    os << "Allowed Methods = " << MethodEnumToString(cs.m_allowedMethods) << std::endl;
-    os << "Client Body Buff Size = " << cs.m_clientBodyBufferSize << std::endl;
-    os << "Autoindex = " << cs.m_autoindex << std::endl;
 
     os << "----Ports----" << std::endl;
     if(cs.m_ports.size() != 0) {
-    for (int i = 0; i < cs.m_ports.size(); i++)
-        os << "elem " <<i << ": " <<cs.m_ports[i].first <<" " << cs.m_ports[i].second << std::endl;
+        for (int i = 0; i < cs.m_ports.size(); i++)
+            os << "elem " << i << ": " << cs.m_ports[i].first << " " << cs.m_ports[i].second << std::endl;
     }
     else
         os << "No Ports found" << std::endl;
 
-    os << "----CGI----" << std::endl;
-    if(cs.m_cgi.size() != 0) {
-        for (int i = 0; i < cs.m_cgi.size(); i++)
-            os << "elem " <<i << ": " <<cs.m_cgi[i].first <<" " << cs.m_cgi[i].second << std::endl;
-    }
-    else
-        os << "No CGI found" << std::endl;
-
     os << "----Routes----" << std::endl;
     if(cs.m_routes.size() != 0){
-        for (std::map<std::string,ConfigRoute>::const_iterator it = cs.m_routes.begin();it != cs.m_routes.end();it++) {
+        for (std::map<std::string,ConfigRoute *>::const_iterator it = cs.m_routes.begin();it != cs.m_routes.end();it++) {
             os << "Route: " << it->first << std::endl;
-            os << it->second << std::endl;
+            os << *it->second << std::endl;
         }
     }
     else
         os << "No Routes found" << std::endl;
 
     return os;
+}
+
+ConfigServer::ConfigServer(const std::string &defaultName, const std::string &defaultPort)
+{
+    m_ports.emplace_back(std::pair<std::string,std::string>(defaultName,defaultPort));
+}
+
+ConfigServer::~ConfigServer()
+{
+
+    for (std::map<std::string,ConfigRoute*>::const_iterator it = m_routes.begin(); it != m_routes.end(); it++){
+        delete it->second;
+    }
+
+
+}
+
+const std::vector<std::pair<std::string,std::string>>& ConfigServer::getPorts() const
+{
+    return m_ports;
+}
+
+const std::map<int, std::string> &ConfigServer::getErrorPages() const
+{
+    return m_errorPages;
+}
+
+const std::map<std::string, ConfigRoute*> &ConfigServer::getConfigRoutes() const
+{
+    return m_routes;
+}
+
+void ConfigServer::AddConfigRoute(ConfigRoute *config)
+{
+    PRINT("        --ADDING CONFIG TO MAP");
+    PRINTVAR(config->getPath());
+    m_routes.emplace(config->getPath(),config);
+}
+
+void ConfigServer::AddServerPort(const std::string& serverName,const std::string& port)
+{
+    m_ports.emplace_back(std::pair<std::string,std::string>(serverName,port));
 }

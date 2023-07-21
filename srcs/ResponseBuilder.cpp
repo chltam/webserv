@@ -27,7 +27,7 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
 }
 
 int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
-{   
+{
     if (request.getTimeout())
     {
         response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
@@ -38,19 +38,25 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 
     string path = request.getHeaderValueFromKey( "path" );
+
+    PRINTVAR(server);
+    PRINTVAR(path);
     const ConfigRoute* configRoute = server->getRouteFromPath( path );
+
+
 
     if(configRoute == NULL){
         PRINT("ERROR, could find CONFIGROUTE, this should never happen!");
     }
 
-    if(configRoute->m_shouldRedirect == true) {
+//prev: configRoute->m_shouldRedirect == true
+    if(configRoute->getRedirectDir().empty() == false) {
         PRINT("REDIRECT SIR!");
-        response.insertHeaderField("Location",configRoute->m_redirectDir);
+        response.insertHeaderField("Location",configRoute->getRedirectDir());
         return 301;
     }
 
-    std::string newfullPath(configRoute->m_root + path);
+    std::string newfullPath(configRoute->getRoot() + path);
     int ret1 = ValidatePath(newfullPath);
     int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
     PRINTVAR(newfullPath);
@@ -67,15 +73,15 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
             std::string tempPath(newfullPath);
             if(newfullPath[newfullPath.length()-1] != '/' ){
                 newfullPath += "/";
-                newfullPath += configRoute->m_defaultFile;
+                newfullPath += configRoute->getDefaultFile()[0]; //!!!!! needs additional function
             }
             else
-                newfullPath += configRoute->m_defaultFile;
+                newfullPath += configRoute->getDefaultFile()[0]; //!!!!! needs additional function
             ret1 = ValidatePath(newfullPath);
             PRINTVAR(ret1);
-            if((ret1 == -1 || ret1 == S_IFDIR) && configRoute->m_autoindex == true) { //check for autoindex if default file is missing
+            if((ret1 == -1 || ret1 == S_IFDIR) && configRoute->getAutoIndex() == true) { //check for autoindex if default file is missing
                 response.setPath(tempPath);
-                response.setAutoIndex(configRoute->m_autoindex);
+                response.setAutoIndex(configRoute->getAutoIndex());
                 return 200;
             }
             else if(ret1 != S_IFREG) {
@@ -85,14 +91,14 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
             }
         }
 
-    if(!(method & configRoute->m_allowedMethods)){ //if you are not allowed to access the resource with GET POST or DELETE
+    if(!(method & configRoute->getAllowedMethods())){ //if you are not allowed to access the resource with GET POST or DELETE
         PRINT("ERROR,you have no rights to access this resource with the Method provided");
         response.setPathFromErrorCode(403);
         return 403;
     }
 
 	/*if cgi*/
-	if (mvars.check_extension(configRoute->m_cgi, newfullPath) == true)
+	if (mvars.check_extension(configRoute->getCgi(), newfullPath) == true)
 	{
 		PRINTVAR(newfullPath);
 		response.setCgi(true);
@@ -101,7 +107,7 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         response.setBody(mvars.cgi_caller(request.getBody()));
         mvars.clean_meta_map();
         return 200;//not always 200
-		
+
 	}
 
     if(method == METH_DELETE){
