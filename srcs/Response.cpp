@@ -90,6 +90,11 @@ bool	Response::getCgi()
 	return (_cgi);
 }
 
+std::string Response::getPath()
+{
+    return (_path);
+}
+
 void Response::setAutoIndex(bool val)
 {
     _autoindex = val;

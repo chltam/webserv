@@ -43,6 +43,8 @@ public: //getters
     friend std::ostream& operator<< (std::ostream& os, const Config& config);
     const ConfigServer* getConfigServerFromRequest(std::string hostPort) const;
     std::vector<ConfigServer> m_servers;
+    const std::map<std::string, std::string>& getTypes() const;
+
 private:
 
     //parsing data
@@ -59,12 +61,15 @@ private:
 
     void createConfigServer(Node &serverNode);
     void AddServerPort(ConfigServer& server,const std::string& value);
+    void extractMimesFromFile();
+
     //utils
     bool isValidChar(char c);
     std::string TokenToString(int tokenVal);
 
     //rando utils maybe get rid of this
     int m_brackCount;
+    std::map<std::string, std::string> m_types;
 
 
 };

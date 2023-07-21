@@ -26,6 +26,7 @@ class Response {
 		void setCgi(bool state);
         const std::string& getResponseBody();
 		bool	getCgi();
+        std::string getPath();
 
         std::string build();
 

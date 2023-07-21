@@ -114,3 +114,19 @@ std::string getStringFromStatus(int status)
 
     return "ERROR";
 }
+
+std::string getTypeFromExtension( std::string path,const std::map<std::string, std::string>& types) {
+
+    // std::cout << "PATH: " << path << std::endl;
+
+    std::string ext = path.substr(path.rfind('.') + 1);
+
+    std::cout << "EXT: " << ext << std::endl;
+
+    auto it = types.find(ext);
+    if (it == types.end())
+        return "text/html";
+    
+    return it->second;
+
+}

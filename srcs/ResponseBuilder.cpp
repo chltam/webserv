@@ -19,9 +19,12 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
         std::string::size_type pos = contType.find(',');
         // response->_headerFields["Content-Type"] = contType; /*content type*/
 
-        response->insertHeaderField("Content-Type",contType);
+        // response->insertHeaderField("Content-Type",contType);
+
+
     }
     response->setStatus(setResponseStatus(request,config,*response,mvars));
+    response->insertHeaderField("Content-Type", getTypeFromExtension(response->getPath(), config.getTypes()));
 
     return response;
 }
