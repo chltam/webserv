@@ -62,14 +62,14 @@ void	Socket::enable_listener()
 
 int	Socket::read_test()
 {
-	char	buffer[BUFFER_SIZE];
+	char	buffer[BUFFER_SIZE + 1];
 
 	int bread = read (_sock, buffer, BUFFER_SIZE);
 	PRINTVAR(bread);
-	buffer_to_vec(buffer, bread);
 	if (bread <= 0)
 		return (-1);
-	// buffer[bread] = '\0';
+	buffer_to_vec(buffer, bread);
+	buffer[bread] = '\0';
 	_request_str += buffer;
 	return (0);
 }
@@ -145,5 +145,17 @@ std::vector<char>	Socket::get_request_byte(){
 
 void	Socket::buffer_to_vec(char* buffer, int bread)
 {
+	_request_byte.insert(_request_byte.end(), buffer, buffer + bread);
+}
 
+void	Socket::printVec()
+{
+	for (std::vector<char>::iterator it = _request_byte.begin(); it != _request_byte.end(); it++)
+	{
+		std::cout << *it;
+	}
+
+	std::string	tmpStr(_request_byte.begin(), _request_byte.end());
+	_request_str = tmpStr;
+	
 }

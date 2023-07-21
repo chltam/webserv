@@ -42,6 +42,8 @@ public:
 	std::vector<char>	get_request_byte();
 	long	get_last_active_time();
 
+	void	printVec();
+
 private:
 	int	_sock;
 	long	_last_active_time;
