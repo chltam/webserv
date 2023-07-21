@@ -135,17 +135,19 @@ void	Request::set_name_port()
 	// }
 }
 
-void	Request::printf_all()
-{
-	for (int n = 0; n < _request_pair.size(); n++)
-	{
-		cout << _request_pair[n].first << "=" << _request_pair[n].second << endl;
-	}
-
-	cout << _body;
-}
-
 bool Request::getTimeout()
 {
     return _timeout;
+}
+
+std::ostream& operator<<(std::ostream& os,const Request& request)
+{
+  	for (int n = 0; n < request._request_pair.size(); n++)
+	{
+		os <<" [" << request._request_pair[n].first << "] = [" <<  request._request_pair[n].second <<"]" << endl;
+	}
+
+	os << request._body;  
+
+    return os;
 }

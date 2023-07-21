@@ -8,11 +8,18 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdarg.h>
+#include <map>
+
 
 #define PRINTVAR(x) std::cerr << #x <<": [" << x << "]"  << std::endl
 #define PRINT(x) std::cerr << x  << std::endl
 #define PRINT_ERROR(x) fprintf(stderr,"\x1B[31m%s\033[0m\n",x)
 #define PRINT_WARNING(x) fprintf(stderr,"\x1B[33m%s\033[0m\n",x)
+
+// #define PRINTVAR(x) std::cerr << std::endl
+// #define PRINT(x) std::cerr << std::endl
+// #define PRINT_ERROR(x) 
+// #define PRINT_WARNING(x) 
 
 enum AllowedMethods{
     METH_NONE   = 0,
@@ -31,3 +38,4 @@ std::string saveDateTime();
 std::string getFileContent( const std::string& filename );
 std::string getStringFromStatus(int status);
 std::string	toString(int number);
+std::string getTypeFromExtension( std::string path, const std::map<std::string, std::string>& types);

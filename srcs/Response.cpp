@@ -54,7 +54,7 @@ void Response::headerToString()
     _respHeader = ("HTTP/1.1 " + getStringFromStatus(_status) + "\r\nConnection: keep-alive\r\n");
 
     std::map<std::string,std::string>::const_iterator it = _headerFields.begin();
-    _headerFields["Content-Type"] = "text/html";
+    // _headerFields["Content-Type"] = "text/html";
     for (; it != _headerFields.end(); it++) {
 
         if(it->first != "Status"){
@@ -88,6 +88,11 @@ void	Response::setCgi(bool state)
 bool	Response::getCgi()
 {
 	return (_cgi);
+}
+
+std::string Response::getPath()
+{
+    return (_path);
 }
 
 void Response::setAutoIndex(bool val)

@@ -52,11 +52,47 @@ Config::Config(char *filepath):m_brackCount(0)
     printNode(head);
 
     Executioner(head);
+    extractMimesFromFile();
 }
 
 Config::~Config()
 {
 
+}
+
+void Config::extractMimesFromFile() {
+    
+    std::stringstream buffer;
+    std::stringstream lenStr;
+    std::string bufString;
+
+
+    std::ifstream file( "./types.txt" );
+   
+   
+    while ( std::getline(file, bufString)) {
+
+
+        std::string value = bufString.substr(0, bufString.find(':'));
+        std::string keysPart = bufString.substr(bufString.find(":") + 1);
+
+        std::istringstream   keysPart_line(keysPart);
+     
+        while (getline(keysPart_line, bufString, ','))
+        {
+            m_types[bufString] = value;
+        }
+    }
+    
+
+    for (std::map<std::string, std::string>::iterator it = m_types.begin(); it != m_types.end(); it++)
+    {
+        std::cout << it->first << "=" << it->second << std::endl;
+    }
+
+
+
+    file.close();
 }
 
 void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
@@ -535,4 +571,10 @@ std::string nodetypeToString(int type)
         return "NODE_DIRECTIVE";
     }
     return "ERROR";
+}
+
+
+const std::map<std::string, std::string>& Config::getTypes() const {
+
+    return m_types;
 }
