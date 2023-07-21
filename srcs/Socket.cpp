@@ -148,7 +148,7 @@ void	Socket::buffer_to_vec(char* buffer, int bread)
 	_request_byte.insert(_request_byte.end(), buffer, buffer + bread);
 }
 
-void	Socket::printVec()
+void	Socket::updateStr()
 {
 	for (std::vector<char>::iterator it = _request_byte.begin(); it != _request_byte.end(); it++)
 	{

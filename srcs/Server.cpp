@@ -89,7 +89,7 @@ void	Server::accept_connection()
 				std::cout << "ready to handle request" << std::endl;
 
 				Socket&	writeSock = getClientSockFromVec(m_pfdVec[n].fd);
-				writeSock.printVec();
+				writeSock.updateStr();
 					handle(writeSock);
 			}
 		}

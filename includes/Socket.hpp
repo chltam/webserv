@@ -42,7 +42,7 @@ public:
 	std::vector<char>	get_request_byte();
 	long	get_last_active_time();
 
-	void	printVec();
+	void	updateStr();
 
 private:
 	int	_sock;
