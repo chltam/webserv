@@ -60,7 +60,7 @@ void	Socket::enable_listener()
 	}
 }
 
-int	Socket::read_test()
+int	Socket::read_sock()
 {
 	char	buffer[BUFFER_SIZE + 1];
 
@@ -68,44 +68,43 @@ int	Socket::read_test()
 	PRINTVAR(bread);
 	if (bread <= 0)
 		return (-1);
-	buffer_to_vec(buffer, bread);
-	buffer[bread] = '\0';
-	_request_str += buffer;
+	buffer_to_vec(buffer, bread);	
 	return (0);
 }
 
-void    Socket::read_sock()
-{
-    pollfd	pfd{};
-    char    buffer[BUFFER_SIZE];
-	pfd.fd = _sock;
-	pfd.events = POLLIN;
-	pfd.revents = 0;
-	// _request_str.clear();
+// void    Socket::read_sock()
+// {
+//     pollfd	pfd{};
+//     char    buffer[BUFFER_SIZE];
+// 	pfd.fd = _sock;
+// 	pfd.events = POLLIN;
+// 	pfd.revents = 0;
+// 	// _request_str.clear();
 	
-	while (1)
-	{
-		int	poll_result = poll(&pfd, 1, 100);
-		if (poll_result == -1){
-			perror("poll error");
-			break;
-		}
-		if (poll_result == 0)
-			break;
-		else{
-			int bread = read( _sock,  buffer, BUFFER_SIZE );
-			/* if ( bread == -1 ) {
+// 	while (1)
+// 	{
+// 		int	poll_result = poll(&pfd, 1, 100);
+// 		if (poll_result == -1){
+// 			perror("poll error");
+// 			break;
+// 		}
+// 		if (poll_result == 0)
+// 			break;
+// 		else{
+// 			int bread = read( _sock,  buffer, BUFFER_SIZE );
+// 			/* if ( bread == -1 ) {
 
-				// return with err value and close sock outside
-			} */
-			buffer[bread] = 0;
-			if (bread == 0)
-				break;
-			else
-				_request_str += buffer;
-		}
-	}
-}
+// 				// return with err value and close sock outside
+// 			} */
+// 			buffer[bread] = 0;
+// 			if (bread == 0)
+// 				break;
+// 			else
+// 				_request_str += buffer;
+// 		}
+// 	}
+// }
+
 void	Socket::update_last_active_time(){
 
     struct timeval tv;
@@ -132,7 +131,7 @@ int	Socket::get_sock_fd(){
 }
 
 std::string	Socket::get_request_str(){
-	return (_request_str);
+	return (	std::string(_request_byte.begin(), _request_byte.end()));
 }
 
 time_t	Socket::get_last_active_time(){

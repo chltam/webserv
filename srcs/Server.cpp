@@ -65,19 +65,15 @@ void	Server::accept_connection()
 				m_clientSockVec.push_back(client_sock);
 				pollfd	cfd = {client_sock.get_sock_fd(), POLLIN | POLLOUT , 0};
 				m_pfdVec.push_back(cfd);
-				// client_sock.read_sock();
-
-				// handle(client_sock);
 			}
 
 			else if ((m_pfdVec[n].revents & POLLIN) && isClientSock(m_pfdVec[n].fd))
 			{
-				// std::cout << "reading a request" << std::endl;
-
+				std::cout << "reading a request" << std::endl;
 				//read the socket
 				Socket&	readSock = getClientSockFromVec(m_pfdVec[n].fd);
 				readSock.update_last_active_time();
-				if (readSock.read_test() == -1)
+				if (readSock.read_sock() == -1)
 				{
 					close(m_pfdVec[n].fd);
 					removeFromVec(m_pfdVec[n].fd);
@@ -90,7 +86,7 @@ void	Server::accept_connection()
 				std::cout << "ready to handle request" << std::endl;
 
 				Socket&	writeSock = getClientSockFromVec(m_pfdVec[n].fd);
-				writeSock.updateStr();
+				// writeSock.updateStr();
 					handle(writeSock);
 			}
 		}

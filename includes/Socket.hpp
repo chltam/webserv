@@ -33,8 +33,7 @@ public:
 	~Socket();
 	void	bind_socket(std::string ip, int port);
 	void	enable_listener();
-	void	read_sock();
-	int		read_test();
+	int		read_sock();
 	void	update_last_active_time();
 	bool	is_idle(long timeout);
 	int		get_sock_fd();
