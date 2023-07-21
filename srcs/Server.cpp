@@ -2,7 +2,7 @@
 
 Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder(), _mvars(envp)
 {
-	m_Config.printServers();
+	std::cout << m_Config << std::endl;
 };
 
 Server::~Server() {};
@@ -15,13 +15,14 @@ Server::~Server() {};
 void	Server::set_server_sock(/*config info*/)
 {
 	//slightly less temp, how do we get the right server object from the socket in question?
-	const std::vector<ConfigServer>& servers = m_Config.getServers();
+	const std::vector<ConfigServer>& servers = m_Config.m_servers;
 	for(int i = 0; i < servers.size(); i++){
-		for(int j = 0;j < servers[i].m_ports.size(); j++){
+		const std::vector<std::pair<std::string,std::string>>& ports = m_Config.m_servers[i].getPorts();
+		for(int j = 0;j < ports.size(); j++){
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-			std::cout << "i = " << i << "Binding new Socket at: " << servers[i].m_ports[j].second  << std::endl;
-			sock.bind_socket(servers[i].m_ports[j].first, servers[i].m_ports[j].second);
-			m_serverSockVec.push_back(sock);
+			std::cout << "i = " << i << "Binding new Socket at: " << ports[j].second  << std::endl;
+			sock.bind_socket(ports[j].first, std::atoi(ports[j].second.c_str()));
+			_server_sock.push_back(sock);
 
 		}
 	}
@@ -30,18 +31,18 @@ void	Server::set_server_sock(/*config info*/)
 
 void	Server::start_listening()//need to add poll later
 {
-	for (int n = 0; n < m_serverSockVec.size(); n++)
+	for (int n = 0; n < _server_sock.size(); n++)
 	{
-		m_serverSockVec[n].enable_listener();
+		_server_sock[n].enable_listener();
 	}
 
 }
 
 void	Server::accept_connection()
 {
-	for (int n = 0; n < m_serverSockVec.size(); n++)
+	for (int n = 0; n < _server_sock.size(); n++)
 	{
-		pollfd	sfd = {m_serverSockVec[n].get_sock_fd(), POLL_IN, 0};
+		pollfd	sfd = {_server_sock[n].get_sock_fd(), POLL_IN, 0};
 		m_pfdVec.push_back(sfd);
 	}
 
@@ -116,9 +117,9 @@ void Server::handle( Socket& client_sock )
 
 bool	Server::isClientSock(int fdToCheck)
 {
-	for (int  n = 0; n < m_serverSockVec.size(); n++)
+	for (int  n = 0; n < _server_sock.size(); n++)
 	{
-		if (m_serverSockVec[n].get_sock_fd() == fdToCheck)
+		if (_server_sock[n].get_sock_fd() == fdToCheck)
 			return (false);
 	}
 	return (true);

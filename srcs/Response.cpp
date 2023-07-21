@@ -54,6 +54,7 @@ void Response::headerToString()
     _respHeader = ("HTTP/1.1 " + getStringFromStatus(_status) + "\r\nConnection: keep-alive\r\n");
 
     std::map<std::string,std::string>::const_iterator it = _headerFields.begin();
+    _headerFields["Content-Type"] = "text/html";
     for (; it != _headerFields.end(); it++) {
 
         if(it->first != "Status"){

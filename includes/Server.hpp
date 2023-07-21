@@ -49,6 +49,7 @@ class Server {
 
 		MetaVars	_mvars;
         std::vector<Socket>	m_serverSockVec;
+		std::vector<Socket>	_server_sock;
 		std::vector<Socket>	m_clientSockVec;
 		std::vector<pollfd>	m_pfdVec;
         Config m_Config;

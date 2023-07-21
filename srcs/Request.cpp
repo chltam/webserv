@@ -7,10 +7,10 @@ using namespace std;
 Request::Request(std::string request_str)
 {
     if ( request_str.empty() ) {
-        _timeout = true;        
+        _timeout = true;
         return ;
     }
-	else
+    else
         _timeout = false;
 
     std::istringstream   str_iss(request_str);
@@ -19,7 +19,7 @@ Request::Request(std::string request_str)
 
     while (getline(str_iss, getline_buffer, '\n'))
         lines.push_back(getline_buffer);
-    
+
     vector<string>::iterator it = lines.begin();
     istringstream   line_iss(*it);
     vector<string>  tokens;
@@ -91,7 +91,7 @@ void    Request::set_path_query(string uri)
     }
     else
         _request_pair.push_back(make_pair("path", uri));
-}       
+}
 
 void	Request::set_name_port()
 {
@@ -112,7 +112,7 @@ void	Request::set_name_port()
 			}
 		}
 	}
-	
+
 	// vector<pair<string, string> >::iterator	it = _request_pair.begin();
 
 	// while (it != _request_pair.end())
