@@ -18,8 +18,7 @@ public:
     std::string getHeaderValueFromKey(const std::string &key);
     std::string getBody();
 	std::vector<std::pair<std::string, std::string> >&	get_request_pair();
-
-	void	printf_all();
+    friend std::ostream&operator<<(std::ostream& os,const Request& request);
     bool    getTimeout();
 
 private:
