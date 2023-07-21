@@ -66,9 +66,10 @@ int	Socket::read_test()
 
 	int bread = read (_sock, buffer, BUFFER_SIZE);
 	PRINTVAR(bread);
+	buffer_to_vec(buffer, bread);
 	if (bread <= 0)
 		return (-1);
-	buffer[bread] = '\0';
+	// buffer[bread] = '\0';
 	_request_str += buffer;
 	return (0);
 }
@@ -136,4 +137,13 @@ std::string	Socket::get_request_str(){
 
 time_t	Socket::get_last_active_time(){
 	return (_last_active_time);
+}
+
+std::vector<char>	Socket::get_request_byte(){
+	return (_request_byte);
+}
+
+void	Socket::buffer_to_vec(char* buffer, int bread)
+{
+
 }
