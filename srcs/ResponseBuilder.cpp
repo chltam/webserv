@@ -32,6 +32,12 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
 int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
 {
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
+    if(server == NULL){
+        PRINT_ERROR("Server is NULL, likely due to an invalid path");
+        response.setPath(server->getErrorPageFromCode(404));
+        return 404; //this case shouldnt be necessary something goes wrong beforehand
+    }
+
     if (request.getTimeout())
     {
         response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
@@ -56,30 +62,32 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     }
 
     std::string newfullPath(configRoute->getRoot() + path);
-    int ret1 = ValidatePath(newfullPath);
+    int fileInfo = ValidatePath(newfullPath);
     int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
-    if(ret1 == -1 && method != METH_POST){
+    if(fileInfo == -1 && method != METH_POST){
         PRINT_ERROR("ERROR, Path is invalid!, PATH:",newfullPath);
         response.setPath(server->getErrorPageFromCode(404));
         return 404;
     }
-    else if(ret1 == S_IFDIR && method == METH_GET) { //find,append,validate index file, if not, check for autoindex, else error
+    else if(fileInfo == S_IFDIR && method == METH_GET) { //find,append,validate index file, if not, check for autoindex, else error
         //only check this for a get request
             std::string tempPath(newfullPath);
             if(newfullPath[newfullPath.length()-1] != '/' ){
                 newfullPath += "/";
-                newfullPath += configRoute->getDefaultFile()[0]; //!!!!! needs additional function
+                fileInfo = configRoute->findValidIndexFile(newfullPath);
             }
             else
-                newfullPath += configRoute->getDefaultFile()[0]; //!!!!! needs additional function
-            ret1 = ValidatePath(newfullPath);
-            if((ret1 == -1 || ret1 == S_IFDIR) && configRoute->getAutoIndex() == true) { //check for autoindex if default file is missing
+                fileInfo = configRoute->findValidIndexFile(newfullPath);
+            if((fileInfo == -1 || fileInfo == S_IFDIR) && configRoute->getAutoIndex() == true) { //check for autoindex if default file is missing
                 response.setPath(tempPath);
                 response.setAutoIndex(configRoute->getAutoIndex());
                 return 200;
             }
-            else if(ret1 != S_IFREG) {
-                PRINT_LOG("Path is invalid! Couldn't find default file",configRoute->getDefaultFile()[0]);
+            else if(fileInfo != S_IFREG) {
+                PRINT_LOG("Path is invalid! Couldn't find a single valid default file, default files:");
+                const std::vector<std::string>& indexFiles = configRoute->getDefaultFile();
+                for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); it++)
+                    PRINT_LOG(*it);
                 response.setPath(server->getErrorPageFromCode(404));
                 return 404;
             }

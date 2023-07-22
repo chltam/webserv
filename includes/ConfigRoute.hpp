@@ -34,7 +34,8 @@ public: //getters & setters
 
     void AddIndexFile(const std::string& newDefaultFile);
     void addCGI(const std::string& key, const std::string& value);
-    
+    int findValidIndexFile(std::string& path) const;
+
 private:
     std::string m_path;
     std::string m_root;

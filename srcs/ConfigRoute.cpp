@@ -151,6 +151,23 @@ void ConfigRoute::addCGI(const std::string &key, const std::string &value)
     }
 }
 
+int ConfigRoute::findValidIndexFile(std::string &path) const
+{
+    std::string fullpath;
+    int fileInfo;
+    for (int i = 0; i < m_indexFiles.size(); i++)
+    {
+        fullpath = path + m_indexFiles[i];
+        fileInfo = ValidatePath(fullpath);
+        if(fileInfo == S_IFREG){
+            path += m_indexFiles[i];
+            return fileInfo;
+        }
+    }
+    PRINT_WARNING("No index valid index file could be found for",path);
+    return -1;
+}
+
 void ConfigRoute::setRedirectDir(const std::string &dir)
 {
     m_redirectDir = dir;

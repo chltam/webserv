@@ -427,10 +427,14 @@ bool Config::isValidChar(char c)
 const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) const
 {
     //error checking might not be neccesary because if we get here we already know its one of our expected ports
+    if(hostPort.empty()){
+        PRINT_ERROR("ERROR, hostport is NULL: [",hostPort,"]");
+        return NULL;
+    }
 
     size_t colon= hostPort.find(":");
     if(colon == std::string::npos){
-        PRINT_ERROR("ERROR, name:port format is incorrect for:",hostPort);
+        PRINT_ERROR("ERROR, name:port format is incorrect for: [",hostPort,"]");
         return NULL;
     }
 
