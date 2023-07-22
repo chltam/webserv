@@ -49,7 +49,7 @@ void Response::bodyToString()
 void Response::headerToString()
 {
     _headerFields["Content-Length"] = std::to_string(_respBody.length());
-    PRINTVAR(_respBody.length());
+    PRINT_LOG("Content-Length = ",_respBody.length());
 
     _respHeader = ("HTTP/1.1 " + getStringFromStatus(_status) + "\r\nConnection: keep-alive\r\n");
 
@@ -108,30 +108,6 @@ const std::string &Response::getResponseBody()
 void Response::insertHeaderField(const std::string& key, const std::string& value)
 {
     _headerFields[key] = value;
-}
-
-
-void Response::setPathFromErrorCode(int errorCode)
-{
-    switch (errorCode)
-    {
-    case 403:
-        _path = "./errorpages/error403.html";
-        return;
-    case 404:
-        _path = "./errorpages/error404.html";
-        return;
-    case 408:
-        _path = "./errorpages/error408.html";
-        return;
-    case 413:
-        _path = "./errorpages/error413.html";
-        return ;
-    default:
-        _path = "ERROR";
-        PRINT("Error, path from error code is incorrect");
-        return;
-    }
 }
 
 std::string Response::buildIndexPage()

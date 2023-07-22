@@ -21,7 +21,6 @@ class Response {
         void setStatus(int);
         void setPath(const std::string& path);
         void setAutoIndex(bool val);
-        void setPathFromErrorCode(int errorCode);
         void setBody(const std::string& body);
 		void setCgi(bool state);
         const std::string& getResponseBody();
@@ -31,7 +30,7 @@ class Response {
         std::string build();
 
     private:
-    
+
         void headerToString();
         void bodyToString();
         std::string buildIndexPage();

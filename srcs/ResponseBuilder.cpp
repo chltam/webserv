@@ -27,79 +27,78 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
 
 int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars, Socket& socket )
 {
-    if (request.getTimeout())
+    const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
+
+    if (request.getTimeout() || server == NULL)
     {
         response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
         response.insertHeaderField("Content-Type", "text/html");
-        response.setPathFromErrorCode(408);
+        if(server == NULL){
+            response.setPath(config.m_errorPages.find(408)->second);
+        }
+        else
+            response.setPath(server->getErrorPageFromCode(408));
         return 408;
     }
-    const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 
     string path = request.getHeaderValueFromKey( "path" );
 
-    PRINTVAR(server);
-    PRINTVAR(path);
     const ConfigRoute* configRoute = server->getRouteFromPath( path );
-
-
+    PRINT_LOG("Config ROute from path:",path,"-----\n",*configRoute);
 
     if(configRoute == NULL){
-        PRINT("ERROR, could find CONFIGROUTE, this should never happen!");
+        PRINT_ERROR("ERROR, could find CONFIGROUTE, this should never happen!,path = ",path);
     }
 
-//prev: configRoute->m_shouldRedirect == true
     if(configRoute->getRedirectDir().empty() == false) {
-        PRINT("REDIRECT SIR!");
+        PRINT_LOG("Redirecting to:",configRoute->getRedirectDir());
         response.insertHeaderField("Location",configRoute->getRedirectDir());
         return 301;
     }
 
     std::string newfullPath(configRoute->getRoot() + path);
-    int ret1 = ValidatePath(newfullPath);
+    int fileInfo = ValidatePath(newfullPath);
     int method = StringToMethodEnum(request.getHeaderValueFromKey("request type"));
-    // PRINTVAR(newfullPath);
-    // PRINTVAR(ret1);
-    // PRINTVAR(S_IFREG);
-    // PRINTVAR(S_IFDIR);
-    if(ret1 == -1 && method != METH_POST){
-        PRINT("ERROR, Path is invalid!");
-        response.setPathFromErrorCode(404);
+    if(fileInfo == -1 && method != METH_POST){
+        PRINT_ERROR("ERROR, Path is invalid!, PATH:",newfullPath);
+        response.setPath(server->getErrorPageFromCode(404));
         return 404;
     }
-    else if(ret1 == S_IFDIR && method == METH_GET) { //find,append,validate index file, if not, check for autoindex, else error
+    else if(fileInfo == S_IFDIR && method == METH_GET) { //find,append,validate index file, if not, check for autoindex, else error
         //only check this for a get request
             std::string tempPath(newfullPath);
             if(newfullPath[newfullPath.length()-1] != '/' ){
                 newfullPath += "/";
-                newfullPath += configRoute->getDefaultFile()[0]; //!!!!! needs additional function
+                fileInfo = configRoute->findValidIndexFile(newfullPath);
             }
             else
-                newfullPath += configRoute->getDefaultFile()[0]; //!!!!! needs additional function
-            ret1 = ValidatePath(newfullPath);
-            PRINTVAR(ret1);
-            if((ret1 == -1 || ret1 == S_IFDIR) && configRoute->getAutoIndex() == true) { //check for autoindex if default file is missing
+                fileInfo = configRoute->findValidIndexFile(newfullPath);
+            if((fileInfo == -1 || fileInfo == S_IFDIR) && configRoute->getAutoIndex() == true) { //check for autoindex if default file is missing
                 response.setPath(tempPath);
                 response.setAutoIndex(configRoute->getAutoIndex());
                 return 200;
             }
-            else if(ret1 != S_IFREG) {
-                PRINT("ERROR, Path is invalid! COuldn't find default file");
-                response.setPathFromErrorCode(404);
+            else if(fileInfo != S_IFREG) {
+                PRINT_LOG("Path is invalid! Couldn't find a single valid default file, default files:");
+                const std::vector<std::string>& indexFiles = configRoute->getDefaultFile();
+                for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); it++)
+                    PRINT_LOG(*it);
+                response.setPath(server->getErrorPageFromCode(404));
                 return 404;
             }
         }
 
     if(!(method & configRoute->getAllowedMethods())){ //if you are not allowed to access the resource with GET POST or DELETE
-        PRINT("ERROR,you have no rights to access this resource with the Method provided");
-        response.setPathFromErrorCode(403);
+        PRINT_LOG("ERROR,you have no rights to access this resource with the Method provided");
+        PRINT_LOG("Method used,",MethodEnumToString(method),"Methods allowed:",MethodEnumToString(configRoute->getAllowedMethods()));
+        response.setPath(server->getErrorPageFromCode(403));
         return 403;
     }
 
     if(socket.get_sizeIssue())
     {
         PRINT("request body too big");
-        response.setPathFromErrorCode(413);
+        response.setPath(server->getErrorPageFromCode(413));
         return 413;
     }
 
@@ -191,7 +190,7 @@ std::string	ResponseBuilder::extractFileName(std::string& resourceData)
 	end = resourceData.find("\"", start);
 
 	filename = resourceData.substr(start, end - start);
-	PRINTVAR(filename);
+	PRINT_LOG("filename =",filename);
 	return (filename);
 
 }

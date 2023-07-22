@@ -2,7 +2,7 @@
 
 Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder(), _mvars(envp)
 {
-	std::cout << m_Config << std::endl;
+	PRINT_LOG(m_Config);
 };
 
 Server::~Server() {};
@@ -15,12 +15,12 @@ Server::~Server() {};
 void	Server::set_server_sock(/*config info*/)
 {
 	//slightly less temp, how do we get the right server object from the socket in question?
-	const std::vector<ConfigServer>& servers = m_Config.m_servers;
+	const std::vector<ConfigServer*>& servers = m_Config.m_servers;
 	for(int i = 0; i < servers.size(); i++){
-		const std::vector<std::pair<std::string,std::string>>& ports = m_Config.m_servers[i].getPorts();
+		const std::vector<std::pair<std::string,std::string>>& ports = m_Config.m_servers[i]->getPorts();
 		for(int j = 0;j < ports.size(); j++){
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-			std::cout << "i = " << i << "Binding new Socket at: " << ports[j].second  << std::endl;
+			PRINT_LOG("server [",i,"] Binding socket at:",ports[j].second );
 			sock.bind_socket(ports[j].first, std::atoi(ports[j].second.c_str()));
 			m_serverSockVec.push_back(sock);
 
@@ -81,7 +81,7 @@ void	Server::accept_connection()
 				}
 			}
 
-			else if ((m_pfdVec[n].revents & POLLOUT) && (getClientSockFromVec(m_pfdVec[n].fd).is_idle(500) || getClientSockFromVec(m_pfdVec[n].fd).get_error() == true))
+			else if ((m_pfdVec[n].revents & POLLOUT) && (getClientSockFromVec(m_pfdVec[n].fd).is_idle(200) || getClientSockFromVec(m_pfdVec[n].fd).get_error() == true))
 			{
 				std::cout << "ready to handle request" << std::endl;
 
@@ -97,6 +97,7 @@ void Server::handle( Socket& client_sock )
 {
 	// std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());
+	PRINTVAR(client_sock.get_request_str());
 	// request.printf_all();
 
 	Response* resp = _builder.createNewResponse(request, m_Config, _mvars, client_sock);
@@ -142,7 +143,7 @@ void	Server::removeFromVec(int fdToRemove)
 			break ;
 		}
 	}
-	
+
 }
 
 std::string	Server::getHostFromFd(int fdToFind)

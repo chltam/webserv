@@ -50,8 +50,6 @@ ConfigRoute::ConfigRoute(const ConfigRoute &route)
 
     m_redirectDir = "";
     m_clearIndexFiles = true;
-    PRINT("Created config route from other one");
-
 }
 
 const std::vector<std::string>& ConfigRoute::getDefaultFile() const
@@ -144,15 +142,30 @@ void ConfigRoute::addCGI(const std::string &key, const std::string &value)
     }
 
     if(it == m_cgi.end()){
-        PRINT("CGI key was not found, added new pair");
+        PRINT_LOG("CGI key was not found, added new pair: ",key,value);
         m_cgi.emplace_back(std::pair<std::string, std::string>(key,value));
     }
     else{
-        PRINT("CGI key already exists, value will be overwritten");
-        PRINTVAR(it->second );
+        PRINT_WARNING("CGI key already exists, value will be overwritten, old =",it->second,"new = ",value);
         it->second = value;
-        PRINTVAR(it->second );
     }
+}
+
+int ConfigRoute::findValidIndexFile(std::string &path) const
+{
+    std::string fullpath;
+    int fileInfo;
+    for (int i = 0; i < m_indexFiles.size(); i++)
+    {
+        fullpath = path + m_indexFiles[i];
+        fileInfo = ValidatePath(fullpath);
+        if(fileInfo == S_IFREG){
+            path += m_indexFiles[i];
+            return fileInfo;
+        }
+    }
+    PRINT_WARNING("No index valid index file could be found for",path);
+    return -1;
 }
 
 void ConfigRoute::setRedirectDir(const std::string &dir)
@@ -166,18 +179,24 @@ std::ostream &operator<<(std::ostream &os, const ConfigRoute &cr)
 
     os << spaces  << "--------Config ROUTE--------" << std::endl;
 
-    os << spaces << "Path = " << cr.m_path << std::endl;
+    os << spaces << "Path = " << cr.getPath() << std::endl;
     os << spaces << "Root dir = " << cr.m_root << std::endl;
     os << spaces << "Index File(s) = ";
-    for (int i = 0; i < cr.m_indexFiles.size(); i++)
-        os <<  cr.m_indexFiles[i] << " ";
-    os << std::endl;
+    if(cr.m_indexFiles.size() != 0) {
+        for (int i = 0; i < cr.m_indexFiles.size(); i++)
+            os <<  cr.m_indexFiles[i] << " ";
+        os << std::endl;
+    }
+    else
+        os << "NONE are setup" << std::endl;
     os << spaces << "Allowed Methods = " << MethodEnumToString(cr.m_allowedMethods) << std::endl;
     os << spaces << "Client Body Buff Size = " << cr.m_clientBodyBufferSize << std::endl;
     os << spaces << "Autoindex = " << cr.m_autoindex << std::endl;
 
     os << spaces << spaces << "----CGI----" << std::endl;
+
     if(cr.m_cgi.size() != 0) {
+
         for (int i = 0; i < cr.m_cgi.size(); i++)
             os << spaces << spaces << "elem " <<i << ": " <<cr.m_cgi[i].first <<" " << cr.m_cgi[i].second << std::endl;
     }
