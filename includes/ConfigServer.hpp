@@ -10,8 +10,7 @@
 class ConfigServer
 {
 public:
-    ConfigServer();
-    ConfigServer(const std::string& defaultName, const std::string &defaultPort);
+    ConfigServer(const std::map<int,std::string>& defaultErrorPages);
     ~ConfigServer();
 
     friend std::ostream& operator<< (std::ostream& stream, const ConfigServer& cs);

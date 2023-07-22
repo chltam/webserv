@@ -1,13 +1,9 @@
 #include "ConfigServer.hpp"
 #include "../includes/webserv.hpp"
 
-ConfigServer::ConfigServer()
+ConfigServer::ConfigServer(const std::map<int,std::string>& defaultErrorPages)
 {
-    //setting up default error pages
-    std::string dir = "./errorpages/";
-    m_errorPages[403] = dir + "error403.html";
-    m_errorPages[404] = dir + "error404.html";
-    m_errorPages[408] = dir + "error408.html";
+    m_errorPages = std::map<int,std::string>(defaultErrorPages.begin(),defaultErrorPages.end());
 }
 
 
@@ -80,11 +76,6 @@ std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
     return os;
 }
 
-ConfigServer::ConfigServer(const std::string &defaultName, const std::string &defaultPort)
-{
-    m_ports.emplace_back(std::pair<std::string,std::string>(defaultName,defaultPort));
-}
-
 ConfigServer::~ConfigServer()
 {
 
@@ -107,11 +98,13 @@ const std::map<int, std::string> &ConfigServer::getErrorPages() const
 
 std::string ConfigServer::getErrorPageFromCode(int errorCode) const
 {
+    PRINT_WARNING("in here");
     std::map<int,std::string>::const_iterator it = m_errorPages.find(errorCode);
     if(it == m_errorPages.end()) {
         PRINT_WARNING("WARNING, given errorfilepage was not found in server config array");
         return "FILE NOT FOUND IN ARRAY";
     }
+     PRINT_WARNING("in adasdasdas");
     return it->second;
 }
 

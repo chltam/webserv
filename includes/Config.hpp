@@ -43,6 +43,7 @@ public: //getters
     friend std::ostream& operator<< (std::ostream& os, const Config& config);
     const ConfigServer* getConfigServerFromRequest(std::string hostPort) const;
     std::vector<ConfigServer *> m_servers;
+    std::map<int,std::string> m_errorPages;
     const std::map<std::string, std::string>& getTypes() const;
 
 private:

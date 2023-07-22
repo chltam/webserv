@@ -98,6 +98,7 @@ void Server::handle( Socket& client_sock )
 {
 	// std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());
+	PRINTVAR(client_sock.get_request_str());
 	// request.printf_all();
 
 	Response* resp = _builder.createNewResponse(request, m_Config, _mvars);

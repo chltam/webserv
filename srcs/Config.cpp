@@ -31,6 +31,13 @@ enum ConfigToken
 
 Config::Config(char *filepath):m_brackCount(0)
 {
+    //setting up default error pages
+    std::string dir = "./errorpages/";
+    m_errorPages[403] = dir + "error403.html";
+    m_errorPages[404] = dir + "error404.html";
+    m_errorPages[408] = dir + "error408.html";
+    m_errorPages[413] = dir + "error413.html";
+
     std::string path = "";
     if(filepath == NULL){
         PRINT_WARNING("Filepath is NULL, using Default.conf");
@@ -287,7 +294,7 @@ void Config::Executioner(Node &head)
 
 void Config::createConfigServer(Node &serverNode)
 {
-    ConfigServer* newServer = new ConfigServer();
+    ConfigServer* newServer = new ConfigServer(m_errorPages);
     m_servers.emplace_back(newServer);
     ConfigRoute* defaultRoute = new ConfigRoute("/","./files","index.html",METH_GET,100000000,false,""); // setting up default file
     for (int i = 0; i < serverNode.children.size(); i++) { //loop over all directive nodes to create a default route

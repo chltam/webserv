@@ -32,17 +32,16 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
 int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
 {
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
-    if(server == NULL){
-        PRINT_ERROR("Server is NULL, likely due to an invalid path");
-        response.setPath(server->getErrorPageFromCode(404));
-        return 404; //this case shouldnt be necessary something goes wrong beforehand
-    }
 
-    if (request.getTimeout())
+    if (request.getTimeout() || server == NULL)
     {
         response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
         response.insertHeaderField("Content-Type", "text/html");
-        response.setPath(server->getErrorPageFromCode(408));
+        if(server == NULL){
+            response.setPath(config.m_errorPages.find(408)->second);
+        }
+        else
+            response.setPath(server->getErrorPageFromCode(408));
         return 408;
     }
 
