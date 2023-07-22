@@ -42,7 +42,7 @@ public:
 public: //getters
     friend std::ostream& operator<< (std::ostream& os, const Config& config);
     const ConfigServer* getConfigServerFromRequest(std::string hostPort) const;
-    std::vector<ConfigServer> m_servers;
+    std::vector<ConfigServer *> m_servers;
     const std::map<std::string, std::string>& getTypes() const;
 
 private:

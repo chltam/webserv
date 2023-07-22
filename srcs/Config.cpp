@@ -47,6 +47,8 @@ Config::Config(char *filepath):m_brackCount(0)
         printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
 
     Node head;
+    head.name = "HEAD";
+    head.type = NODE_CONFIGURATION;
     Parser(tokens,head);
 
     printNode(head);
@@ -114,7 +116,7 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
     // std::cout << fileContents << std::endl;
     size_t prev = 0;
     int flag = 0; //1 = completed word, 2 = quotes, 3 = comment
-    char quoteType;
+    char quoteType = '\0'; //initializing
     for (size_t i = 0; i <= fileContents.length(); i++) {
         if ((fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}') && flag == 0) {
             tokens.push_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
@@ -282,25 +284,25 @@ void Config::Executioner(Node &head)
     }
 
     for (int i = 0; i < m_servers.size(); i++){
-        if(m_servers[i].getPorts().size() != 0)
+        if(m_servers[i]->getPorts().size() != 0)
             return;
     }
     //adding a default Server if no servers have been setup at all
     PRINT_WARNING("WARNING, No server has any ports setup, adding default 0.0.0.0:8080 to first server block");
-    m_servers[0].AddServerPort("0.0.0.0","8080");
+    m_servers[0]->AddServerPort("0.0.0.0","8080");
 
 }
 
 void Config::createConfigServer(Node &serverNode)
 {
-    m_servers.emplace_back(ConfigServer());
-    ConfigServer& lastServer = m_servers.back();
+    ConfigServer* newServer = new ConfigServer();
+    m_servers.emplace_back(newServer);
     ConfigRoute* defaultRoute = new ConfigRoute("/","./files","index.html",METH_GET,100000000,false,""); // setting up default file
     for (int i = 0; i < serverNode.children.size(); i++) { //loop over all directive nodes to create a default route
         if(serverNode.children[i].name == "listen")
-            AddServerPort(lastServer,serverNode.children[i].values[0]);
+            AddServerPort(*newServer,serverNode.children[i].values[0]);
         else if(serverNode.children[i].name == "error_page")
-            lastServer.AddErrorPage(serverNode.children[i].values[0],serverNode.children[i].values[1]);
+            newServer->AddErrorPage(serverNode.children[i].values[0],serverNode.children[i].values[1]);
         else if (serverNode.children[i].type == NODE_DIRECTIVE){
             updateConfigRoute(*defaultRoute,serverNode.children[i],NODE_BLOCK_SERVER);
         }
@@ -312,22 +314,24 @@ void Config::createConfigServer(Node &serverNode)
             exit(1);
         }
     }
-    lastServer.AddConfigRoute(defaultRoute);
+
+    newServer->AddConfigRoute(defaultRoute);
 
     PRINT("-----------CREATING NEW CONFIGROUTES!!!!---------------");
     for (int i = 0; i < serverNode.children.size(); i++) {
         if (serverNode.children[i].type == NODE_BLOCK_LOCATION) {
-            ConfigRoute* newRoute = new ConfigRoute(*(lastServer.getRouteFromPath(serverNode.children[i].values[0]))); //might need error checking? what if NULL?
+            ConfigRoute* newRoute = new ConfigRoute(*(newServer->getRouteFromPath(serverNode.children[i].values[0]))); //might need error checking? what if NULL?
             newRoute->setPath(serverNode.children[i].values[0]);
             for (int j = 0; j < serverNode.children[i].children.size(); j++) {
                 updateConfigRoute(*newRoute,serverNode.children[i].children[j],NODE_BLOCK_LOCATION);
             }
-            lastServer.AddConfigRoute(newRoute);
+            newServer->AddConfigRoute(newRoute);
         }
 
     }
-    if(lastServer.getPorts().size() == 0)
+    if(newServer->getPorts().size() == 0)
         PRINT_WARNING("WARNING, no port has been setup for server, behavior might be wrong");
+
 }
 
 void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type )
@@ -410,7 +414,7 @@ void Config::AddServerPort(ConfigServer& currServer,const std::string& initialVa
     }
 
     for (int i = 0; i < m_servers.size(); i++) {
-        const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i].getPorts();
+        const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i]->getPorts();
         for (std::vector<std::pair<std::string,std::string>>::const_iterator it = ports.begin(); it != ports.end(); it++) {
             if(it->first == key && it->second == value){
                 PRINT_ERROR("this constellation of servername and host already exists,skipping");
@@ -457,11 +461,11 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
     }
 
     for (int i = 0; i < m_servers.size(); i++) {
-        const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i].getPorts();
+        const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i]->getPorts();
         for (std::vector<std::pair<std::string,std::string>>::const_iterator it = ports.begin(); it != ports.end(); it++) {
             if(it->first == key && it->second == value){
                 PRINT("FOUND SERVER, returning ");
-                return &m_servers[i];
+                return m_servers[i];
             }
         }
     }
@@ -474,7 +478,7 @@ std::ostream &operator<<(std::ostream &os, const Config &config)
     os << "-------PRINTING CONFIG---------"<< std::endl;
     for (int i = 0; i < config.m_servers.size(); i++) {
         os << "Server Nr: " << i << std::endl;
-        os << config.m_servers[i] << std::endl;
+        os << *config.m_servers[i] << std::endl;
     }
 
     return os;
@@ -545,6 +549,9 @@ Node::Node()
 {
     type = NODE_CONFIGURATION;
     name = "HEAD";
+    totalAllowedValues = -1;
+    requireSpecificArgs = false;
+
 }
 
 Node::Node(NodeType type, std::string name)

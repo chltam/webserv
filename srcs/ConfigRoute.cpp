@@ -166,18 +166,24 @@ std::ostream &operator<<(std::ostream &os, const ConfigRoute &cr)
 
     os << spaces  << "--------Config ROUTE--------" << std::endl;
 
-    os << spaces << "Path = " << cr.m_path << std::endl;
+    os << spaces << "Path = " << cr.getPath() << std::endl;
     os << spaces << "Root dir = " << cr.m_root << std::endl;
     os << spaces << "Index File(s) = ";
-    for (int i = 0; i < cr.m_indexFiles.size(); i++)
-        os <<  cr.m_indexFiles[i] << " ";
-    os << std::endl;
+    if(cr.m_indexFiles.size() != 0) {
+        for (int i = 0; i < cr.m_indexFiles.size(); i++)
+            os <<  cr.m_indexFiles[i] << " ";
+        os << std::endl;
+    }
+    else
+        os << "NONE are setup" << std::endl;
     os << spaces << "Allowed Methods = " << MethodEnumToString(cr.m_allowedMethods) << std::endl;
     os << spaces << "Client Body Buff Size = " << cr.m_clientBodyBufferSize << std::endl;
     os << spaces << "Autoindex = " << cr.m_autoindex << std::endl;
 
     os << spaces << spaces << "----CGI----" << std::endl;
+
     if(cr.m_cgi.size() != 0) {
+
         for (int i = 0; i < cr.m_cgi.size(); i++)
             os << spaces << spaces << "elem " <<i << ": " <<cr.m_cgi[i].first <<" " << cr.m_cgi[i].second << std::endl;
     }

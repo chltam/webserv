@@ -130,7 +130,8 @@ void ConfigServer::AddConfigRoute(ConfigRoute *config)
 {
     PRINT("        --ADDING CONFIG TO MAP");
     PRINTVAR(config->getPath());
-    m_routes.emplace(config->getPath(),config);
+    m_routes[config->getPath()] = config;
+    // m_routes.emplace(config->getPath(),config);
 }
 
 void ConfigServer::AddServerPort(const std::string& serverName,const std::string& port)
