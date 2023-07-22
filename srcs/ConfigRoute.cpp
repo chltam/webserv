@@ -50,8 +50,6 @@ ConfigRoute::ConfigRoute(const ConfigRoute &route)
 
     m_redirectDir = "";
     m_clearIndexFiles = true;
-    PRINT("Created config route from other one");
-
 }
 
 const std::vector<std::string>& ConfigRoute::getDefaultFile() const
@@ -144,14 +142,12 @@ void ConfigRoute::addCGI(const std::string &key, const std::string &value)
     }
 
     if(it == m_cgi.end()){
-        PRINT("CGI key was not found, added new pair");
+        PRINT_LOG("CGI key was not found, added new pair: ",key,value);
         m_cgi.emplace_back(std::pair<std::string, std::string>(key,value));
     }
     else{
-        PRINT("CGI key already exists, value will be overwritten");
-        PRINTVAR(it->second );
+        PRINT_WARNING("CGI key already exists, value will be overwritten, old =",it->second,"new = ",value);
         it->second = value;
-        PRINTVAR(it->second );
     }
 }
 

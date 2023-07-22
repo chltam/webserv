@@ -13,7 +13,6 @@ int ValidatePath(const std::string &path)
         std::cout << strerror(errno) << std::endl;
         return ret;
     }
-    std::cout << "Success" << std::endl;
     return (status.st_mode & S_IFMT);
 }
 
@@ -26,7 +25,7 @@ int getFileSize(const std::string &path)
         std::cout << strerror(errno) << std::endl;
         return ret;
     }
-    std::cout << "Successfully getting file size" << std::endl;
+    PRINT_LOG("Successfully getting file size");
     return (status.st_size);
 }
 
@@ -97,16 +96,16 @@ std::string getStringFromStatus(int status)
         break;
     case 404:
         return "404 Not Found";
-        break;   
+        break;
     case 408:
         return "408 Timeout";
-        break;   
+        break;
     case 403:
         return "403 Forbidden";
         break;
     case 301:
         return "301 Moved Permanently";
-        break; 
+        break;
     default:
         return "INVALID";
         break;
@@ -126,7 +125,7 @@ std::string getTypeFromExtension( std::string path,const std::map<std::string, s
     auto it = types.find(ext);
     if (it == types.end())
         return "text/html";
-    
+
     return it->second;
 
 }

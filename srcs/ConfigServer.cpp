@@ -27,15 +27,12 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
     while(true){ //sketchy! might find a better way out
         it = m_routes.find(tempPath);
         if(it == m_routes.end()){
-            //std::cout << "Couldn't find:" << tempPath << std::endl;
             break;
         }
         else{
-            //std::cout << "Found route with path [" << tempPath << "]" << std::endl;
             route = m_routes.find(tempPath)->second;
         }
         prev = path.find("/",prev+1);
-        // PRINTVAR(prev);
         if(prev != std::string::npos){
             tempPath = path.substr(0,prev);
         }
@@ -44,10 +41,7 @@ const ConfigRoute* ConfigServer::getRouteFromPath(const std::string& path) const
         if(tempPath.empty()){
             break;
         }
-    PRINT_WARNING(tempPath.c_str());
     }
-    // PRINT("Final CONFIG");
-    // PRINTVAR(*route);
 
     return route;
 }
@@ -128,10 +122,7 @@ const std::map<std::string, ConfigRoute*> &ConfigServer::getConfigRoutes() const
 
 void ConfigServer::AddConfigRoute(ConfigRoute *config)
 {
-    PRINT("        --ADDING CONFIG TO MAP");
-    PRINTVAR(config->getPath());
     m_routes[config->getPath()] = config;
-    // m_routes.emplace(config->getPath(),config);
 }
 
 void ConfigServer::AddServerPort(const std::string& serverName,const std::string& port)

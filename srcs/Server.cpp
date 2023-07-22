@@ -2,7 +2,7 @@
 
 Server::Server(char *ConfigPath, char **envp):m_Config(ConfigPath), _builder(), _mvars(envp)
 {
-	PRINT_LOG(m_Config)
+	PRINT_LOG(m_Config);
 };
 
 Server::~Server() {};
@@ -20,7 +20,7 @@ void	Server::set_server_sock(/*config info*/)
 		const std::vector<std::pair<std::string,std::string>>& ports = m_Config.m_servers[i]->getPorts();
 		for(int j = 0;j < ports.size(); j++){
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
-			std::cout << "i = " << i << "Binding new Socket at: " << ports[j].second  << std::endl;
+			PRINT_LOG("server [",i,"] Binding socket at:",ports[j].second );
 			sock.bind_socket(ports[j].first, std::atoi(ports[j].second.c_str()));
 			_server_sock.push_back(sock);
 

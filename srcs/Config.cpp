@@ -44,11 +44,10 @@ Config::Config(char *filepath):m_brackCount(0)
     Lexer(tokens);
 
     for (int i = 0; i < tokens.size(); i++)
-        printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
+        PRINT_LOG( TokenToString(tokens[i].second).c_str(),tokens[i].first.c_str());
+
 
     Node head;
-    head.name = "HEAD";
-    head.type = NODE_CONFIGURATION;
     Parser(tokens,head);
 
     printNode(head);
@@ -87,9 +86,10 @@ void Config::extractMimesFromFile() {
     }
 
 
+    PRINT_LOG("File Data from types.txt");
     for (std::map<std::string, std::string>::iterator it = m_types.begin(); it != m_types.end(); it++)
     {
-        std::cout << it->first << "=" << it->second << std::endl;
+        PRINT_LOG(it->first,"=",it->second);
     }
 
 
@@ -99,8 +99,6 @@ void Config::extractMimesFromFile() {
 
 void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 {
-    PRINT("STARTED TOKENIZING");
-
     std::ifstream inputFile(filepath);
     std::string fileContents;
     if (inputFile.is_open()) {
@@ -109,11 +107,10 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
         fileContents = buffer.str();
         inputFile.close();
     } else {
-        PRINT_ERROR("Failed to open the file.");
+        PRINT_ERROR("Failed to open the file.",filepath);
         exit(1);
     }
 
-    // std::cout << fileContents << std::endl;
     size_t prev = 0;
     int flag = 0; //1 = completed word, 2 = quotes, 3 = comment
     char quoteType = '\0'; //initializing
@@ -187,8 +184,7 @@ void Config::Parser(TokenQueue& tokens, Node& head)
 {
     ParseConfig(tokens,head);
     if(m_brackCount != 0) {
-        PRINT_ERROR("ERROR, NOT MATCHING BRACKETS");
-        PRINTVAR(m_brackCount);
+        PRINT_ERROR("ERROR, NOT MATCHING BRACKETS, brackets",m_brackCount);
         exit(1);
     }
 }
@@ -237,9 +233,7 @@ void Config::ParseStatement(TokenQueue& tokens, Node& currNode)
         return;
     }
     else{
-        PRINT_ERROR("PARSE ERROR, IN PARSE STATEMENT!!!!");
-        // PRINTVAR(tokens[0].first);
-        // PRINTVAR(tokens[1].first);
+        PRINT_ERROR("PARSE ERROR, IN PARSE STATEMENT!!!!","Token[0]=",tokens[0].first,"Token[1]=",tokens[1].first);
         exit(1);
     }
 
@@ -268,9 +262,7 @@ void Config::ParseDirective(TokenQueue& tokens, Node& currNode)
             return;
          }
     else{
-         PRINT_ERROR("PARSE ERROR, IN PARSE DIRECTIVE!!!!");
-         PRINTVAR(currNode.name);
-         PRINTVAR(tokens[0].first);
+         PRINT_ERROR("PARSE ERROR, IN PARSE DIRECTIVE!!!!","Current node name = ",currNode.name,"Token[0]=",tokens[0].first);
          exit(1);
     }
 }
@@ -317,7 +309,6 @@ void Config::createConfigServer(Node &serverNode)
 
     newServer->AddConfigRoute(defaultRoute);
 
-    PRINT("-----------CREATING NEW CONFIGROUTES!!!!---------------");
     for (int i = 0; i < serverNode.children.size(); i++) {
         if (serverNode.children[i].type == NODE_BLOCK_LOCATION) {
             ConfigRoute* newRoute = new ConfigRoute(*(newServer->getRouteFromPath(serverNode.children[i].values[0]))); //might need error checking? what if NULL?
@@ -336,9 +327,6 @@ void Config::createConfigServer(Node &serverNode)
 
 void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type )
 {
-    PRINT("UPDATING ROUTE");
-    //switch statement with loads of functions to update a route
-    // allow_methods index root
 
     if(currNode.name == "allow_methods"){
         int allowedMethods = METH_NONE;
@@ -376,7 +364,7 @@ void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type 
         route.addCGI(currNode.values[0],currNode.values[1]);
     }
     else{
-        PRINT_ERROR("Error, node name was not recognized.");
+        PRINT_ERROR("Error, node name was not recognized.","Name:", currNode.name);
         exit(1);
     }
 
@@ -391,20 +379,20 @@ void Config::AddServerPort(ConfigServer& currServer,const std::string& initialVa
 
     size_t colon= initialValue.find(":");
     if(colon == std::string::npos){
-        PRINT_ERROR("ERROR, name:port format is incorrect");
+        PRINT_ERROR("ERROR, name:port format is incorrect for",initialValue);
         return;
     }
     std::string key = initialValue.substr(0,colon);
     std::string value = initialValue.substr(colon+1);
 
-    PRINTVAR(initialValue);
-    PRINTVAR(key);
-    PRINTVAR(value);
+    PRINT_LOG("initial value =",initialValue);
+    PRINT_LOG("key =",key);
+    PRINT_LOG("value =",value);
 
     if(key == "localhost")
         key = "127.0.0.1";
     if(value.find_first_not_of("0123456789") != std::string::npos){
-        PRINT_ERROR("ERROR, port does not contain only digits");
+        PRINT_ERROR("ERROR, port does not contain only digits. Value =",value);
         return;
     }
 
@@ -417,7 +405,7 @@ void Config::AddServerPort(ConfigServer& currServer,const std::string& initialVa
         const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i]->getPorts();
         for (std::vector<std::pair<std::string,std::string>>::const_iterator it = ports.begin(); it != ports.end(); it++) {
             if(it->first == key && it->second == value){
-                PRINT_ERROR("this constellation of servername and host already exists,skipping");
+                PRINT_ERROR("this constellation of servername and host already exists,skipping,",key,":",value);
                 return;
             }
         }
@@ -442,7 +430,7 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
 
     size_t colon= hostPort.find(":");
     if(colon == std::string::npos){
-        PRINT_ERROR("ERROR, name:port format is incorrect");
+        PRINT_ERROR("ERROR, name:port format is incorrect for:",hostPort);
         return NULL;
     }
 
@@ -456,7 +444,7 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
     if(key == "localhost")
         key = "127.0.0.1";
     if(value.find_first_not_of("0123456789") != std::string::npos){
-        PRINT_ERROR("ERROR, port does not contain only digits");
+        PRINT_ERROR("ERROR, port does not contain only digits,value =",value);
         return NULL;
     }
 
@@ -464,12 +452,14 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
         const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i]->getPorts();
         for (std::vector<std::pair<std::string,std::string>>::const_iterator it = ports.begin(); it != ports.end(); it++) {
             if(it->first == key && it->second == value){
-                PRINT("FOUND SERVER, returning ");
+                PRINT_LOG("FOUND SERVER, returning ");
                 return m_servers[i];
             }
         }
     }
 
+
+    PRINT_ERROR("ERROR, couldn't find configserver from hostport:",hostPort);
     return NULL;
 }
 
@@ -492,20 +482,21 @@ void printNode(const Node &node,int inset)
 
     std::string type = nodetypeToString(node.type);
     if(node.type == NODE_BLOCK_SERVER)
-        printf("%s\x1B[31m%s\033[0m\n",offset.c_str(),type.c_str());
+        PRINT_LOG(offset,"\x1B[31m",type.c_str(),"\033[0m");
     else if(node.type == NODE_BLOCK_LOCATION)
-        printf("%s\x1B[32m%s\033[0m\n",offset.c_str(),type.c_str());
+        PRINT_LOG(offset,"\x1B[32m",type.c_str(),"\033[0m");
     else
-        printf("%s\x1B[36m%s\033[0m\n",offset.c_str(),type.c_str());
-    std::cout << offset << "Directive: " << node.name << std::endl;
-    std::cout << offset << "tot Values: " << node.totalAllowedValues << std::endl;
-    std::cout << offset << "bool: " << node.requireSpecificArgs << std::endl;
+        PRINT_LOG(offset,"\x1B[36m",type.c_str(),"\033[0m");
+
+    PRINT_LOG(offset,"Directive: ",node.name);
+    PRINT_LOG(offset,"tot Values: ",node.totalAllowedValues);
+    PRINT_LOG(offset,"bool: ",node.requireSpecificArgs);
 
     for (int i = 0; i < node.values.size(); i++)
-        std::cout << offset << node.values[i] << std::endl;
-    std::cout << offset << "-----Node Children-----" << std::endl;
+        PRINT_LOG(offset, node.values[i]);
+    PRINT_LOG(offset, "-----Node Children-----");
     for (int i = 0; i < node.children.size(); i++){
-        std::cout << offset << "Child: " << i << std::endl;
+        PRINT_LOG(offset, "Child: ",  i);
         printNode(node.children[i],inset+5);
     }
 
@@ -513,26 +504,39 @@ void printNode(const Node &node,int inset)
 
 std::string Config::TokenToString(int tokenVal)
 {
+    std::string ret;
     switch (tokenVal)
     {
     case T_CONF_KEYWORD:
-        return "KEYWORD";
+        ret = "KEYWORD";
+        break;
     case T_CONF_IDENTIFIER:
-        return "IDENTIFIER";
+        ret = "IDENTIFIER";
+        break;
     case T_CONF_LITERAL:
-        return "LITERAL";
+        ret = "LITERAL";
+        break;
     case T_CONF_SEMICOLON:
-        return "SEMICOLON";
+        ret = "SEMICOLON";
+        break;
     case T_CONF_BLOCKSTART:
-        return "BLOCKSTART";
+        ret = "BLOCKSTART";
+        break;
     case T_CONF_BLOCKEND:
-        return "BLOCKEND";
+        ret = "BLOCKEND";
+        break;
     case T_CONF_BLOCK_SERVER:
-        return "SERVER";
+        ret = "SERVER";
+        break;
     case T_CONF_BLOCK_LOCATION:
-        return "LOCATION";
+        ret = "LOCATION";
+        break;
     }
-    return "INVALID TOKEN";
+    size_t strLen =  11;
+    while(ret.length() < strLen)
+        ret+=" ";
+
+    return ret;
 }
 
 unsigned int calcAllowedValues(const std::string &key)
