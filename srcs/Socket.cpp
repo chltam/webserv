@@ -3,7 +3,7 @@
 Socket::Socket(){};
 
 /**
- * @brief Socket object constructor for listening socket
+ * @brief Server socket (lisener) constructor
  * 
  * @param ipVersion ipv4=AF_INET
  * @param service TCP=SOCK_STREAM
@@ -23,7 +23,7 @@ Socket::Socket(int ipVersion, int service, int protocol)
 }
 
 /**
- * @brief Socket object constructor for client socket
+ * @brief Client socket constructor
  * 
  * @param listener_fd listener socket fd
 */
@@ -31,8 +31,11 @@ Socket::Socket(int listener_fd)
 {
     sockaddr_in client_addr{};
     socklen_t   len = 0;
+
     _sock = accept(listener_fd, (sockaddr *) &client_addr, &len);
 	update_last_active_time();
+	_error = false;
+	_sizeIssue = false;
 }
 
 Socket::~Socket()
@@ -42,10 +45,14 @@ Socket::~Socket()
 
 void    Socket::bind_socket(std::string ip, int port)
 {
+	_server_ip = ip;
+	_server_port = port;
+
     sockaddr_in sockaddr{};
     sockaddr.sin_family = AF_INET;
-    sockaddr.sin_port = htons(port);
+    sockaddr.sin_port = htons(port);//ntohs() to convert it back to int
     sockaddr.sin_addr.s_addr = inet_addr(ip.c_str());
+
     if (bind(_sock, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == -1){
         perror("bind error");
         exit(EXIT_FAILURE);
@@ -60,7 +67,7 @@ void	Socket::enable_listener()
 	}
 }
 
-int	Socket::read_sock()
+int	Socket::read_sock(const Config& metaConfig)
 {
 	char	buffer[BUFFER_SIZE + 1];
 
@@ -68,42 +75,13 @@ int	Socket::read_sock()
 	PRINTVAR(bread);
 	if (bread <= 0)
 		return (-1);
-	buffer_to_vec(buffer, bread);	
+	buffer_to_vec(buffer, bread);
+	buffer[bread] = '\0';
+	_header_str += buffer;
+	if (isFullHeader())
+		checkHeaderError(metaConfig);
 	return (0);
 }
-
-// void    Socket::read_sock()
-// {
-//     pollfd	pfd{};
-//     char    buffer[BUFFER_SIZE];
-// 	pfd.fd = _sock;
-// 	pfd.events = POLLIN;
-// 	pfd.revents = 0;
-// 	// _request_str.clear();
-	
-// 	while (1)
-// 	{
-// 		int	poll_result = poll(&pfd, 1, 100);
-// 		if (poll_result == -1){
-// 			perror("poll error");
-// 			break;
-// 		}
-// 		if (poll_result == 0)
-// 			break;
-// 		else{
-// 			int bread = read( _sock,  buffer, BUFFER_SIZE );
-// 			/* if ( bread == -1 ) {
-
-// 				// return with err value and close sock outside
-// 			} */
-// 			buffer[bread] = 0;
-// 			if (bread == 0)
-// 				break;
-// 			else
-// 				_request_str += buffer;
-// 		}
-// 	}
-// }
 
 void	Socket::update_last_active_time(){
 
@@ -142,19 +120,86 @@ std::vector<char>	Socket::get_request_byte(){
 	return (_request_byte);
 }
 
+bool	Socket::get_error(){
+	return (_error);
+}
+
+bool	Socket::get_sizeIssue(){
+	return (_sizeIssue);
+}
+
+std::string	Socket::get_host(){
+	return (_server_ip + ":" + toString(_server_port));
+}
+
 void	Socket::buffer_to_vec(char* buffer, int bread)
 {
 	_request_byte.insert(_request_byte.end(), buffer, buffer + bread);
 }
 
-void	Socket::updateStr()
+bool	Socket::isFullHeader()
 {
-	for (std::vector<char>::iterator it = _request_byte.begin(); it != _request_byte.end(); it++)
-	{
-		std::cout << *it;
-	}
+	size_t	pos;
 
-	std::string	tmpStr(_request_byte.begin(), _request_byte.end());
-	_request_str = tmpStr;
-	
+	pos = _header_str.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		return (false);
+	_header_str = _header_str.substr(0, pos);
+	// printHeader();
+	return (true);
+}
+
+std::string	Socket::getValueFromHeader(std::string key)
+{
+	size_t	pos;
+	size_t	endpos;
+
+	pos = _header_str.find(key);
+	if (pos == std::string::npos)
+		return (std::string());
+	pos += key.length() + 1;
+	endpos = _header_str.find("\r\n", pos);
+
+	return (_header_str.substr(pos, endpos - pos));
+
+}
+
+void	Socket::checkHeaderError(const Config& metaConfig)
+{
+	size_t	size;
+	std::string host;
+	std::string	path;
+
+	size = atoi(getValueFromHeader("Content-Length").c_str());
+	host = getValueFromHeader("Host:");
+
+	size_t	pos;
+	size_t	endpos;
+
+	pos = _header_str.find(' ') + 1;
+	endpos = _header_str.find(' ', pos);
+	path = _header_str.substr(pos, endpos - pos);
+
+	size_t maxBody = metaConfig.getConfigServerFromRequest(host)->getRouteFromPath(path)->getClientBodyBufferSize();
+
+	PRINT("SIZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZE");
+	PRINTVAR(size);
+	PRINT("HOOOOOOOOOOOOOOOOOOOOST");
+	PRINTVAR(host);
+	PRINT("PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATH");
+	PRINTVAR(path);
+	PRINT("MAXXXXXXXXXXXXXXXXXXX");
+	PRINTVAR(maxBody);
+
+
+	if (size > maxBody)
+	{
+		_sizeIssue = true;
+		_error = true;
+	}
+}
+
+void	Socket::printHeader()
+{
+	std::cout << _header_str << std::endl;
 }

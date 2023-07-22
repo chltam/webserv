@@ -22,7 +22,7 @@ void	Server::set_server_sock(/*config info*/)
 			Socket sock = Socket(AF_INET, SOCK_STREAM, 0);
 			PRINT_LOG("server [",i,"] Binding socket at:",ports[j].second );
 			sock.bind_socket(ports[j].first, std::atoi(ports[j].second.c_str()));
-			_server_sock.push_back(sock);
+			m_serverSockVec.push_back(sock);
 
 		}
 	}
@@ -31,18 +31,18 @@ void	Server::set_server_sock(/*config info*/)
 
 void	Server::start_listening()//need to add poll later
 {
-	for (int n = 0; n < _server_sock.size(); n++)
+	for (int n = 0; n < m_serverSockVec.size(); n++)
 	{
-		_server_sock[n].enable_listener();
+		m_serverSockVec[n].enable_listener();
 	}
 
 }
 
 void	Server::accept_connection()
 {
-	for (int n = 0; n < _server_sock.size(); n++)
+	for (int n = 0; n < m_serverSockVec.size(); n++)
 	{
-		pollfd	sfd = {_server_sock[n].get_sock_fd(), POLL_IN, 0};
+		pollfd	sfd = {m_serverSockVec[n].get_sock_fd(), POLL_IN, 0};
 		m_pfdVec.push_back(sfd);
 	}
 
@@ -73,7 +73,7 @@ void	Server::accept_connection()
 				//read the socket
 				Socket&	readSock = getClientSockFromVec(m_pfdVec[n].fd);
 				readSock.update_last_active_time();
-				if (readSock.read_sock() == -1)
+				if (readSock.read_sock(m_Config) == -1)
 				{
 					close(m_pfdVec[n].fd);
 					removeFromVec(m_pfdVec[n].fd);
@@ -81,13 +81,12 @@ void	Server::accept_connection()
 				}
 			}
 
-			else if ((m_pfdVec[n].revents & POLLOUT) && getClientSockFromVec(m_pfdVec[n].fd).is_idle(200))
+			else if ((m_pfdVec[n].revents & POLLOUT) && (getClientSockFromVec(m_pfdVec[n].fd).is_idle(200) || getClientSockFromVec(m_pfdVec[n].fd).get_error() == true))
 			{
 				std::cout << "ready to handle request" << std::endl;
 
 				Socket&	writeSock = getClientSockFromVec(m_pfdVec[n].fd);
-				// writeSock.updateStr();
-					handle(writeSock);
+				handle(writeSock);
 			}
 		}
 
@@ -101,10 +100,10 @@ void Server::handle( Socket& client_sock )
 	PRINTVAR(client_sock.get_request_str());
 	// request.printf_all();
 
-	Response* resp = _builder.createNewResponse(request, m_Config, _mvars);
+	Response* resp = _builder.createNewResponse(request, m_Config, _mvars, client_sock);
 
 	std::string respString = resp->build();
-
+	PRINTVAR(respString);
     // write to socket
 	write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() );
     close(client_sock.get_sock_fd());
@@ -114,9 +113,9 @@ void Server::handle( Socket& client_sock )
 
 bool	Server::isClientSock(int fdToCheck)
 {
-	for (int  n = 0; n < _server_sock.size(); n++)
+	for (int  n = 0; n < m_serverSockVec.size(); n++)
 	{
-		if (_server_sock[n].get_sock_fd() == fdToCheck)
+		if (m_serverSockVec[n].get_sock_fd() == fdToCheck)
 			return (false);
 	}
 	return (true);
@@ -147,6 +146,37 @@ void	Server::removeFromVec(int fdToRemove)
 
 }
 
+std::string	Server::getHostFromFd(int fdToFind)
+{
+	for (int n = 0; n < m_serverSockVec.size(); n++)
+	{
+		if (m_serverSockVec[n].get_sock_fd() == fdToFind)
+		{
+			return (m_serverSockVec[n].get_host());
+		}
+	}
+
+	for (int n = 0; n < m_clientSockVec.size(); n++)
+	{
+		if (m_clientSockVec[n].get_sock_fd() == fdToFind)
+		{
+			return (m_clientSockVec[n].get_host());
+		}
+	}
+
+	return (std::string());
+}
+
+Socket&	Server::getServerSockFromVec(int fdToFind)
+{
+	for (int n = 0; n < m_serverSockVec.size(); n++)
+	{
+		if (m_serverSockVec[n].get_sock_fd() == fdToFind)
+			return (m_serverSockVec[n]);
+	}
+	return (*new Socket);
+}
+
 Socket&	Server::getClientSockFromVec(int fdToFind)
 {
 	for (int n = 0; n < m_clientSockVec.size(); n++)
@@ -154,5 +184,6 @@ Socket&	Server::getClientSockFromVec(int fdToFind)
 		if (m_clientSockVec[n].get_sock_fd() == fdToFind)
 			return (m_clientSockVec[n]);
 	}
-	throw "blablablabla!";
+	// throw "blablablabla!";
+	return (*new Socket);
 }

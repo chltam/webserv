@@ -104,7 +104,7 @@ bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, st
 	int	dpos = path.rfind('.');
 	if (dpos == std::string::npos)
 		return (false);
-	// vector<pair<string , string> >::const_iterator it = cgi_pair.begin();
+	vector<pair<string , string> >::const_iterator it = cgi_pair.begin();
 	// while (it != cgi_pair.end())
 	// {
 	// 	if (path.substr(dpos) == it->first)
@@ -118,9 +118,6 @@ bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, st
 	// }
 	for (int n = 0; n < cgi_pair.size(); n++)
 	{
-		// PRINTVAR(cgi_pair[n].first);
-		// PRINTVAR(cgi_pair[n].second);
-		// PRINTVAR(path);
 		if (path.substr(dpos) == cgi_pair[n].first)
 		{
 			set_value("SCRIPT_NAME", path);
