@@ -397,8 +397,9 @@ void Config::AddServerPort(ConfigServer& currServer,const std::string& initialVa
     PRINT_LOG("key =",key);
     PRINT_LOG("value =",value);
 
-    if(key == "localhost")
+    if(key == "localhost" || key == "0.0.0.0")
         key = "127.0.0.1";
+
     if(value.find_first_not_of("0123456789") != std::string::npos){
         PRINT_ERROR("ERROR, port does not contain only digits. Value =",value);
         return;
@@ -453,8 +454,10 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
     int port = std::atoi(value.c_str()); //silly step because port string has a trailing new line
     value =  std::to_string(port);
 
-    if(key == "localhost")
+//not the cleanest? but we cant bind multiple ports so we need to convert somewhere, localhost exist always
+    if(key == "localhost" || key == "0.0.0.0")
         key = "127.0.0.1";
+
     if(value.find_first_not_of("0123456789") != std::string::npos){
         PRINT_ERROR("ERROR, port does not contain only digits,value =",value);
         return NULL;

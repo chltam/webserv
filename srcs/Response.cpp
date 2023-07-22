@@ -131,7 +131,7 @@ std::string Response::buildIndexPage()
 
     directory = opendir(_path.c_str());
     while ((entry = readdir(directory)))
-        ret += createIndexingElement(filetypeToString(entry->d_type),entry->d_name);
+        ret += createIndexingElement(_path.substr(_path.find("/",3)),filetypeToString(entry->d_type),entry->d_name);
 
     ret += "</ul></body></html>";
     closedir(directory);
@@ -139,13 +139,15 @@ std::string Response::buildIndexPage()
 }
 
 
-std::string Response::createIndexingElement(const std::string& fileType,const std::string& relPath)
+std::string Response::createIndexingElement(const std::string& path,const std::string& fileType,const std::string& relPath)
 {
     std::string ret("<li><span class=\"list-text\">");
     ret += fileType;
     ret += ": </span><a href=\"";
+    ret += path;
     ret +=relPath;
     ret +="\">";
+    ret += path;
     ret +=relPath;
     ret +="</a></li>";
 
