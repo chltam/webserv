@@ -163,7 +163,7 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 void Config::Lexer(TokenQueue& tokens)
 {
     std::vector<std::string> keywords = {"listen","error_page","server_name","auto_index",
-            "client_body_buffer_size","root","index","allow_methods","cgi","return"};
+            "client_max_body_size","root","index","allow_methods","cgi","return"};
 
     for (size_t i = 0; i < tokens.size(); i++) {
         if(tokens[i].first == ";")
@@ -362,11 +362,11 @@ void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type 
     else if(currNode.name == "return"){
         route.setRedirectDir(currNode.values[0]);
     }
-    else if(currNode.name == "client_body_buffer_size"){
+    else if(currNode.name == "client_max_body_size"){
         std::stringstream sstream(currNode.values[0]);
         size_t result;
         sstream >> result;
-        route.setClientBodyBufferSize(result);
+        route.setClientMaxBodySize(result);
     }
     else if(currNode.name == "cgi"){
         route.addCGI(currNode.values[0],currNode.values[1]);

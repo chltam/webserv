@@ -7,7 +7,7 @@ ConfigRoute::ConfigRoute()
     m_path = "NOT DEFINED";
     m_root = "NOT DEFINED";
     m_allowedMethods = METH_NONE;
-    m_clientBodyBufferSize = -1;
+    m_clientMaxBodySize = -1;
     m_autoindex = false;
 
     m_redirectDir= "";
@@ -20,7 +20,7 @@ ConfigRoute::ConfigRoute(const std::string& path,const std::string &root, const 
     m_root = root;
     m_indexFiles.emplace_back(defaultFile);
     m_allowedMethods = allowedMethods;
-    m_clientBodyBufferSize = bodyBufferSize;
+    m_clientMaxBodySize = bodyBufferSize;
     m_autoindex = autoIndex;
 
     m_redirectDir= redirectDir;
@@ -33,7 +33,7 @@ ConfigRoute::ConfigRoute(const ConfigRoute &route)
     m_path = route.getPath();
     m_root = route.getRoot();
     m_allowedMethods = route.getAllowedMethods();
-    m_clientBodyBufferSize = route.getClientBodyBufferSize();
+    m_clientMaxBodySize = route.getClientMaxBodySize();
     m_autoindex = route.getAutoIndex();
 
     if(route.m_cgi.size() != 0) {
@@ -73,9 +73,9 @@ int ConfigRoute::getAllowedMethods() const
     return m_allowedMethods;
 }
 
-size_t ConfigRoute::getClientBodyBufferSize() const
+size_t ConfigRoute::getClientMaxBodySize() const
 {
-    return m_clientBodyBufferSize;
+    return m_clientMaxBodySize;
 }
 
 bool ConfigRoute::getAutoIndex() const
@@ -123,9 +123,9 @@ void ConfigRoute::setRoot(const std::string &newRoot)
     m_root = newRoot;
 }
 
-void ConfigRoute::setClientBodyBufferSize(size_t size)
+void ConfigRoute::setClientMaxBodySize(size_t size)
 {
-    m_clientBodyBufferSize = size;
+    m_clientMaxBodySize = size;
 }
 
 void ConfigRoute::setAutoindex(bool value)
@@ -190,7 +190,7 @@ std::ostream &operator<<(std::ostream &os, const ConfigRoute &cr)
     else
         os << "NONE are setup" << std::endl;
     os << spaces << "Allowed Methods = " << MethodEnumToString(cr.m_allowedMethods) << std::endl;
-    os << spaces << "Client Body Buff Size = " << cr.m_clientBodyBufferSize << std::endl;
+    os << spaces << "Client Body Buff Size = " << cr.m_clientMaxBodySize << std::endl;
     os << spaces << "Autoindex = " << cr.m_autoindex << std::endl;
 
     os << spaces << spaces << "----CGI----" << std::endl;

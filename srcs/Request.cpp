@@ -147,7 +147,7 @@ std::ostream& operator<<(std::ostream& os,const Request& request)
 		os <<" [" << request._request_pair[n].first << "] = [" <<  request._request_pair[n].second <<"]" << endl;
 	}
 
-	os << request._body;  
+	os << request._body;
 
     return os;
 }

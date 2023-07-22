@@ -19,7 +19,7 @@ public: //getters & setters
     const std::string& getRoot() const;
     const std::vector<std::string>& getDefaultFile() const;
     int getAllowedMethods() const;
-    size_t getClientBodyBufferSize() const;
+    size_t getClientMaxBodySize() const;
     bool getAutoIndex() const;
     const std::vector<std::pair<std::string, std::string>>& getCgi() const;
     const std::string& getRedirectDir() const;
@@ -28,7 +28,7 @@ public: //getters & setters
     void setPath(const std::string& path);
     void setAllowedMethods(int methods);
     void setRoot(const std::string& newRoot);
-    void setClientBodyBufferSize(size_t size);
+    void setClientMaxBodySize(size_t size);
     void setAutoindex(bool value);
     void setRedirectDir(const std::string& dir);
 
@@ -41,7 +41,7 @@ private:
     std::string m_root;
     std::vector<std::string> m_indexFiles;
     int m_allowedMethods;
-    size_t m_clientBodyBufferSize;
+    size_t m_clientMaxBodySize;
     bool m_autoindex;
     std::vector<std::pair<std::string, std::string>> m_cgi;
 
