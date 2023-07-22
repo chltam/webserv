@@ -97,11 +97,14 @@ std::string getStringFromStatus(int status)
     case 404:
         return "404 Not Found";
         break;
-    case 408:
-        return "408 Timeout";
-        break;
     case 403:
         return "403 Forbidden";
+        break;
+    case 405:
+        return "405 Method Bot Allowed";
+        break;
+    case 408:
+        return "408 Timeout";
         break;
     case 301:
         return "301 Moved Permanently";

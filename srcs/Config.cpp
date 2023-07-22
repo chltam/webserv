@@ -35,6 +35,7 @@ Config::Config(char *filepath):m_brackCount(0)
     std::string dir = "./errorpages/";
     m_errorPages[403] = dir + "error403.html";
     m_errorPages[404] = dir + "error404.html";
+    m_errorPages[405] = dir + "error405.html";
     m_errorPages[408] = dir + "error408.html";
     m_errorPages[413] = dir + "error413.html";
 

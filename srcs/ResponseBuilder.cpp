@@ -95,8 +95,8 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     if(!(method & configRoute->getAllowedMethods())){ //if you are not allowed to access the resource with GET POST or DELETE
         PRINT_LOG("ERROR,you have no rights to access this resource with the Method provided");
         PRINT_LOG("Method used,",MethodEnumToString(method),"Methods allowed:",MethodEnumToString(configRoute->getAllowedMethods()));
-        response.setPath(server->getErrorPageFromCode(403));
-        return 403;
+        response.setPath(server->getErrorPageFromCode(405));
+        return 405;
     }
 
 	/*if cgi*/
