@@ -33,6 +33,8 @@ Socket::Socket(int listener_fd)
     socklen_t   len = 0;
     _sock = accept(listener_fd, (sockaddr *) &client_addr, &len);
 	update_last_active_time();
+	_error = false;
+	_sizeIssue = false;
 }
 
 Socket::~Socket()
@@ -68,42 +70,13 @@ int	Socket::read_sock()
 	PRINTVAR(bread);
 	if (bread <= 0)
 		return (-1);
-	buffer_to_vec(buffer, bread);	
+	buffer_to_vec(buffer, bread);
+	buffer[bread] = '\0';
+	_header_str += buffer;
+	if (isFullHeader())
+		checkHeaderError();
 	return (0);
 }
-
-// void    Socket::read_sock()
-// {
-//     pollfd	pfd{};
-//     char    buffer[BUFFER_SIZE];
-// 	pfd.fd = _sock;
-// 	pfd.events = POLLIN;
-// 	pfd.revents = 0;
-// 	// _request_str.clear();
-	
-// 	while (1)
-// 	{
-// 		int	poll_result = poll(&pfd, 1, 100);
-// 		if (poll_result == -1){
-// 			perror("poll error");
-// 			break;
-// 		}
-// 		if (poll_result == 0)
-// 			break;
-// 		else{
-// 			int bread = read( _sock,  buffer, BUFFER_SIZE );
-// 			/* if ( bread == -1 ) {
-
-// 				// return with err value and close sock outside
-// 			} */
-// 			buffer[bread] = 0;
-// 			if (bread == 0)
-// 				break;
-// 			else
-// 				_request_str += buffer;
-// 		}
-// 	}
-// }
 
 void	Socket::update_last_active_time(){
 
@@ -142,19 +115,58 @@ std::vector<char>	Socket::get_request_byte(){
 	return (_request_byte);
 }
 
+bool	Socket::get_error(){
+	return (_error);
+}
+
+bool	Socket::get_sizeIssue(){
+	return (_sizeIssue);
+}
+
 void	Socket::buffer_to_vec(char* buffer, int bread)
 {
 	_request_byte.insert(_request_byte.end(), buffer, buffer + bread);
 }
 
-void	Socket::updateStr()
+bool	Socket::isFullHeader()
 {
-	for (std::vector<char>::iterator it = _request_byte.begin(); it != _request_byte.end(); it++)
-	{
-		std::cout << *it;
-	}
+	size_t	pos;
 
-	std::string	tmpStr(_request_byte.begin(), _request_byte.end());
-	_request_str = tmpStr;
-	
+	pos = _header_str.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		return (false);
+	_header_str = _header_str.substr(0, pos);
+	// printHeader();
+	return (true);
+}
+
+std::string	Socket::getValueFromHeader(std::string key)
+{
+	size_t	pos;
+	size_t	endpos;
+
+	pos = _header_str.find(key);
+	if (pos == std::string::npos)
+		return (std::string());
+	pos += key.length() + 1;
+	endpos = _header_str.find("\r\n", pos);
+
+	return (_header_str.substr(pos, endpos - pos));
+
+}
+
+void	Socket::checkHeaderError()
+{
+	size_t	size = atoi(getValueFromHeader("Content-Length").c_str());
+	PRINTVAR(size);
+	if (size > 100)
+	{
+		_sizeIssue = true;
+		_error = true;
+	}
+}
+
+void	Socket::printHeader()
+{
+	std::cout << _header_str << std::endl;
 }

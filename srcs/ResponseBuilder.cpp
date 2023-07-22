@@ -7,29 +7,25 @@ ResponseBuilder::ResponseBuilder() {};
 
 ResponseBuilder::~ResponseBuilder() {};
 
-Response* ResponseBuilder::createNewResponse(Request &request, const Config& config, MetaVars& mvars  )
+Response* ResponseBuilder::createNewResponse(Request &request, const Config& config, MetaVars& mvars, Socket& socket )
 {
     Response* response = new Response();
 
-    if ( !request.getTimeout() ) {
-
-        response->insertHeaderField("Server",request.getHeaderValueFromKey("Host"));
-
-        std::string contType= request.getHeaderValueFromKey("Accept");
-        std::string::size_type pos = contType.find(',');
-        // response->_headerFields["Content-Type"] = contType; /*content type*/
-
-        // response->insertHeaderField("Content-Type",contType);
-
-
+    if (request.getTimeout())
+    {
+        response->setStatus(setResponseStatus(request,config,*response,mvars,socket));
+        response->insertHeaderField("Content-Type", getTypeFromExtension(response->getPath(), config.getTypes()));
+        return response;
     }
-    response->setStatus(setResponseStatus(request,config,*response,mvars));
+    response->insertHeaderField("Server",request.getHeaderValueFromKey("Host"));
+    std::string contType= request.getHeaderValueFromKey("Accept");
+    response->setStatus(setResponseStatus(request,config,*response,mvars,socket));
     response->insertHeaderField("Content-Type", getTypeFromExtension(response->getPath(), config.getTypes()));
 
     return response;
 }
 
-int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
+int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars, Socket& socket )
 {
     if (request.getTimeout())
     {
@@ -98,6 +94,13 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         PRINT("ERROR,you have no rights to access this resource with the Method provided");
         response.setPathFromErrorCode(403);
         return 403;
+    }
+
+    if(socket.get_sizeIssue())
+    {
+        PRINT("request body too big");
+        response.setPathFromErrorCode(413);
+        return 413;
     }
 
 	/*if cgi*/

@@ -49,13 +49,12 @@ class Server {
 
 		MetaVars	_mvars;
         std::vector<Socket>	m_serverSockVec;
-		std::vector<Socket>	_server_sock;
 		std::vector<Socket>	m_clientSockVec;
 		std::vector<pollfd>	m_pfdVec;
         Config m_Config;
         ResponseBuilder _builder;
 
-        void handle(Socket& client_sock);
+        void 	handle(Socket& client_sock);
 		bool	isClientSock(int fdToCheck);
 		void	removeFromVec(int fdToRemove);
 		Socket&	getClientSockFromVec(int fdToFind);
