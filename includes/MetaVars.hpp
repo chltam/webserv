@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <cstring>
@@ -27,6 +28,8 @@ public:
 	void		update_envp(Request& request);
 	std::string get_value(std::string key);
 	char		**get_envp();
+	bool		get_cgi_failure();
+
 	bool		check_extension(const std::vector<std::pair<std::string,std::string> >& cgi_pair, std::string path);
 
 
@@ -37,6 +40,7 @@ public:
 private:
 	char**	_envp;
 	int		_envp_size;
+	bool	_cgi_fail;
 	std::string	_executor;
 	std::map<std::string, std::string> _meta_map;
 

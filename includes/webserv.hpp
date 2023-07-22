@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <errno.h>
 #include <string.h>
 #include <fstream>
@@ -85,3 +86,4 @@ std::string getFileContent( const std::string& filename );
 std::string getStringFromStatus(int status);
 std::string	toString(int number);
 std::string getTypeFromExtension( std::string path, const std::map<std::string, std::string>& types);
+long	getUnixTime();

@@ -88,11 +88,25 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
             }
         }
 
+	if (method & configRoute->getAllowedMethods() && socket.get_permsIssue())
+	{
+        PRINT_LOG("Method allowed but not authorized");
+        response.setPath(server->getErrorPageFromCode(401));
+		return 401;	
+	}
+
+	if (!(method & configRoute->getAllowedMethods()) && socket.get_needAuthorized() && !socket.get_permsIssue())
+	{
+        PRINT_LOG("Authorized but method not allowed");
+        response.setPath(server->getErrorPageFromCode(403));
+		return 403;
+	}
+
     if(!(method & configRoute->getAllowedMethods())){ //if you are not allowed to access the resource with GET POST or DELETE
         PRINT_LOG("ERROR,you have no rights to access this resource with the Method provided");
         PRINT_LOG("Method used,",MethodEnumToString(method),"Methods allowed:",MethodEnumToString(configRoute->getAllowedMethods()));
-        response.setPath(server->getErrorPageFromCode(403));
-        return 403;
+        response.setPath(server->getErrorPageFromCode(405));
+        return 405;
     }
 
     if(socket.get_sizeIssue())
@@ -102,6 +116,11 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         return 413;
     }
 
+	if (socket.get_permsIssue())
+	{
+
+	}
+
 	/*if cgi*/
 	if (mvars.check_extension(configRoute->getCgi(), newfullPath) == true)
 	{
@@ -110,8 +129,14 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
 		mvars.update_envp(request);
 		// PRINT(mvars.get_value("REQUEST_METHOD"));
         response.setBody(mvars.cgi_caller(request.getBody()));
+		if (mvars.get_cgi_failure())
+		{
+			response.setPath(server->getErrorPageFromCode(500));
+			response.setCgi(false);
+       		return 500;
+		}
         mvars.clean_meta_map();
-        return 200;//not always 200
+        return 200;
 
 	}
 

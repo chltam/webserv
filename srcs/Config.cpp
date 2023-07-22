@@ -33,10 +33,14 @@ Config::Config(char *filepath):m_brackCount(0)
 {
     //setting up default error pages
     std::string dir = "./errorpages/";
+    m_errorPages[400] = dir + "error400.html";
+    m_errorPages[401] = dir + "error401.html";
     m_errorPages[403] = dir + "error403.html";
+    m_errorPages[405] = dir + "error405.html";
     m_errorPages[404] = dir + "error404.html";
     m_errorPages[408] = dir + "error408.html";
     m_errorPages[413] = dir + "error413.html";
+    m_errorPages[500] = dir + "error500.html";
 
     std::string path = "";
     if(filepath == NULL){

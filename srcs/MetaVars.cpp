@@ -6,6 +6,8 @@ MetaVars::MetaVars()
 {
 	_envp = NULL;
 	_envp_size = 0;
+	_cgi_fail = false;
+
 }
 
 MetaVars::MetaVars(char** envp)
@@ -13,6 +15,7 @@ MetaVars::MetaVars(char** envp)
 	_envp_size = count_envp_size(envp);
 	_envp = copy_envp(envp, _envp_size);
 	_envp[_envp_size] = NULL;
+	_cgi_fail = false;
 
 }
 
@@ -99,23 +102,16 @@ char	**MetaVars::get_envp()
 	return(new_envp);
 }
 
+bool	MetaVars::get_cgi_failure(){
+	return (_cgi_fail);
+}
+
 bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, string path)
 {
 	int	dpos = path.rfind('.');
 	if (dpos == std::string::npos)
 		return (false);
 	vector<pair<string , string> >::const_iterator it = cgi_pair.begin();
-	// while (it != cgi_pair.end())
-	// {
-	// 	if (path.substr(dpos) == it->first)
-	// 	{
-	// 		set_value("SCRIPT_NAME", path);
-	// 		set_value("SCRIPT_FILENAME", path);
-	// 		set_executor(it->second);
-	// 		return (true);
-	// 	}
-	// 	it++;
-	// }
 	for (int n = 0; n < cgi_pair.size(); n++)
 	{
 		if (path.substr(dpos) == cgi_pair[n].first)
@@ -159,17 +155,25 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 	}
 	else
 	{
+
 		write(fd[1], request_body.c_str(), request_body.length());
 		close(fd[1]);
-		waitpid(pid, NULL, 0);
+
 		char	buffer[100];
 		int	bread;
-		
-		while((bread = read(fd[0], buffer, 100)) != 0)
+		int status;
+		waitpid(pid, &status,0);
+		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+			_cgi_fail = true;	
+		bread = 1;
+		while(bread != 0)
 		{
+			bread = read(fd[0], buffer, 100);
 			buffer[bread] = '\0';
 			ret += buffer;
 		}
+		
+
 		close(fd[0]);
 	}
 
@@ -220,6 +224,7 @@ char	**MetaVars::copy_envp(char **envp, int& _envp_size)
 void	MetaVars::clean_meta_map()
 {
 	_meta_map.clear();
+	_cgi_fail = false;
 }
 
 void	MetaVars::free_envp(char **envp)

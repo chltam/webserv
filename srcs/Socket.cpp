@@ -35,7 +35,10 @@ Socket::Socket(int listener_fd)
     _sock = accept(listener_fd, (sockaddr *) &client_addr, &len);
 	update_last_active_time();
 	_error = false;
+	_needAuthorize = false;
 	_sizeIssue = false;
+	_permsIssue = false;
+	_badRequest = false;
 }
 
 Socket::~Socket()
@@ -128,6 +131,14 @@ bool	Socket::get_sizeIssue(){
 	return (_sizeIssue);
 }
 
+bool	Socket::get_permsIssue(){
+	return (_permsIssue);
+}
+
+bool	Socket::get_needAuthorized(){
+	return (_needAuthorize);
+}
+
 std::string	Socket::get_host(){
 	return (_server_ip + ":" + toString(_server_port));
 }
@@ -166,12 +177,17 @@ std::string	Socket::getValueFromHeader(std::string key)
 
 void	Socket::checkHeaderError(const Config& metaConfig)
 {
-	size_t	size;
+	size_t		size;
 	std::string host;
+	std::string	pass;
 	std::string	path;
 
 	size = atoi(getValueFromHeader("Content-Length").c_str());
 	host = getValueFromHeader("Host:");
+	pass = getValueFromHeader("Authorization:");
+
+	if (_header_str.find("Authorization:") != std::string::npos)
+		_needAuthorize = true;
 
 	size_t	pos;
 	size_t	endpos;
@@ -182,21 +198,20 @@ void	Socket::checkHeaderError(const Config& metaConfig)
 
 	size_t maxBody = metaConfig.getConfigServerFromRequest(host)->getRouteFromPath(path)->getClientBodyBufferSize();
 
-	PRINT("SIZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZE");
-	PRINTVAR(size);
-	PRINT("HOOOOOOOOOOOOOOOOOOOOST");
-	PRINTVAR(host);
-	PRINT("PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATH");
-	PRINTVAR(path);
-	PRINT("MAXXXXXXXXXXXXXXXXXXX");
-	PRINTVAR(maxBody);
-
-
 	if (size > maxBody)
 	{
 		_sizeIssue = true;
 		_error = true;
+		return ;
 	}
+	if (pass.empty())
+		return ;
+	if (pass != "4242")
+	{
+		_permsIssue = true;
+		_error = true;
+	}
+	
 }
 
 void	Socket::printHeader()

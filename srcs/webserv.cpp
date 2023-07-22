@@ -94,18 +94,33 @@ std::string getStringFromStatus(int status)
     case 200:
         return "200 OK";
         break;
-    case 404:
-        return "404 Not Found";
+    case 301:
+        return "301 Moved Permanently";
         break;
-    case 408:
-        return "408 Timeout";
+    case 400:
+        return "400 Bad Request";
+        break;
+	case 401:
+        return "401 Unauthorized";
         break;
     case 403:
         return "403 Forbidden";
         break;
-    case 301:
-        return "301 Moved Permanently";
+	case 404:
+        return "404 Not Found";
         break;
+	case 405:
+        return "405 Method Not Allowed";
+        break;
+	case 413:
+        return "413 Content Too Large";
+        break;
+    case 408:
+        return "408 Timeout";
+        break;
+	case 500:
+		return "500 Internal Server Error";
+		break;
     default:
         return "INVALID";
         break;
@@ -130,6 +145,13 @@ std::string getTypeFromExtension( std::string path,const std::map<std::string, s
 
 }
 
+long	getUnixTime()
+{
+	struct timeval tv;
+	
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
 
 std::string	toString(int number)
 {

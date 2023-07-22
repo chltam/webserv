@@ -25,8 +25,6 @@ std::string Response::build()
 void Response::bodyToString()
 {
     std::stringstream buffer;
-    std::stringstream lenStr;
-    std::string bufString;
 
 	if (_cgi)
 		return ;

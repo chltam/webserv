@@ -31,7 +31,7 @@ struct Node{
 
 };
 
-typedef std::deque<std::pair<std::string, int>> TokenQueue;
+typedef std::deque<std::pair<std::string, int> > TokenQueue;
 
 class Config
 {

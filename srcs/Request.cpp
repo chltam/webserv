@@ -13,6 +13,8 @@ Request::Request(std::string request_str)
     else
         _timeout = false;
 
+	PRINTVAR(request_str);
+
     std::istringstream   str_iss(request_str);
     vector<string>    lines;
     string getline_buffer;

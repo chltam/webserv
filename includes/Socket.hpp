@@ -51,7 +51,10 @@ public:
 	int		get_sock_fd();
 	long	get_last_active_time();
 	bool	get_error();
+	bool	get_needAuthorized();
+
 	bool	get_sizeIssue();
+	bool	get_permsIssue();
 	std::string	get_host();
 
 
@@ -66,14 +69,14 @@ private:
 	std::vector<char>	_request_byte;
 	std::string			_response_str;
 	MetaVars			_mvars;
-	// ConfigServer& 		_server;
 
 //header error
 private:
 	bool	_error;
+	bool	_needAuthorize;
 	bool	_sizeIssue;
 	bool	_permsIssue;
-
+	bool	_badRequest;
 private:
 	void	buffer_to_vec(char* buffer, int bread);
 	bool	isFullHeader();

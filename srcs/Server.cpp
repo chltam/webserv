@@ -103,7 +103,7 @@ void Server::handle( Socket& client_sock )
 	Response* resp = _builder.createNewResponse(request, m_Config, _mvars, client_sock);
 
 	std::string respString = resp->build();
-	PRINTVAR(respString);
+	// PRINT(respString);
     // write to socket
 	write( client_sock.get_sock_fd(),  respString.c_str(), respString.length() );
     close(client_sock.get_sock_fd());
