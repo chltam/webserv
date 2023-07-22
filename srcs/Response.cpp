@@ -110,27 +110,6 @@ void Response::insertHeaderField(const std::string& key, const std::string& valu
     _headerFields[key] = value;
 }
 
-
-void Response::setPathFromErrorCode(int errorCode)
-{
-    switch (errorCode)
-    {
-    case 403:
-        _path = "./errorpages/error403.html";
-        return;
-    case 404:
-        _path = "./errorpages/error404.html";
-        return;
-    case 408:
-        _path = "./errorpages/error408.html";
-        return;
-    default:
-        _path = "ERROR";
-        PRINT("Error, path from error code is incorrect");
-        return;
-    }
-}
-
 std::string Response::buildIndexPage()
 {
     //im assuming i get the path to the directory in question

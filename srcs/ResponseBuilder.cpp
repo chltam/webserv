@@ -31,21 +31,20 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
 
 int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars )
 {
+    const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
     if (request.getTimeout())
     {
         response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
         response.insertHeaderField("Content-Type", "text/html");
-        response.setPathFromErrorCode(408);
+        response.setPath(server->getErrorPageFromCode(408));
         return 408;
     }
-    const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 
     string path = request.getHeaderValueFromKey( "path" );
 
     PRINTVAR(server);
     PRINTVAR(path);
     const ConfigRoute* configRoute = server->getRouteFromPath( path );
-
 
 
     if(configRoute == NULL){
@@ -68,7 +67,7 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
     // PRINTVAR(S_IFDIR);
     if(ret1 == -1 && method != METH_POST){
         PRINT("ERROR, Path is invalid!");
-        response.setPathFromErrorCode(404);
+        response.setPath(server->getErrorPageFromCode(404));
         return 404;
     }
     else if(ret1 == S_IFDIR && method == METH_GET) { //find,append,validate index file, if not, check for autoindex, else error
@@ -89,14 +88,14 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
             }
             else if(ret1 != S_IFREG) {
                 PRINT("ERROR, Path is invalid! COuldn't find default file");
-                response.setPathFromErrorCode(404);
+                response.setPath(server->getErrorPageFromCode(404));
                 return 404;
             }
         }
 
     if(!(method & configRoute->getAllowedMethods())){ //if you are not allowed to access the resource with GET POST or DELETE
         PRINT("ERROR,you have no rights to access this resource with the Method provided");
-        response.setPathFromErrorCode(403);
+        response.setPath(server->getErrorPageFromCode(403));
         return 403;
     }
 

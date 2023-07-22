@@ -43,8 +43,8 @@ Config::Config(char *filepath):m_brackCount(0)
     Tokenizer(path,tokens);
     Lexer(tokens);
 
-    // for (int i = 0; i < tokens.size(); i++)
-    //     printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
+    for (int i = 0; i < tokens.size(); i++)
+        printf( "%-10s : %s\n", TokenToString(tokens[i].second).c_str(), tokens[i].first.c_str());
 
     Node head;
     Parser(tokens,head);
@@ -61,15 +61,15 @@ Config::~Config()
 }
 
 void Config::extractMimesFromFile() {
-    
+
     std::stringstream buffer;
     std::stringstream lenStr;
     std::string bufString;
 
 
     std::ifstream file( "./types.txt" );
-   
-   
+
+
     while ( std::getline(file, bufString)) {
 
 
@@ -77,13 +77,13 @@ void Config::extractMimesFromFile() {
         std::string keysPart = bufString.substr(bufString.find(":") + 1);
 
         std::istringstream   keysPart_line(keysPart);
-     
+
         while (getline(keysPart_line, bufString, ','))
         {
             m_types[bufString] = value;
         }
     }
-    
+
 
     for (std::map<std::string, std::string>::iterator it = m_types.begin(); it != m_types.end(); it++)
     {
@@ -155,7 +155,7 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 
 void Config::Lexer(TokenQueue& tokens)
 {
-    std::vector<std::string> keywords = {"listen","server_name","auto_index",
+    std::vector<std::string> keywords = {"listen","error_page","server_name","auto_index",
             "client_body_buffer_size","root","index","allow_methods","cgi","return"};
 
     for (size_t i = 0; i < tokens.size(); i++) {
@@ -299,6 +299,8 @@ void Config::createConfigServer(Node &serverNode)
     for (int i = 0; i < serverNode.children.size(); i++) { //loop over all directive nodes to create a default route
         if(serverNode.children[i].name == "listen")
             AddServerPort(lastServer,serverNode.children[i].values[0]);
+        else if(serverNode.children[i].name == "error_page")
+            lastServer.AddErrorPage(serverNode.children[i].values[0],serverNode.children[i].values[1]);
         else if (serverNode.children[i].type == NODE_DIRECTIVE){
             updateConfigRoute(*defaultRoute,serverNode.children[i],NODE_BLOCK_SERVER);
         }
@@ -531,10 +533,10 @@ std::string Config::TokenToString(int tokenVal)
 
 unsigned int calcAllowedValues(const std::string &key)
 {
-    std::vector<std::string> infititeKeywords = {"index","allow_methods","server_name"};
+    std::vector<std::string> infititeKeywords = {"index","allow_methods"};
     if(std::find(infititeKeywords.begin(),infititeKeywords.end(),key) != infititeKeywords.end())
         return -1; // will be unsigned int max
-    else if(key == "cgi")
+    else if(key == "cgi" || key == "error_page")
         return 2;
     return 1;
 }

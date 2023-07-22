@@ -16,6 +16,7 @@ public:
 
     friend std::ostream& operator<< (std::ostream& stream, const ConfigServer& cs);
     const ConfigRoute* getRouteFromPath(const std::string& path) const;
+    std::string getErrorPageFromCode(int errorCode) const;
 public: //getters, setters
     const std::vector<std::pair<std::string,std::string>>& getPorts() const;
     const std::map<int,std::string>& getErrorPages() const;
@@ -23,7 +24,8 @@ public: //getters, setters
 
     void AddConfigRoute(ConfigRoute * config);
     void AddServerPort(const std::string& serverName,const std::string& port);
-private: 
+    void AddErrorPage(const std::string& key,const std::string& value);
+private:
     std::vector<std::pair<std::string,std::string>> m_ports;
     std::map<int,std::string> m_errorPages;
     std::map<std::string,ConfigRoute *> m_routes;
