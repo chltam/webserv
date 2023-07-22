@@ -17,7 +17,7 @@
 #define LOG_ERRORS_ONLY 1
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL LOG_WARNINGS_ERRORS
+#define LOG_LEVEL LOG_EVERYTHING
 #endif
 
 

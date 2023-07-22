@@ -34,7 +34,7 @@ class Response {
         void headerToString();
         void bodyToString();
         std::string buildIndexPage();
-        std::string createIndexingElement(const std::string& fileType,const std::string& relPath);
+        std::string createIndexingElement(const std::string& path,const std::string& fileType,const std::string& relPath);
         std::string filetypeToString(int type);
         std::map<std::string,std::string> _headerFields;
         int _status;

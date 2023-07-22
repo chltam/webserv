@@ -155,17 +155,19 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 	}
 	else
 	{
-
+		char	buffer[100];
+		int	bread = 1;
+		int status;
+	
 		write(fd[1], request_body.c_str(), request_body.length());
 		close(fd[1]);
 
-		char	buffer[100];
-		int	bread;
-		int status;
+		
+
 		waitpid(pid, &status,0);
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 			_cgi_fail = true;	
-		bread = 1;
+
 		while(bread != 0)
 		{
 			bread = read(fd[0], buffer, 100);

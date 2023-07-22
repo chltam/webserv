@@ -4,13 +4,13 @@ Socket::Socket(){};
 
 /**
  * @brief Server socket (lisener) constructor
- * 
+ *
  * @param ipVersion ipv4=AF_INET
  * @param service TCP=SOCK_STREAM
  * @param protocol default = 0
 */
 Socket::Socket(int ipVersion, int service, int protocol)
-{   
+{
     _sock = socket(ipVersion, service, protocol);
     if (_sock < 0){
         perror("Failed to Connect...");
@@ -24,7 +24,7 @@ Socket::Socket(int ipVersion, int service, int protocol)
 
 /**
  * @brief Client socket constructor
- * 
+ *
  * @param listener_fd listener socket fd
 */
 Socket::Socket(int listener_fd)
@@ -43,7 +43,7 @@ Socket::Socket(int listener_fd)
 
 Socket::~Socket()
 {
-	
+
 }
 
 void    Socket::bind_socket(std::string ip, int port)
@@ -100,7 +100,7 @@ bool	Socket::is_idle(long timeout)
 	gettimeofday(&tv, NULL);
 	long	now = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 
-	
+
 	if (now - get_last_active_time() > timeout)
 		return (true);
 	else
@@ -196,7 +196,7 @@ void	Socket::checkHeaderError(const Config& metaConfig)
 	endpos = _header_str.find(' ', pos);
 	path = _header_str.substr(pos, endpos - pos);
 
-	size_t maxBody = metaConfig.getConfigServerFromRequest(host)->getRouteFromPath(path)->getClientBodyBufferSize();
+	size_t maxBody = metaConfig.getConfigServerFromRequest(host)->getRouteFromPath(path)->getClientMaxBodySize();
 
 	if (size > maxBody)
 	{

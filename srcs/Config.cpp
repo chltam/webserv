@@ -38,6 +38,7 @@ Config::Config(char *filepath):m_brackCount(0)
     m_errorPages[403] = dir + "error403.html";
     m_errorPages[405] = dir + "error405.html";
     m_errorPages[404] = dir + "error404.html";
+    m_errorPages[405] = dir + "error405.html";
     m_errorPages[408] = dir + "error408.html";
     m_errorPages[413] = dir + "error413.html";
     m_errorPages[500] = dir + "error500.html";
@@ -166,7 +167,7 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 void Config::Lexer(TokenQueue& tokens)
 {
     std::vector<std::string> keywords = {"listen","error_page","server_name","auto_index",
-            "client_body_buffer_size","root","index","allow_methods","cgi","return"};
+            "client_max_body_size","root","index","allow_methods","cgi","return"};
 
     for (size_t i = 0; i < tokens.size(); i++) {
         if(tokens[i].first == ";")
@@ -365,11 +366,11 @@ void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type 
     else if(currNode.name == "return"){
         route.setRedirectDir(currNode.values[0]);
     }
-    else if(currNode.name == "client_body_buffer_size"){
+    else if(currNode.name == "client_max_body_size"){
         std::stringstream sstream(currNode.values[0]);
         size_t result;
         sstream >> result;
-        route.setClientBodyBufferSize(result);
+        route.setClientMaxBodySize(result);
     }
     else if(currNode.name == "cgi"){
         route.addCGI(currNode.values[0],currNode.values[1]);
@@ -400,8 +401,9 @@ void Config::AddServerPort(ConfigServer& currServer,const std::string& initialVa
     PRINT_LOG("key =",key);
     PRINT_LOG("value =",value);
 
-    if(key == "localhost")
+    if(key == "localhost" || key == "0.0.0.0")
         key = "127.0.0.1";
+
     if(value.find_first_not_of("0123456789") != std::string::npos){
         PRINT_ERROR("ERROR, port does not contain only digits. Value =",value);
         return;
@@ -456,8 +458,10 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
     int port = std::atoi(value.c_str()); //silly step because port string has a trailing new line
     value =  std::to_string(port);
 
-    if(key == "localhost")
+//not the cleanest? but we cant bind multiple ports so we need to convert somewhere, localhost exist always
+    if(key == "localhost" || key == "0.0.0.0")
         key = "127.0.0.1";
+
     if(value.find_first_not_of("0123456789") != std::string::npos){
         PRINT_ERROR("ERROR, port does not contain only digits,value =",value);
         return NULL;
