@@ -22,6 +22,8 @@
 #include <vector>
 #include <algorithm>
 #include <MetaVars.hpp>
+#include <Config.hpp>
+#include <ConfigServer.hpp>
 #define BUFFER_SIZE 500
 
 class Socket {
@@ -35,7 +37,7 @@ public:
 //client socket functions
 public:
 	Socket(int listener_fd);
-	int					read_sock();
+	int					read_sock(const Config& metaConfig);
 	std::string			get_request_str();
 	std::vector<char>	get_request_byte();
 
@@ -50,17 +52,21 @@ public:
 	long	get_last_active_time();
 	bool	get_error();
 	bool	get_sizeIssue();
+	std::string	get_host();
 
 
 	void	printHeader();
 
 private:
-	int	_sock;
-	long	_last_active_time;
-	std::string	_header_str; 
+	std::string			_server_ip;
+	int					_server_port;
+	int					_sock;
+	long				_last_active_time;
+	std::string			_header_str; 
 	std::vector<char>	_request_byte;
-	std::string	_response_str;
-	MetaVars	_mvars;
+	std::string			_response_str;
+	MetaVars			_mvars;
+	// ConfigServer& 		_server;
 
 //header error
 private:
@@ -72,7 +78,7 @@ private:
 	void	buffer_to_vec(char* buffer, int bread);
 	bool	isFullHeader();
 	std::string	getValueFromHeader(std::string key);
-	void	checkHeaderError();
+	void	checkHeaderError(const Config& metaConfig);
 
 };
 

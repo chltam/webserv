@@ -85,10 +85,10 @@ void Config::extractMimesFromFile() {
     }
     
 
-    for (std::map<std::string, std::string>::iterator it = m_types.begin(); it != m_types.end(); it++)
-    {
-        std::cout << it->first << "=" << it->second << std::endl;
-    }
+    // for (std::map<std::string, std::string>::iterator it = m_types.begin(); it != m_types.end(); it++)
+    // {
+    //     std::cout << it->first << "=" << it->second << std::endl;
+    // }
 
 
 

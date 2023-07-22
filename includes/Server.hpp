@@ -57,6 +57,8 @@ class Server {
         void 	handle(Socket& client_sock);
 		bool	isClientSock(int fdToCheck);
 		void	removeFromVec(int fdToRemove);
+		std::string	getHostFromFd(int fdToFind);
+		Socket&	getServerSockFromVec(int fdToFind);
 		Socket&	getClientSockFromVec(int fdToFind);
 
 };

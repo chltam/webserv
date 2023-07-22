@@ -3,7 +3,7 @@
 Socket::Socket(){};
 
 /**
- * @brief Socket object constructor for listening socket
+ * @brief Server socket (lisener) constructor
  * 
  * @param ipVersion ipv4=AF_INET
  * @param service TCP=SOCK_STREAM
@@ -23,7 +23,7 @@ Socket::Socket(int ipVersion, int service, int protocol)
 }
 
 /**
- * @brief Socket object constructor for client socket
+ * @brief Client socket constructor
  * 
  * @param listener_fd listener socket fd
 */
@@ -31,6 +31,7 @@ Socket::Socket(int listener_fd)
 {
     sockaddr_in client_addr{};
     socklen_t   len = 0;
+
     _sock = accept(listener_fd, (sockaddr *) &client_addr, &len);
 	update_last_active_time();
 	_error = false;
@@ -44,10 +45,14 @@ Socket::~Socket()
 
 void    Socket::bind_socket(std::string ip, int port)
 {
+	_server_ip = ip;
+	_server_port = port;
+
     sockaddr_in sockaddr{};
     sockaddr.sin_family = AF_INET;
-    sockaddr.sin_port = htons(port);
+    sockaddr.sin_port = htons(port);//ntohs() to convert it back to int
     sockaddr.sin_addr.s_addr = inet_addr(ip.c_str());
+
     if (bind(_sock, (struct sockaddr *) &sockaddr, sizeof(sockaddr)) == -1){
         perror("bind error");
         exit(EXIT_FAILURE);
@@ -62,7 +67,7 @@ void	Socket::enable_listener()
 	}
 }
 
-int	Socket::read_sock()
+int	Socket::read_sock(const Config& metaConfig)
 {
 	char	buffer[BUFFER_SIZE + 1];
 
@@ -74,7 +79,7 @@ int	Socket::read_sock()
 	buffer[bread] = '\0';
 	_header_str += buffer;
 	if (isFullHeader())
-		checkHeaderError();
+		checkHeaderError(metaConfig);
 	return (0);
 }
 
@@ -123,6 +128,10 @@ bool	Socket::get_sizeIssue(){
 	return (_sizeIssue);
 }
 
+std::string	Socket::get_host(){
+	return (_server_ip + ":" + toString(_server_port));
+}
+
 void	Socket::buffer_to_vec(char* buffer, int bread)
 {
 	_request_byte.insert(_request_byte.end(), buffer, buffer + bread);
@@ -155,11 +164,35 @@ std::string	Socket::getValueFromHeader(std::string key)
 
 }
 
-void	Socket::checkHeaderError()
+void	Socket::checkHeaderError(const Config& metaConfig)
 {
-	size_t	size = atoi(getValueFromHeader("Content-Length").c_str());
+	size_t	size;
+	std::string host;
+	std::string	path;
+
+	size = atoi(getValueFromHeader("Content-Length").c_str());
+	host = getValueFromHeader("Host:");
+
+	size_t	pos;
+	size_t	endpos;
+
+	pos = _header_str.find(' ') + 1;
+	endpos = _header_str.find(' ', pos);
+	path = _header_str.substr(pos, endpos - pos);
+
+	size_t maxBody = metaConfig.getConfigServerFromRequest(host)->getRouteFromPath(path)->getClientBodyBufferSize();
+
+	PRINT("SIZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZE");
 	PRINTVAR(size);
-	if (size > 100)
+	PRINT("HOOOOOOOOOOOOOOOOOOOOST");
+	PRINTVAR(host);
+	PRINT("PAAAAAAAAAAAAAAAAAAAAAAAAAAAAAATH");
+	PRINTVAR(path);
+	PRINT("MAXXXXXXXXXXXXXXXXXXX");
+	PRINTVAR(maxBody);
+
+
+	if (size > maxBody)
 	{
 		_sizeIssue = true;
 		_error = true;
