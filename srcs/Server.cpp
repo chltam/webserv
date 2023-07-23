@@ -61,7 +61,7 @@ void	Server::accept_connection()
 			if ((m_pfdVec[n].revents & POLLIN) && !isClientSock(m_pfdVec[n].fd))
 			{
 				std::cout << "connection established" << std::endl;
-				Socket	client_sock(m_pfdVec[n].fd);
+				Socket	client_sock(m_pfdVec[n].fd, getServerSockFromVec(m_pfdVec[n].fd).getIp(), getServerSockFromVec(m_pfdVec[n].fd).getPort());
 				m_clientSockVec.push_back(client_sock);
 				pollfd	cfd = {client_sock.get_sock_fd(), POLLIN | POLLOUT , 0};
 				m_pfdVec.push_back(cfd);

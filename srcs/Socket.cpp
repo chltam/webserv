@@ -27,7 +27,7 @@ Socket::Socket(int ipVersion, int service, int protocol)
  *
  * @param listener_fd listener socket fd
 */
-Socket::Socket(int listener_fd)
+Socket::Socket(int listener_fd, std::string	ip, int port)
 {
     sockaddr_in client_addr;
     socklen_t   len = 0;
@@ -39,6 +39,9 @@ Socket::Socket(int listener_fd)
 	_sizeIssue = false;
 	_permsIssue = false;
 	_badRequest = false;
+	_ip = ip;
+	_port = port;
+
 }
 
 Socket::~Socket()
@@ -48,8 +51,8 @@ Socket::~Socket()
 
 void    Socket::bind_socket(std::string ip, int port)
 {
-	_server_ip = ip;
-	_server_port = port;
+	_ip = ip;
+	_port = port;
 
     sockaddr_in sockaddr;
     sockaddr.sin_family = AF_INET;
@@ -123,6 +126,14 @@ std::vector<char>	Socket::get_request_byte(){
 	return (_request_byte);
 }
 
+std::string	Socket::getIp(){
+	return (_ip);
+}
+
+int	Socket::getPort(){
+	return (_port);
+}
+
 bool	Socket::get_error(){
 	return (_error);
 }
@@ -140,7 +151,7 @@ bool	Socket::get_needAuthorized(){
 }
 
 std::string	Socket::get_host(){
-	return (_server_ip + ":" + toString(_server_port));
+	return (_ip + ":" + toString(_port));
 }
 
 void	Socket::buffer_to_vec(char* buffer, int bread)
@@ -183,11 +194,13 @@ void	Socket::checkHeaderError(const Config& metaConfig)
 	std::string	path;
 
 	size = atoi(getValueFromHeader("Content-Length").c_str());
-	host = getValueFromHeader("Host:");
+	host = get_host();
 	pass = getValueFromHeader("Authorization:");
 
 	if (_header_str.find("Authorization:") != std::string::npos)
 		_needAuthorize = true;
+	else
+		_needAuthorize = false;
 
 	size_t	pos;
 	size_t	endpos;
@@ -196,7 +209,15 @@ void	Socket::checkHeaderError(const Config& metaConfig)
 	endpos = _header_str.find(' ', pos);
 	path = _header_str.substr(pos, endpos - pos);
 
-	size_t maxBody = metaConfig.getConfigServerFromRequest(host)->getRouteFromPath(path)->getClientMaxBodySize();
+	const ConfigServer*	serverConf = metaConfig.getConfigServerFromRequest(host);
+	if (serverConf == NULL)
+	{
+		_permsIssue = true;
+		_error = true;
+		return ;
+	}
+
+	size_t maxBody = serverConf->getRouteFromPath(path)->getClientMaxBodySize();
 
 	if (size > maxBody)
 	{

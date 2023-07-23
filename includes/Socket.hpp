@@ -36,7 +36,7 @@ public:
 
 //client socket functions
 public:
-	Socket(int listener_fd);
+	Socket(int listener_fd, std::string ip, int port);
 	int					read_sock(const Config& metaConfig);
 	std::string			get_request_str();
 	std::vector<char>	get_request_byte();
@@ -52,6 +52,9 @@ public:
 	long	get_last_active_time();
 	bool	get_error();
 	bool	get_needAuthorized();
+	std::string	getIp();
+	int	getPort();
+
 
 	bool	get_sizeIssue();
 	bool	get_permsIssue();
@@ -61,8 +64,8 @@ public:
 	void	printHeader();
 
 private:
-	std::string			_server_ip;
-	int					_server_port;
+	std::string			_ip;
+	int					_port;
 	int					_sock;
 	long				_last_active_time;
 	std::string			_header_str; 
