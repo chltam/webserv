@@ -162,16 +162,19 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 
 		write(fd[1], request_body.c_str(), request_body.length());
 		PRINT("HERE1");
-		waitpid(pid, &status, -1);
-		PRINT("HERE2");
-		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-			_cgi_fail = true;
 
 		long start = getUnixTime();
 		while (1)
 		{
 			if (getUnixTime() - start > 200)
 				break ;
+		}
+		waitpid(pid, &status, -1);
+		PRINT("HERE2");
+		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+		{
+			PRINT(WEXITSTATUS(status));
+			_cgi_fail = true;
 		}
 
 		pollfd pfd = {fd[0], POLLIN, 0};
@@ -191,14 +194,17 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 			{
 				bread = read(fd[0], buffer, 100);
 				PRINTVAR(bread);
-				if (bread <= 0)
+				if (bread <= 0){
 					break ;
+				}
 				else{
 					buffer[bread] = '\0';
 					ret += buffer;
 				}
 			}
 		}
+		if(ret.empty())
+			_cgi_fail = true;
 		// while(bread != 0)
 		// {
 		// 	if (getUnixTime() - start > 500)
@@ -209,7 +215,7 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 		// 		break;
 		// 	}
 		// 	PRINT("before read");
-			
+
 		// 	bread = read(fd[0], buffer, 100);
 		// 	buffer[bread] = '\0';
 		// 	ret += buffer;
@@ -223,7 +229,10 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 	PRINTVAR(ret);
 	size_t start = ret.find("<!DOCTYPE html>");
 	if (start == std::string::npos)
+	{
+		_cgi_fail = true;
 		return (string());
+	}
 	ret = ret.substr(start);
 	return (ret);
 
