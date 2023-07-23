@@ -87,7 +87,7 @@ Request::~Request(){}
 
 std::string Request::getHeaderValueFromKey(const std::string &key)
 {
-    for (int i = 0; i < _request_pair.size(); i++) {
+    for (size_t i = 0; i < _request_pair.size(); i++) {
         if(_request_pair[i].first == key)
             return _request_pair[i].second;
     }
@@ -106,7 +106,7 @@ std::vector<std::pair<std::string, std::string> >& Request::get_request_pair()
 
 void    Request::set_path_query(string uri)
 {
-    int split = uri.find('?');
+    size_t split = uri.find('?');
     if (split != string::npos)
     {
         _request_pair.push_back(make_pair("path", uri.substr(0, split)));
@@ -118,11 +118,11 @@ void    Request::set_path_query(string uri)
 
 void	Request::set_name_port()
 {
-	for (int n = 0; n < _request_pair.size(); n++)
+	for (size_t n = 0; n < _request_pair.size(); n++)
 	{
 		if (_request_pair[n].first == "Host")
 		{
-			int split = _request_pair[n].second.find(':');
+			size_t split = _request_pair[n].second.find(':');
 			if (split != string::npos)
 			{
 				_request_pair.push_back(make_pair("server_name", _request_pair[n].second.substr(0, split)));
@@ -156,7 +156,7 @@ int	Request::validHttpRequest(std::string requestStr)
 
 	if ( !( iss >> method >> path >> version) )
 		return (-1);
-	
+
 	if (method != "GET" && method != "POST" && method != "DELETE")
 		return (-1);
     _request_pair.push_back(make_pair("request type", method));
@@ -198,7 +198,7 @@ void	Request::parseInfo(std::string& requestStr)
 	if (infoStr.empty())
 		return ;
 	std::istringstream	info_iss(infoStr);
-	
+
 	while (getline(info_iss, buffer, '\n'))
 	{
 		size_t	pos = buffer.find(":");
@@ -227,7 +227,7 @@ bool	Request::get_badRequest(){
 
 std::ostream& operator<<(std::ostream& os,const Request& request)
 {
-  	for (int n = 0; n < request._request_pair.size(); n++)
+  	for (size_t n = 0; n < request._request_pair.size(); n++)
 	{
 		os <<" [" << request._request_pair[n].first << "] = [" <<  request._request_pair[n].second <<"]" << endl;
 	}

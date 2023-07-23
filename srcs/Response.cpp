@@ -33,7 +33,8 @@ void Response::bodyToString()
     }
     else{
 
-        std::ifstream file( _path );
+        std::ifstream file;
+        file.open(_path.c_str());
 		if ( file.is_open() ) {
 			buffer << file.rdbuf();
 		}
@@ -46,7 +47,7 @@ void Response::bodyToString()
 
 void Response::headerToString()
 {
-    _headerFields["Content-Length"] = std::to_string(_respBody.length());
+    _headerFields["Content-Length"] = toString(_respBody.length());
     PRINT_LOG("Content-Length = ",_respBody.length());
 
     _respHeader = ("HTTP/1.1 " + getStringFromStatus(_status) + "\r\nConnection: keep-alive\r\n");

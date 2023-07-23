@@ -55,8 +55,9 @@ Config::Config(char *filepath):m_brackCount(0)
     Tokenizer(path,tokens);
     Lexer(tokens);
 
-    for (int i = 0; i < tokens.size(); i++)
+    for (size_t i = 0; i < tokens.size(); i++){
         PRINT_LOG( TokenToString(tokens[i].second).c_str(),tokens[i].first.c_str());
+    }
 
 
     Node head;
@@ -111,7 +112,8 @@ void Config::extractMimesFromFile() {
 
 void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 {
-    std::ifstream inputFile(filepath);
+    std::ifstream inputFile;
+    inputFile.open(filepath.c_str());
     std::string fileContents;
     if (inputFile.is_open()) {
         std::stringstream buffer;
@@ -124,11 +126,13 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
     }
 
     size_t prev = 0;
+    std::string temp; //stupid cpp98 standard -.-
     int flag = 0; //1 = completed word, 2 = quotes, 3 = comment
     char quoteType = '\0'; //initializing
     for (size_t i = 0; i <= fileContents.length(); i++) {
         if ((fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}') && flag == 0) {
-            tokens.push_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
+            temp = fileContents[i];
+            tokens.push_back(std::make_pair(temp,-1)); //recently changed
             prev = i;
         }
         else if(fileContents[i] == '#' && flag == 0){ // found comments
@@ -145,7 +149,7 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
             prev = i;
         }
         else if(quoteType == fileContents[i] && flag == 2) { // quote end
-            tokens.push_back(std::pair<std::string,int>(fileContents.substr(prev,i - prev + 1),-1));
+            tokens.push_back(std::make_pair(fileContents.substr(prev,i - prev + 1),-1));
             flag = 0;
             prev = i;
         }
@@ -154,9 +158,11 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
             prev = i;
         }
         else if(!isValidChar(fileContents[i]) && flag == 1) {
-            tokens.push_back(std::pair<std::string,int>(fileContents.substr(prev,i - prev),-1));
-            if(fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}' )
-                tokens.push_back(std::pair<std::string,int>(std::string{fileContents[i]},-1));
+            tokens.push_back(std::make_pair(fileContents.substr(prev,i - prev),-1));
+            if(fileContents[i] == ';' || fileContents[i] == '{' || fileContents[i] == '}' ){
+                temp = fileContents[i];
+                tokens.push_back(std::make_pair(temp,-1));
+            }
             flag = 0;
             prev = i;
         }
@@ -166,8 +172,19 @@ void Config::Tokenizer(const std::string &filepath, TokenQueue &tokens)
 
 void Config::Lexer(TokenQueue& tokens)
 {
-    std::vector<std::string> keywords = {"listen","error_page","server_name","auto_index",
-            "client_max_body_size","root","index","allow_methods","cgi","return"};
+    // std::vector<std::string> keywords = {"listen","error_page","server_name","auto_index",
+    //         "client_max_body_size","root","index","allow_methods","cgi","return"}; //BULLSHIT cpp98 standard
+    std::vector<std::string> keywords;
+    keywords.push_back("listen");
+    keywords.push_back("error_page");
+    keywords.push_back("server_name");
+    keywords.push_back("auto_index");
+    keywords.push_back("client_max_body_size");
+    keywords.push_back("root");
+    keywords.push_back("index");
+    keywords.push_back("allow_methods");
+    keywords.push_back("cgi");
+    keywords.push_back("return");
 
     for (size_t i = 0; i < tokens.size(); i++) {
         if(tokens[i].first == ";")
@@ -217,7 +234,7 @@ void Config::ParseConfig(TokenQueue& tokens, Node& currNode)
 void Config::ParseStatement(TokenQueue& tokens, Node& currNode)
 {
     if(tokens[0].second == T_CONF_BLOCK_SERVER && tokens[1].second == T_CONF_BLOCKSTART && currNode.type == NODE_CONFIGURATION){
-        currNode.children.emplace_back(Node(NODE_BLOCK_SERVER,tokens[0].first));
+        currNode.children.push_back(Node(NODE_BLOCK_SERVER,tokens[0].first));
         for (int i = 0; i < 2; i++)
             tokens.pop_front();
         m_brackCount++;
@@ -225,15 +242,15 @@ void Config::ParseStatement(TokenQueue& tokens, Node& currNode)
     }
     else if(tokens[0].second == T_CONF_BLOCK_LOCATION && tokens[1].second == T_CONF_LITERAL
      && tokens[2].second == T_CONF_BLOCKSTART && currNode.type == NODE_BLOCK_SERVER){
-        currNode.children.emplace_back(Node(NODE_BLOCK_LOCATION,tokens[0].first));
-        currNode.children.back().values.emplace_back(tokens[1].first);
+        currNode.children.push_back(Node(NODE_BLOCK_LOCATION,tokens[0].first));
+        currNode.children.back().values.push_back(tokens[1].first);
         m_brackCount++;
         for (int i = 0; i < 3; i++)
             tokens.pop_front();
         ParseConfig(tokens,currNode.children.back());
     }
     else if(tokens[0].second == T_CONF_KEYWORD){
-        currNode.children.emplace_back(Node(NODE_DIRECTIVE,tokens[0].first));
+        currNode.children.push_back(Node(NODE_DIRECTIVE,tokens[0].first));
         tokens.pop_front();
         ParseDirective(tokens, currNode.children.back());
     }
@@ -255,20 +272,20 @@ void Config::ParseStatement(TokenQueue& tokens, Node& currNode)
 void Config::ParseDirective(TokenQueue& tokens, Node& currNode)
 {
     if(tokens[0].second == T_CONF_LITERAL && tokens[1].second == T_CONF_LITERAL && currNode.totalAllowedValues > 0){
-        currNode.values.emplace_back(tokens[0].first);
+        currNode.values.push_back(tokens[0].first);
         tokens.pop_front();
         currNode.totalAllowedValues--;
         ParseDirective(tokens,currNode);
     }
     else if(tokens[0].second == T_CONF_LITERAL && tokens[1].second == T_CONF_SEMICOLON
          && currNode.totalAllowedValues == 1 && currNode.requireSpecificArgs){
-        currNode.values.emplace_back(tokens[0].first);
+        currNode.values.push_back(tokens[0].first);
         tokens.pop_front();
         currNode.totalAllowedValues--;
         return;
     }
     else if(tokens[0].second == T_CONF_LITERAL && tokens[1].second == T_CONF_SEMICOLON && !currNode.requireSpecificArgs){
-            currNode.values.emplace_back(tokens[0].first);
+            currNode.values.push_back(tokens[0].first);
             tokens.pop_front();
             currNode.totalAllowedValues--;
             return;
@@ -283,11 +300,11 @@ void Config::Executioner(Node &head)
 {
     //set default root route foreach Server
 
-    for (int i = 0; i < head.children.size(); i++) {
+    for (size_t i = 0; i < head.children.size(); i++) {
         createConfigServer(head.children[i]);
     }
 
-    for (int i = 0; i < m_servers.size(); i++){
+    for (size_t i = 0; i < m_servers.size(); i++){
         if(m_servers[i]->getPorts().size() != 0)
             return;
     }
@@ -300,9 +317,9 @@ void Config::Executioner(Node &head)
 void Config::createConfigServer(Node &serverNode)
 {
     ConfigServer* newServer = new ConfigServer(m_errorPages);
-    m_servers.emplace_back(newServer);
+    m_servers.push_back(newServer);
     ConfigRoute* defaultRoute = new ConfigRoute("/","./files","index.html",METH_GET,100000000,false,""); // setting up default file
-    for (int i = 0; i < serverNode.children.size(); i++) { //loop over all directive nodes to create a default route
+    for (size_t i = 0; i < serverNode.children.size(); i++) { //loop over all directive nodes to create a default route
         if(serverNode.children[i].name == "listen")
             AddServerPort(*newServer,serverNode.children[i].values[0]);
         else if(serverNode.children[i].name == "error_page")
@@ -321,34 +338,36 @@ void Config::createConfigServer(Node &serverNode)
 
     newServer->AddConfigRoute(defaultRoute);
 
-    for (int i = 0; i < serverNode.children.size(); i++) {
+    for (size_t i = 0; i < serverNode.children.size(); i++) {
         if (serverNode.children[i].type == NODE_BLOCK_LOCATION) {
             ConfigRoute* newRoute = new ConfigRoute(*(newServer->getRouteFromPath(serverNode.children[i].values[0]))); //might need error checking? what if NULL?
             newRoute->setPath(serverNode.children[i].values[0]);
-            for (int j = 0; j < serverNode.children[i].children.size(); j++) {
+            for (size_t j = 0; j < serverNode.children[i].children.size(); j++) {
                 updateConfigRoute(*newRoute,serverNode.children[i].children[j],NODE_BLOCK_LOCATION);
             }
             newServer->AddConfigRoute(newRoute);
         }
 
     }
-    if(newServer->getPorts().size() == 0)
+    if(newServer->getPorts().size() == 0){
         PRINT_WARNING("WARNING, no port has been setup for server, behavior might be wrong");
+    }
 
 }
 
 void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type )
 {
+    (void)type;
 
     if(currNode.name == "allow_methods"){
         int allowedMethods = METH_NONE;
-        for (int i = 0; i < currNode.values.size(); i++) {
+        for (size_t i = 0; i < currNode.values.size(); i++) {
            allowedMethods |= StringToMethodEnum(currNode.values[i]);
         }
         route.setAllowedMethods(allowedMethods);
     }
     else if(currNode.name == "index"){
-        for (int i = 0; i < currNode.values.size(); i++) {
+        for (size_t i = 0; i < currNode.values.size(); i++) {
             route.AddIndexFile(currNode.values[i]); // behavior unclear for overwriting
         }
     }
@@ -360,8 +379,9 @@ void Config::updateConfigRoute(ConfigRoute& route,Node &currNode, NodeType type 
             route.setAutoindex(true);
         else if(currNode.values[0] == "off" || currNode.values[0] == "0" )
             route.setAutoindex(false);
-        else
+        else{
             PRINT_WARNING("WARNING! autoindex read invalid value, val will not be changed");
+        }
     }
     else if(currNode.name == "return"){
         route.setRedirectDir(currNode.values[0]);
@@ -414,9 +434,9 @@ void Config::AddServerPort(ConfigServer& currServer,const std::string& initialVa
         return;
     }
 
-    for (int i = 0; i < m_servers.size(); i++) {
-        const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i]->getPorts();
-        for (std::vector<std::pair<std::string,std::string>>::const_iterator it = ports.begin(); it != ports.end(); it++) {
+    for (size_t i = 0; i < m_servers.size(); i++) {
+        const std::vector<std::pair<std::string,std::string> >& ports = m_servers[i]->getPorts();
+        for (std::vector<std::pair<std::string,std::string> >::const_iterator it = ports.begin(); it != ports.end(); it++) {
             if(it->first == key && it->second == value){
                 PRINT_ERROR("this constellation of servername and host already exists,skipping,",key,":",value);
                 return;
@@ -429,7 +449,7 @@ void Config::AddServerPort(ConfigServer& currServer,const std::string& initialVa
 bool Config::isValidChar(char c)
 {
     char forbidded[] = " \n\r\t;{}\0";
-    for (int i = 0; i < sizeof(forbidded); i++) {
+    for (size_t i = 0; i < sizeof(forbidded); i++) {
         if(forbidded[i] == c)
             return false;
     }
@@ -456,7 +476,8 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
 
 
     int port = std::atoi(value.c_str()); //silly step because port string has a trailing new line
-    value =  std::to_string(port);
+    value =  toString(port);
+
 
 //not the cleanest? but we cant bind multiple ports so we need to convert somewhere, localhost exist always
     if(key == "localhost" || key == "0.0.0.0")
@@ -467,9 +488,9 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
         return NULL;
     }
 
-    for (int i = 0; i < m_servers.size(); i++) {
-        const std::vector<std::pair<std::string,std::string>>& ports = m_servers[i]->getPorts();
-        for (std::vector<std::pair<std::string,std::string>>::const_iterator it = ports.begin(); it != ports.end(); it++) {
+    for (size_t i = 0; i < m_servers.size(); i++) {
+        const std::vector<std::pair<std::string,std::string> >& ports = m_servers[i]->getPorts();
+        for (std::vector<std::pair<std::string,std::string> >::const_iterator it = ports.begin(); it != ports.end(); it++) {
             if(it->first == key && it->second == value){
                 PRINT_LOG("FOUND SERVER, returning ");
                 return m_servers[i];
@@ -485,7 +506,7 @@ const ConfigServer* Config::getConfigServerFromRequest(std::string hostPort) con
 std::ostream &operator<<(std::ostream &os, const Config &config)
 {
     os << "-------PRINTING CONFIG---------"<< std::endl;
-    for (int i = 0; i < config.m_servers.size(); i++) {
+    for (size_t i = 0; i < config.m_servers.size(); i++) {
         os << "Server Nr: " << i << std::endl;
         os << *config.m_servers[i] << std::endl;
     }
@@ -500,21 +521,25 @@ void printNode(const Node &node,int inset)
         offset += " ";
 
     std::string type = nodetypeToString(node.type);
-    if(node.type == NODE_BLOCK_SERVER)
+    if(node.type == NODE_BLOCK_SERVER){
         PRINT_LOG(offset,"\x1B[31m",type.c_str(),"\033[0m");
-    else if(node.type == NODE_BLOCK_LOCATION)
+    }
+    else if(node.type == NODE_BLOCK_LOCATION){
         PRINT_LOG(offset,"\x1B[32m",type.c_str(),"\033[0m");
-    else
+    }
+    else{
         PRINT_LOG(offset,"\x1B[36m",type.c_str(),"\033[0m");
+    }
 
     PRINT_LOG(offset,"Directive: ",node.name);
     PRINT_LOG(offset,"tot Values: ",node.totalAllowedValues);
     PRINT_LOG(offset,"bool: ",node.requireSpecificArgs);
 
-    for (int i = 0; i < node.values.size(); i++)
+    for (size_t i = 0; i < node.values.size(); i++){
         PRINT_LOG(offset, node.values[i]);
+    }
     PRINT_LOG(offset, "-----Node Children-----");
-    for (int i = 0; i < node.children.size(); i++){
+    for (size_t i = 0; i < node.children.size(); i++){
         PRINT_LOG(offset, "Child: ",  i);
         printNode(node.children[i],inset+5);
     }
@@ -560,8 +585,7 @@ std::string Config::TokenToString(int tokenVal)
 
 unsigned int calcAllowedValues(const std::string &key)
 {
-    std::vector<std::string> infititeKeywords = {"index","allow_methods"};
-    if(std::find(infititeKeywords.begin(),infititeKeywords.end(),key) != infititeKeywords.end())
+    if(key == "index" || key == "allow_methods")
         return -1; // will be unsigned int max
     else if(key == "cgi" || key == "error_page")
         return 2;

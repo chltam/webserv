@@ -47,7 +47,7 @@ void	MetaVars::set_executor(std::string executor)
 }
 
 /**
- * @brief get info from Request, set MetaVars accordingly 
+ * @brief get info from Request, set MetaVars accordingly
 */
 void	MetaVars::update_envp(Request& request)
 {
@@ -57,11 +57,11 @@ void	MetaVars::update_envp(Request& request)
 	// set_value("SCRIPT_FILENAME", request.getHeaderValueFromKey("path"));
 	// set_value("SCRIPT_NAME", request.getHeaderValueFromKey("path"));
 
-	
+
 	set_value("SERVER_PROTOCOL", request.getHeaderValueFromKey("protocol"));
 	set_value("SERVER_NAME", request.getHeaderValueFromKey("server_name"));
 	set_value("SERVER_PORT", request.getHeaderValueFromKey("server_port"));
-	
+
 	set_content_length(request.getBody());
 
 	set_value("PATH_INFO", request.getHeaderValueFromKey("path")); //depends on our approach
@@ -91,7 +91,7 @@ char	**MetaVars::get_envp()
 	for (int n = 0; n < _envp_size; n++){
 		new_envp[n] = strdup(_envp[n]);
 	}
-	
+
 	int	n = 0;
 	for (map<string, string>::iterator it = _meta_map.begin(); it != _meta_map.end(); it++){
 		new_envp[_envp_size  + n] = strdup((it->first + "=" + it->second).c_str());
@@ -108,11 +108,11 @@ bool	MetaVars::get_cgi_failure(){
 
 bool	MetaVars::check_extension(const vector<pair<string, string> >& cgi_pair, string path)
 {
-	int	dpos = path.rfind('.');
+	size_t	dpos = path.rfind('.');
 	if (dpos == std::string::npos)
 		return (false);
-	vector<pair<string , string> >::const_iterator it = cgi_pair.begin();
-	for (int n = 0; n < cgi_pair.size(); n++)
+	// vector<pair<string , string> >::const_iterator it = cgi_pair.begin(); //commented out by Jean as its unused (Werror)
+	for (size_t n = 0; n < cgi_pair.size(); n++)
 	{
 		if (path.substr(dpos) == cgi_pair[n].first)
 		{
@@ -145,7 +145,7 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 		exit(EXIT_FAILURE); // dc from client?
 
 	if (pid == 0)
-	{	
+	{
 		dup2(fd[0], STDIN_FILENO);
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
@@ -162,7 +162,7 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 	// 	// pfd[1] = {fd[1], POLLOUT, 0};
 
 	// 	pollfd	sfd = {fd[0], POLLIN, 0};
-				
+
 
 	// 	write(fd[1], request_body.c_str(), request_body.length());
 	// 	close(fd[1]);
@@ -202,12 +202,12 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 		char	buffer[100];
 		int	bread = 1;
 		int status;
-	
+
 		write(fd[1], request_body.c_str(), request_body.length());
 		close(fd[1]);
 		waitpid(pid, &status,0);
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
-			_cgi_fail = true;	
+			_cgi_fail = true;
 
 		while(bread != 0)
 		{
@@ -215,12 +215,12 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 			buffer[bread] = '\0';
 			ret += buffer;
 		}
-		
+
 
 		close(fd[0]);
 	}
 	PRINTVAR(ret);
-	int start = ret.find("<!DOCTYPE html>");
+	size_t start = ret.find("<!DOCTYPE html>");
 	if (start == std::string::npos)
 		return (string());
 	ret = ret.substr(start);
@@ -254,7 +254,7 @@ int	MetaVars::count_envp_size(char **envp)
 char	**MetaVars::copy_envp(char **envp, int& _envp_size)
 {
 	char **new_envp;
-	
+
 	new_envp = new char*[_envp_size + 1];
 	for (int n = 0; n < _envp_size; n++){
 			new_envp[n] = strdup(envp[n]);

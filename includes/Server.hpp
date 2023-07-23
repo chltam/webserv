@@ -47,12 +47,12 @@ class Server {
 
     private:
 
-		MetaVars	_mvars;
         std::vector<Socket>	m_serverSockVec;
 		std::vector<Socket>	m_clientSockVec;
 		std::vector<pollfd>	m_pfdVec;
         Config m_Config;
         ResponseBuilder _builder;
+		MetaVars	_mvars; //order matters for initialization -.- (Werror flag)
 
         void 	handle(Socket& client_sock);
 		bool	isClientSock(int fdToCheck);

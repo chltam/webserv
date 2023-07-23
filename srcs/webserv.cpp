@@ -137,7 +137,8 @@ std::string getTypeFromExtension( std::string path,const std::map<std::string, s
 
     std::cout << "EXT: " << ext << std::endl;
 
-    auto it = types.find(ext);
+
+    std::map<std::string, std::string>::const_iterator it = types.find(ext);
     if (it == types.end())
         return "text/html";
 
@@ -148,7 +149,7 @@ std::string getTypeFromExtension( std::string path,const std::map<std::string, s
 long	getUnixTime()
 {
 	struct timeval tv;
-	
+
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }

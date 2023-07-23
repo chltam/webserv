@@ -48,7 +48,7 @@ std::ostream &operator<<(std::ostream &os, const ConfigServer &cs)
 
     os << "----Ports----" << std::endl;
     if(cs.m_ports.size() != 0) {
-        for (int i = 0; i < cs.m_ports.size(); i++)
+        for (size_t i = 0; i < cs.m_ports.size(); i++)
             os << "elem " << i << ": " << cs.m_ports[i].first << " " << cs.m_ports[i].second << std::endl;
     }
     else
@@ -86,7 +86,7 @@ ConfigServer::~ConfigServer()
 
 }
 
-const std::vector<std::pair<std::string,std::string>>& ConfigServer::getPorts() const
+const std::vector<std::pair<std::string,std::string> >& ConfigServer::getPorts() const
 {
     return m_ports;
 }
@@ -98,13 +98,11 @@ const std::map<int, std::string> &ConfigServer::getErrorPages() const
 
 std::string ConfigServer::getErrorPageFromCode(int errorCode) const
 {
-    PRINT_WARNING("in here");
     std::map<int,std::string>::const_iterator it = m_errorPages.find(errorCode);
     if(it == m_errorPages.end()) {
         PRINT_WARNING("WARNING, given errorfilepage was not found in server config array");
         return "FILE NOT FOUND IN ARRAY";
     }
-     PRINT_WARNING("in adasdasdas");
     return it->second;
 }
 
@@ -120,7 +118,7 @@ void ConfigServer::AddConfigRoute(ConfigRoute *config)
 
 void ConfigServer::AddServerPort(const std::string& serverName,const std::string& port)
 {
-    m_ports.emplace_back(std::pair<std::string,std::string>(serverName,port));
+    m_ports.push_back(std::pair<std::string,std::string>(serverName,port));
 }
 
 void ConfigServer::AddErrorPage(const std::string &key, const std::string &value)

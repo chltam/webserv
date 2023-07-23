@@ -29,7 +29,7 @@ Socket::Socket(int ipVersion, int service, int protocol)
 */
 Socket::Socket(int listener_fd)
 {
-    sockaddr_in client_addr{};
+    sockaddr_in client_addr;
     socklen_t   len = 0;
 
     _sock = accept(listener_fd, (sockaddr *) &client_addr, &len);
@@ -51,7 +51,7 @@ void    Socket::bind_socket(std::string ip, int port)
 	_server_ip = ip;
 	_server_port = port;
 
-    sockaddr_in sockaddr{};
+    sockaddr_in sockaddr;
     sockaddr.sin_family = AF_INET;
     sockaddr.sin_port = htons(port);//ntohs() to convert it back to int
     sockaddr.sin_addr.s_addr = inet_addr(ip.c_str());
@@ -211,7 +211,7 @@ void	Socket::checkHeaderError(const Config& metaConfig)
 		_permsIssue = true;
 		_error = true;
 	}
-	
+
 }
 
 void	Socket::printHeader()

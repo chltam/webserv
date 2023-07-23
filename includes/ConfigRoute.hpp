@@ -21,7 +21,7 @@ public: //getters & setters
     int getAllowedMethods() const;
     size_t getClientMaxBodySize() const;
     bool getAutoIndex() const;
-    const std::vector<std::pair<std::string, std::string>>& getCgi() const;
+    const std::vector<std::pair<std::string, std::string> >& getCgi() const;
     const std::string& getRedirectDir() const;
 
 
@@ -43,7 +43,7 @@ private:
     int m_allowedMethods;
     size_t m_clientMaxBodySize;
     bool m_autoindex;
-    std::vector<std::pair<std::string, std::string>> m_cgi;
+    std::vector<std::pair<std::string, std::string> > m_cgi;
 
     std::string m_redirectDir;
 

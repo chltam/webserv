@@ -83,8 +83,9 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
             else if(fileInfo != S_IFREG) {
                 PRINT_LOG("Path is invalid! Couldn't find a single valid default file, default files:");
                 const std::vector<std::string>& indexFiles = configRoute->getDefaultFile();
-                for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); it++)
+                for (std::vector<std::string>::const_iterator it = indexFiles.begin(); it != indexFiles.end(); it++){
                     PRINT_LOG(*it);
+                }
                 response.setPath(server->getErrorPageFromCode(404));
                 return 404;
             }
@@ -94,7 +95,7 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
 	{
         PRINT_LOG("Method allowed but not authorized");
         response.setPath(server->getErrorPageFromCode(401));
-		return 401;	
+		return 401;
 	}
 
 	if (!(method & configRoute->getAllowedMethods()) && socket.get_needAuthorized() && !socket.get_permsIssue())

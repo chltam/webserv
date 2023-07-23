@@ -31,42 +31,46 @@
 #define PRINT(x) std::cerr << x  << std::endl
 #define PRINTVAR_LOG(x) std::cerr<< COL_GREY << #x <<": [" << x << "]" << COL_DEFAULT  << std::endl
 
-#define PRINT_LOG(...) do { \
-    if(LOG_LEVEL >= LOG_EVERYTHING){ \
-    std::cerr << COL_GREY ; \
-    printvar_internal(__VA_ARGS__); \
-    std::cerr << COL_DEFAULT << std::endl; \
-    } \
-} while (false)
+#define PRINT_LOG(...)
+#define PRINT_WARNING(...)
+#define PRINT_ERROR(...)
+
+// #define PRINT_LOG(...) do { \
+//     if(LOG_LEVEL >= LOG_EVERYTHING){ \
+//     std::cerr << COL_GREY ; \
+//     printvar_internal(__VA_ARGS__); \
+//     std::cerr << COL_DEFAULT << std::endl; \
+//     } \
+// } while (false)
 
 
-#define PRINT_WARNING(...) do { \
-    if(LOG_LEVEL >= LOG_WARNINGS_ERRORS){ \
-    std::cerr << COL_YELLOW ; \
-    printvar_internal(__VA_ARGS__); \
-    std::cerr << COL_DEFAULT << std::endl; \
-    } \
-} while (false)
+// #define PRINT_WARNING(...) do { \
+//     if(LOG_LEVEL >= LOG_WARNINGS_ERRORS){ \
+//     std::cerr << COL_YELLOW ; \
+//     printvar_internal(__VA_ARGS__); \
+//     std::cerr << COL_DEFAULT << std::endl; \
+//     } \
+// } while (false)
 
-#define PRINT_ERROR(...) do { \
-    if(LOG_LEVEL >= LOG_ERRORS_ONLY){ \
-    std::cerr << COL_RED ; \
-    printvar_internal(__VA_ARGS__); \
-    std::cerr << COL_DEFAULT << std::endl; \
-    } \
-} while (false)
+// #define PRINT_ERROR(...) do { \
+//     if(LOG_LEVEL >= LOG_ERRORS_ONLY){ \
+//     std::cerr << COL_RED ; \
+//     printvar_internal(__VA_ARGS__); \
+//     std::cerr << COL_DEFAULT << std::endl; \
+//     } \
+// } while (false)
 
 // Helper function for printing multiple variables
-template<typename T>
-void printvar_internal(const T& t) {
-    std::cerr << t;
-}
+// template<typename T>
+// void printvar_internal(const T& t) {
+//     std::cerr << t;
+// }
 
-template<typename T, typename... Args>
-void printvar_internal(const T& t, Args... args) {
-    std::cerr << t << " ";
-    printvar_internal(args...);
-}
+// template<typename T, typename... Args>
+// void printvar_internal(const T& t, Args... args) {
+//     std::cerr << t << " ";
+//     printvar_internal(args...);
+// }
 
 
 enum AllowedMethods{

@@ -18,7 +18,7 @@ ConfigRoute::ConfigRoute(const std::string& path,const std::string &root, const 
 {
     m_path = path;
     m_root = root;
-    m_indexFiles.emplace_back(defaultFile);
+    m_indexFiles.push_back(defaultFile);
     m_allowedMethods = allowedMethods;
     m_clientMaxBodySize = bodyBufferSize;
     m_autoindex = autoIndex;
@@ -37,13 +37,13 @@ ConfigRoute::ConfigRoute(const ConfigRoute &route)
     m_autoindex = route.getAutoIndex();
 
     if(route.m_cgi.size() != 0) {
-        for (int i = 0; i < route.m_cgi.size(); i++)
-            m_cgi.emplace_back(route.m_cgi[i].first,route.m_cgi[i].second);
+        for (size_t i = 0; i < route.m_cgi.size(); i++)
+            m_cgi.push_back(std::make_pair( route.m_cgi[i].first,route.m_cgi[i].second));
     }
 
     if(route.m_indexFiles.size() != 0) {
-        for (int i = 0; i < route.m_indexFiles.size(); i++){
-            m_indexFiles.emplace_back(route.m_indexFiles[i]);
+        for (size_t i = 0; i < route.m_indexFiles.size(); i++){
+            m_indexFiles.push_back(route.m_indexFiles[i]);
         }
 
     }
@@ -83,7 +83,7 @@ bool ConfigRoute::getAutoIndex() const
     return m_autoindex;
 }
 
-const std::vector<std::pair<std::string, std::string>> &ConfigRoute::getCgi() const
+const std::vector<std::pair<std::string, std::string> > &ConfigRoute::getCgi() const
 {
     return m_cgi;
 }
@@ -111,7 +111,7 @@ void ConfigRoute::AddIndexFile(const std::string &newIndexFile)
     }
 
     if (std::find(m_indexFiles.begin(),m_indexFiles.end(),newIndexFile) == m_indexFiles.end())
-        m_indexFiles.emplace_back(newIndexFile);
+        m_indexFiles.push_back(newIndexFile);
     else {
         PRINT("WARNING, index file already exists, skipping this one");
     }
@@ -135,7 +135,7 @@ void ConfigRoute::setAutoindex(bool value)
 
 void ConfigRoute::addCGI(const std::string &key, const std::string &value)
 {
-    std::vector<std::pair<std::string,std::string>>::iterator it = m_cgi.begin() ;
+    std::vector<std::pair<std::string,std::string> >::iterator it = m_cgi.begin() ;
     for (; it < m_cgi.end(); it++){
         if(it->first == key)
             break;
@@ -143,7 +143,7 @@ void ConfigRoute::addCGI(const std::string &key, const std::string &value)
 
     if(it == m_cgi.end()){
         PRINT_LOG("CGI key was not found, added new pair: ",key,value);
-        m_cgi.emplace_back(std::pair<std::string, std::string>(key,value));
+        m_cgi.push_back(std::pair<std::string, std::string>(key,value));
     }
     else{
         PRINT_WARNING("CGI key already exists, value will be overwritten, old =",it->second,"new = ",value);
@@ -155,7 +155,7 @@ int ConfigRoute::findValidIndexFile(std::string &path) const
 {
     std::string fullpath;
     int fileInfo;
-    for (int i = 0; i < m_indexFiles.size(); i++)
+    for (size_t i = 0; i < m_indexFiles.size(); i++)
     {
         fullpath = path + m_indexFiles[i];
         fileInfo = ValidatePath(fullpath);
@@ -183,7 +183,7 @@ std::ostream &operator<<(std::ostream &os, const ConfigRoute &cr)
     os << spaces << "Root dir = " << cr.m_root << std::endl;
     os << spaces << "Index File(s) = ";
     if(cr.m_indexFiles.size() != 0) {
-        for (int i = 0; i < cr.m_indexFiles.size(); i++)
+        for (size_t i = 0; i < cr.m_indexFiles.size(); i++)
             os <<  cr.m_indexFiles[i] << " ";
         os << std::endl;
     }
@@ -197,7 +197,7 @@ std::ostream &operator<<(std::ostream &os, const ConfigRoute &cr)
 
     if(cr.m_cgi.size() != 0) {
 
-        for (int i = 0; i < cr.m_cgi.size(); i++)
+        for (size_t i = 0; i < cr.m_cgi.size(); i++)
             os << spaces << spaces << "elem " <<i << ": " <<cr.m_cgi[i].first <<" " << cr.m_cgi[i].second << std::endl;
     }
     else{
