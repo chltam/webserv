@@ -27,9 +27,9 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
 
 int ResponseBuilder::setResponseStatus( Request& request, const Config& config, Response& response, MetaVars& mvars, Socket& socket )
 {
-    const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
+    const ConfigServer* server = config.getConfigServerFromRequest( socket.get_host() );
 
-    if (request.getTimeout())
+    if (request.getTimeout() )
     {
         response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
         response.insertHeaderField("Content-Type", "text/html");
@@ -42,6 +42,14 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         response.setPath(config.m_errorPages.find(400)->second);
         return 400;
     }
+
+	if (server == NULL)
+	{
+		response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
+        response.insertHeaderField("Content-Type", "text/html");
+        response.setPath(config.m_errorPages.find(408)->second);
+        return 408;
+	}
 
     string path = request.getHeaderValueFromKey( "path" );
 

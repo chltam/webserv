@@ -22,6 +22,7 @@ Request::Request(std::string requestStr)
 		return ;
 	}
 	parseInfo(requestStr);
+	std::cout << *this << std::endl;
 
 }
 
