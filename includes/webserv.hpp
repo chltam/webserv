@@ -20,6 +20,7 @@
 #define LOG_LEVEL LOG_EVERYTHING
 #endif
 
+#define UPLOAD_DIR "upload/"
 
 #define COL_RED "\x1B[31m"
 #define COL_YELLOW "\x1B[33m"

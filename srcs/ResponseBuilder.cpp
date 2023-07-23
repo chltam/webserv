@@ -168,7 +168,7 @@ void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string 
 	ofstream	file;
 	if (isFileUploading(contentType))
 	{
-		filename = "upload/" + extractFileName(resourceData);
+		filename = UPLOAD_DIR + extractFileName(resourceData);
 		resourceData = extractFileData(resourceData);
 		file.open(filename.c_str());
 	}

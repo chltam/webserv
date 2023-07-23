@@ -16,6 +16,7 @@
 #include "Response.hpp"
 #include "MetaVars.hpp"
 #include "Socket.hpp"
+#include "webserv.hpp"
 
 #define VALID_REQUEST_NUM 3
 
