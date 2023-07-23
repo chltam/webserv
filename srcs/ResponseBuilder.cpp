@@ -130,6 +130,7 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
 		{
 			response.setPath(server->getErrorPageFromCode(500));
 			response.setCgi(false);
+            mvars.clean_meta_map();
        		return 500;
 		}
         mvars.clean_meta_map();

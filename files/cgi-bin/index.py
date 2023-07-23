@@ -16,6 +16,7 @@ print("<title>Python CGI example</title>")
 print("</head>")
 print("<body>")
 print("<h2>Python CGI called</h2>")
+print("<img src='../images/Mr.Meeseeks.png' alt='meeseek'>")
 print("</body>")
 print("</html>")
 
