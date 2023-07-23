@@ -137,6 +137,7 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 	int	pid;
 	int fd[2];
 
+	_cgi_fail = false;
 	if (pipe(fd) == -1)
 		exit(EXIT_FAILURE); // dc from client?
 
@@ -153,50 +154,6 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 		execve(arg[0], arg, get_envp());
 			PRINT("HERERERE\n");
 	}
-	// else
-	// {
-	// 	char	buffer[100];
-	// 	int status;
-	// 	// pollfd	pfd[2];
-	// 	// pfd[0] = {fd[0], POLLIN, 0};
-	// 	// pfd[1] = {fd[1], POLLOUT, 0};
-
-	// 	pollfd	sfd = {fd[0], POLLIN, 0};
-
-
-	// 	write(fd[1], request_body.c_str(), request_body.length());
-	// 	close(fd[1]);
-	// 	while (true)
-	// 	{
-	// 		// PRINT_ERROR("HERE1");
-	// 		int result = poll(&sfd, 1, 1000);
-	// 		if (result <= 0)
-	// 			break ;
-	// 		PRINTVAR(result);
-	// 		PRINTVAR(sfd.revents);
-
-	// 		// if (pfd[1].revents & POLLOUT)
-	// 		// {
-	// 		// 	PRINT_ERROR("HERE3");
-	// 		// 	write(fd[1], request_body.c_str(), request_body.length());
-	// 		// 	close(fd[1]);
-	// 		// }
-	// 		if (sfd.revents & (POLLIN | POLLHUP) )
-	// 		{
-	// 			PRINT_ERROR("HERE3");
-
-	// 			int bread = read(fd[0], buffer, 100);
-	// 			PRINTVAR(bread);
-	// 			if (bread <= 0)
-	// 				break ;
-	// 			else
-	// 			{
-	// 				buffer[bread] = '\0';
-	// 				ret += buffer;
-	// 			}
-	// 			PRINT("test");
-	// 		}
-	// 	}
 	else
 	{
 		char	buffer[100];
@@ -204,19 +161,63 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 		int status;
 
 		write(fd[1], request_body.c_str(), request_body.length());
-		close(fd[1]);
-		waitpid(pid, &status,0);
+		PRINT("HERE1");
+		waitpid(pid, &status, -1);
+		PRINT("HERE2");
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 			_cgi_fail = true;
 
-		while(bread != 0)
+		long start = getUnixTime();
+		while (1)
 		{
-			bread = read(fd[0], buffer, 100);
-			buffer[bread] = '\0';
-			ret += buffer;
+			if (getUnixTime() - start > 200)
+				break ;
 		}
 
+		pollfd pfd = {fd[0], POLLIN, 0};
+		while (1)
+		{
+			int result = poll(&pfd, 1, 100);
+			PRINTVAR(pfd.revents);
+			if (getUnixTime() - start > 500)
+			{
+				_cgi_fail = true;
+				kill(pid, SIGINT);
+				break;
+			}
+			if (result <= 0)
+				break ;
+			else if (pfd.revents & POLLIN)
+			{
+				bread = read(fd[0], buffer, 100);
+				PRINTVAR(bread);
+				if (bread <= 0)
+					break ;
+				else{
+					buffer[bread] = '\0';
+					ret += buffer;
+				}
+			}
+		}
+		// while(bread != 0)
+		// {
+		// 	if (getUnixTime() - start > 500)
+		// 	{
+		// 		PRINT("HERE3");
+		// 		_cgi_fail = true;
+		// 		kill(pid, SIGINT);
+		// 		break;
+		// 	}
+		// 	PRINT("before read");
+			
+		// 	bread = read(fd[0], buffer, 100);
+		// 	buffer[bread] = '\0';
+		// 	ret += buffer;
+		// 	PRINTVAR(ret);
 
+		// }
+
+		close(fd[1]);
 		close(fd[0]);
 	}
 	PRINTVAR(ret);

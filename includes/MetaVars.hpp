@@ -11,6 +11,7 @@
 #include <vector>
 #include <map>
 #include <poll.h>
+#include <signal.h>
 
 #include "Request.hpp"
 #include "ConfigRoute.hpp"
