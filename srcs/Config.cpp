@@ -245,7 +245,7 @@ void Config::ParseStatement(TokenQueue& tokens, Node& currNode)
         return;
     }
     else{
-        PRINT_ERROR("PARSE ERROR, IN PARSE STATEMENT!!!!","Token[0]=",tokens[0].first,"Token[1]=",tokens[1].first);
+        PRINT_ERROR("PARSE ERROR, IN PARSE STATEMENT!!!!","Token[0]=",tokens[0].first);
         exit(1);
     }
 
