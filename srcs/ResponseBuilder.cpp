@@ -146,9 +146,13 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         return 200;
 
 	}
-
+    PRINTVAR(newfullPath);
     if(method == METH_DELETE){
-
+        if(newfullPath == (configRoute->getRoot() + "/")){
+            PRINT_WARNING("WARNING","Dont try to delete root plis");
+            response.setPath(server->getErrorPageFromCode(405));
+            return 405;
+        }
         // if path is root on delete, send which response?
         deleteResource(newfullPath);
     }
