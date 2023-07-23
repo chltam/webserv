@@ -310,7 +310,7 @@ void Config::Executioner(Node &head)
     }
     //adding a default Server if no servers have been setup at all
     PRINT_WARNING("WARNING, No server has any ports setup, adding default 0.0.0.0:8080 to first server block");
-    m_servers[0]->AddServerPort("0.0.0.0","8080");
+    m_servers[0]->AddServerPort("127.0.0.1","8080");
 
 }
 
