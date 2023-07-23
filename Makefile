@@ -1,7 +1,7 @@
 NAME = webserv
 
 CXX := c++
-CXXFLAGS =  -g #-std=c++98 -Wall -Wextra -Werror
+CXXFLAGS =  -g -std=c++98 -Wall -Wextra -Werror
 
 SRCS = main.cpp Server.cpp ResponseBuilder.cpp \
        MetaVars.cpp Socket.cpp Config.cpp ConfigServer.cpp \

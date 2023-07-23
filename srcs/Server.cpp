@@ -48,19 +48,16 @@ void	Server::accept_connection()
 
 	while (true)
 	{
-        // std::cout << "========= WAITING ========" << std::endl;
 		int	result = poll(m_pfdVec.data(), m_pfdVec.size(), 100);
 
 		if (result == -1){
 			perror("poll failed");
 			exit(EXIT_FAILURE);
 		}
-		// std::cout << "result = " << result << std::endl;
 		for (size_t n = 0; n < m_pfdVec.size(); n++)
 		{
 			if ((m_pfdVec[n].revents & POLLIN) && !isClientSock(m_pfdVec[n].fd))
 			{
-				std::cout << "connection established" << std::endl;
 				Socket	client_sock(m_pfdVec[n].fd, getServerSockFromVec(m_pfdVec[n].fd).getIp(), getServerSockFromVec(m_pfdVec[n].fd).getPort());
 				m_clientSockVec.push_back(client_sock);
 				pollfd	cfd = {client_sock.get_sock_fd(), POLLIN | POLLOUT , 0};
@@ -69,7 +66,6 @@ void	Server::accept_connection()
 
 			else if ((m_pfdVec[n].revents & POLLIN) && isClientSock(m_pfdVec[n].fd))
 			{
-				std::cout << "reading a request" << std::endl;
 				//read the socket
 				Socket&	readSock = getClientSockFromVec(m_pfdVec[n].fd);
 				readSock.update_last_active_time();
@@ -83,7 +79,6 @@ void	Server::accept_connection()
 
 			else if ((m_pfdVec[n].revents & POLLOUT) && (getClientSockFromVec(m_pfdVec[n].fd).is_idle(200) || getClientSockFromVec(m_pfdVec[n].fd).get_error() == true))
 			{
-				std::cout << "ready to handle request" << std::endl;
 
 				Socket&	writeSock = getClientSockFromVec(m_pfdVec[n].fd);
 				handle(writeSock);
@@ -95,7 +90,6 @@ void	Server::accept_connection()
 
 void Server::handle( Socket& client_sock )
 {
-	// std::cout << client_sock.get_request_str() << std::endl;
 	Request	request(client_sock.get_request_str());
 	PRINTVAR(client_sock.get_request_str());
 	// request.printf_all();

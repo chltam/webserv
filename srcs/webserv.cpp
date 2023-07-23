@@ -10,7 +10,7 @@ int ValidatePath(const std::string &path)
 
     int ret = stat(path.c_str(),&status);
     if(ret == -1){
-        std::cout << strerror(errno) << std::endl;
+        PRINT_WARNING(strerror(errno));
         return ret;
     }
     return (status.st_mode & S_IFMT);
@@ -22,7 +22,7 @@ int getFileSize(const std::string &path)
 
     int ret = stat(path.c_str(),&status);
     if(ret == -1){
-        std::cout << strerror(errno) << std::endl;
+        PRINT_WARNING(strerror(errno));
         return ret;
     }
     PRINT_LOG("Successfully getting file size");
@@ -131,12 +131,8 @@ std::string getStringFromStatus(int status)
 
 std::string getTypeFromExtension( std::string path,const std::map<std::string, std::string>& types) {
 
-    // std::cout << "PATH: " << path << std::endl;
 
     std::string ext = path.substr(path.rfind('.') + 1);
-
-    std::cout << "EXT: " << ext << std::endl;
-
 
     std::map<std::string, std::string>::const_iterator it = types.find(ext);
     if (it == types.end())

@@ -177,7 +177,6 @@ void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string 
     string filename;
     stringstream lenStr;
 
-    cout << "POST received" << endl;
 	ofstream	file;
 	if (isFileUploading(contentType))
 	{
@@ -196,7 +195,7 @@ void ResponseBuilder::uploadResource(const std::string& newfullPath,std::string 
         file << resourceData;
 
     } else {
-        cout << "Unable to open file\n";
+        PRINT_WARNING("Unable to open file",newfullPath);
         // _status = "403 Not Allowed";
     }
     file.close();

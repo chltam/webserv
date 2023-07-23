@@ -22,8 +22,7 @@ Request::Request(std::string requestStr)
 		return ;
 	}
 	parseInfo(requestStr);
-	std::cout << *this << std::endl;
-
+	PRINT_LOG(*this);
 }
 
 // Request::Request(std::string request_str)

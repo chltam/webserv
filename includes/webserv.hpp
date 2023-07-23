@@ -17,7 +17,7 @@
 #define LOG_ERRORS_ONLY 1
 
 #ifndef LOG_LEVEL
-#define LOG_LEVEL LOG_EVERYTHING
+#define LOG_LEVEL LOG_WARNINGS_ERRORS
 #endif
 
 #define UPLOAD_DIR "upload/"
@@ -27,49 +27,52 @@
 #define COL_GREY "\x1B[90m"
 #define COL_DEFAULT "\033[0m"
 
-#define PRINTVAR(x) std::cerr << #x <<": [" << x << "]"  << std::endl
-#define PRINT(x) std::cerr << x  << std::endl
-#define PRINTVAR_LOG(x) std::cerr<< COL_GREY << #x <<": [" << x << "]" << COL_DEFAULT  << std::endl
+// #define PRINTVAR(x) std::cerr << #x <<": [" << x << "]"  << std::endl
+// #define PRINT(x) std::cerr << x  << std::endl
+// #define PRINTVAR_LOG(x) std::cerr<< COL_GREY << #x <<": [" << x << "]" << COL_DEFAULT  << std::endl
 
-// #define PRINT_LOG(...)
-// #define PRINT_WARNING(...)
-// #define PRINT_ERROR(...)
+#define PRINTVAR(x)
+#define PRINT(x)
+#define PRINTVAR_LOG(x)
+#define PRINT_LOG(...)
+#define PRINT_WARNING(...)
+#define PRINT_ERROR(...)
 
-#define PRINT_LOG(...) do { \
-    if(LOG_LEVEL >= LOG_EVERYTHING){ \
-    std::cerr << COL_GREY ; \
-    printvar_internal(__VA_ARGS__); \
-    std::cerr << COL_DEFAULT << std::endl; \
-    } \
-} while (false)
+// #define PRINT_LOG(...) do { \
+//     if(LOG_LEVEL >= LOG_EVERYTHING){ \
+//     std::cerr << COL_GREY ; \
+//     printvar_internal(__VA_ARGS__); \
+//     std::cerr << COL_DEFAULT << std::endl; \
+//     } \
+// } while (false)
 
 
-#define PRINT_WARNING(...) do { \
-    if(LOG_LEVEL >= LOG_WARNINGS_ERRORS){ \
-    std::cerr << COL_YELLOW ; \
-    printvar_internal(__VA_ARGS__); \
-    std::cerr << COL_DEFAULT << std::endl; \
-    } \
-} while (false)
+// #define PRINT_WARNING(...) do { \
+//     if(LOG_LEVEL >= LOG_WARNINGS_ERRORS){ \
+//     std::cerr << COL_YELLOW ; \
+//     printvar_internal(__VA_ARGS__); \
+//     std::cerr << COL_DEFAULT << std::endl; \
+//     } \
+// } while (false)
 
-#define PRINT_ERROR(...) do { \
-    if(LOG_LEVEL >= LOG_ERRORS_ONLY){ \
-    std::cerr << COL_RED ; \
-    printvar_internal(__VA_ARGS__); \
-    std::cerr << COL_DEFAULT << std::endl; \
-    } \
-} while (false)
+// #define PRINT_ERROR(...) do { \
+//     if(LOG_LEVEL >= LOG_ERRORS_ONLY){ \
+//     std::cerr << COL_RED ; \
+//     printvar_internal(__VA_ARGS__); \
+//     std::cerr << COL_DEFAULT << std::endl; \
+//     } \
+// } while (false)
 
-template<typename T>
-void printvar_internal(const T& t) {
-    std::cerr << t;
-}
+// template<typename T>
+// void printvar_internal(const T& t) {
+//     std::cerr << t;
+// }
 
-template<typename T, typename... Args>
-void printvar_internal(const T& t, Args... args) {
-    std::cerr << t << " ";
-    printvar_internal(args...);
-}
+// template<typename T, typename... Args>
+// void printvar_internal(const T& t, Args... args) {
+//     std::cerr << t << " ";
+//     printvar_internal(args...);
+// }
 
 
 enum AllowedMethods{

@@ -237,5 +237,5 @@ void	Socket::checkHeaderError(const Config& metaConfig)
 
 void	Socket::printHeader()
 {
-	std::cout << _header_str << std::endl;
+	PRINT_LOG(_header_str);
 }

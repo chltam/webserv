@@ -241,7 +241,7 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 void	MetaVars::print_envp()
 {
 	for (int n = 0; _envp[n]; n++){
-		std::cout << _envp[n] << std::endl;
+		PRINT(_envp[n]);
 	}
 }
 
