@@ -153,6 +153,50 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 		execve(arg[0], arg, get_envp());
 			PRINT("HERERERE\n");
 	}
+	// else
+	// {
+	// 	char	buffer[100];
+	// 	int status;
+	// 	// pollfd	pfd[2];
+	// 	// pfd[0] = {fd[0], POLLIN, 0};
+	// 	// pfd[1] = {fd[1], POLLOUT, 0};
+
+	// 	pollfd	sfd = {fd[0], POLLIN, 0};
+				
+
+	// 	write(fd[1], request_body.c_str(), request_body.length());
+	// 	close(fd[1]);
+	// 	while (true)
+	// 	{
+	// 		// PRINT_ERROR("HERE1");
+	// 		int result = poll(&sfd, 1, 1000);
+	// 		if (result <= 0)
+	// 			break ;
+	// 		PRINTVAR(result);
+	// 		PRINTVAR(sfd.revents);
+
+	// 		// if (pfd[1].revents & POLLOUT)
+	// 		// {
+	// 		// 	PRINT_ERROR("HERE3");
+	// 		// 	write(fd[1], request_body.c_str(), request_body.length());
+	// 		// 	close(fd[1]);
+	// 		// }
+	// 		if (sfd.revents & (POLLIN | POLLHUP) )
+	// 		{
+	// 			PRINT_ERROR("HERE3");
+
+	// 			int bread = read(fd[0], buffer, 100);
+	// 			PRINTVAR(bread);
+	// 			if (bread <= 0)
+	// 				break ;
+	// 			else
+	// 			{
+	// 				buffer[bread] = '\0';
+	// 				ret += buffer;
+	// 			}
+	// 			PRINT("test");
+	// 		}
+	// 	}
 	else
 	{
 		char	buffer[100];
@@ -161,9 +205,6 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 	
 		write(fd[1], request_body.c_str(), request_body.length());
 		close(fd[1]);
-
-		
-
 		waitpid(pid, &status,0);
 		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
 			_cgi_fail = true;	
@@ -178,7 +219,6 @@ std::string	MetaVars::cgi_caller(std::string request_body)
 
 		close(fd[0]);
 	}
-
 	PRINTVAR(ret);
 	int start = ret.find("<!DOCTYPE html>");
 	if (start == std::string::npos)

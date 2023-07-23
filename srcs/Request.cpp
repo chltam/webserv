@@ -4,63 +4,84 @@
 
 using namespace std;
 
-Request::Request(std::string request_str)
+Request::Request(std::string requestStr)
 {
-    if ( request_str.empty() ) {
+    _badRequest = false;
+    if ( requestStr.empty() ) {
         _timeout = true;
         return ;
     }
-    else
-        _timeout = false;
+    _timeout = false;
 
-	PRINTVAR(request_str);
-
-    std::istringstream   str_iss(request_str);
-    vector<string>    lines;
-    string getline_buffer;
-
-    while (getline(str_iss, getline_buffer, '\n'))
-        lines.push_back(getline_buffer);
-
-    vector<string>::iterator it = lines.begin();
-    istringstream   line_iss(*it);
-    vector<string>  tokens;
-
-    // handle first request line
-    while (getline(line_iss, getline_buffer, ' '))
-        tokens.push_back(getline_buffer);
-    _request_pair.push_back(make_pair("request type", tokens[0]));
-    set_path_query(tokens[1]);//split the query string after '?'
-    _request_pair.push_back(make_pair("protocol", tokens[2]));
-    tokens.clear();
-    it++;
-
-    // handle remaining lines
-    while (it != lines.end())
-    {
-        // after the header, save the body
-        if ( *it == "\r" ) {
-
-            ++it;  // skip the empty line
-            while (it != lines.end()) {
-                _body += *it + '\n';
-                ++it;
-            }
-            break; // we are done
-        }
-        // save the header info
-        size_t split_position = it->find(": ");
-        if (split_position != string::npos) {
-            string key = it->substr(0, split_position);
-            string value = it->substr(split_position + 2); // +2 to skip over ': '
-            _request_pair.push_back(make_pair(key, value));
-        }
-        tokens.clear();
-        it++;
-    }
-	set_name_port(); //read the 'Host' pair and split into 'server_name' and 'server_port'
+	if (extractBody(requestStr) == -1){
+		_badRequest = true;
+		return ;
+	}
+	if (validHttpRequest(requestStr) == -1){
+		_badRequest = true;
+		return ;
+	}
+	parseInfo(requestStr);
 
 }
+
+// Request::Request(std::string request_str)
+// {
+//     if ( request_str.empty() ) {
+//         _timeout = true;
+//         return ;
+//     }
+//     else
+//         _timeout = false;
+
+// 	PRINTVAR(request_str);
+
+//     std::istringstream   str_iss(request_str);
+//     vector<string>    lines;
+//     string getline_buffer;
+
+//     while (getline(str_iss, getline_buffer, '\n'))
+//         lines.push_back(getline_buffer);
+
+//     vector<string>::iterator it = lines.begin();
+//     istringstream   line_iss(*it);
+//     vector<string>  tokens;
+
+//     // handle first request line
+//     while (getline(line_iss, getline_buffer, ' '))
+//         tokens.push_back(getline_buffer);
+//     _request_pair.push_back(make_pair("request type", tokens[0]));
+//     set_path_query(tokens[1]);//split the query string after '?'
+//     _request_pair.push_back(make_pair("protocol", tokens[2]));
+//     tokens.clear();
+//     it++;
+
+//     // handle remaining lines
+//     while (it != lines.end())
+//     {
+//         // after the header, save the body
+//         if ( *it == "\r" ) {
+
+//             ++it;  // skip the empty line
+//             while (it != lines.end()) {
+//                 _body += *it + '\n';
+//                 ++it;
+//             }
+//             break; // we are done
+//         }
+//         // save the header info
+//         size_t split_position = it->find(": ");
+//         if (split_position != string::npos) {
+//             string key = it->substr(0, split_position);
+//             string value = it->substr(split_position + 2); // +2 to skip over ': '
+//             _request_pair.push_back(make_pair(key, value));
+//         }
+//         tokens.clear();
+//         it++;
+//     }
+// 	set_name_port(); //read the 'Host' pair and split into 'server_name' and 'server_port'
+
+// }
 
 Request::~Request(){}
 
@@ -115,31 +136,93 @@ void	Request::set_name_port()
 		}
 	}
 
-	// vector<pair<string, string> >::iterator	it = _request_pair.begin();
-
-	// while (it != _request_pair.end())
-	// {
-	// 	if (it->first == "Host")
-	// 	{
-	// 		int split = it->second.find(':');
-	// 		if (split != string::npos)
-	// 		{
-	// 			_request_pair.push_back(make_pair("server_name", it->second.substr(0, split)));
-	// 			_request_pair.push_back(make_pair("server_port", it->second.substr(split + 1)));
-	// 		}
-	// 		else
-	// 		{
-	// 			_request_pair.push_back(make_pair("server_name", it->second));
-	// 			_request_pair.push_back(make_pair("server_port", "80"));
-	// 		}
-	// 	}
-	// 	it++;
-	// }
 }
 
-bool Request::getTimeout()
+int	Request::extractBody(std::string& requestStr)
+{
+	size_t	pos;
+
+	pos = requestStr.find("\r\n\r\n");
+	if (pos == std::string::npos)
+		return (-1);
+	_body = requestStr.substr(pos + 4) + "\n";
+	return (0);
+}
+
+int	Request::validHttpRequest(std::string requestStr)
+{
+	std::istringstream	iss(requestStr);
+	std::string	method, path, version;
+
+	if ( !( iss >> method >> path >> version) )
+		return (-1);
+	
+	if (method != "GET" && method != "POST" && method != "DELETE")
+		return (-1);
+    _request_pair.push_back(make_pair("request type", method));
+
+	if (path.empty())
+		return (-1);
+	set_path_query(path);
+
+	if (version.substr(0, 5) != "HTTP/")
+		return (-1);
+    _request_pair.push_back(make_pair("protocol", version));
+
+	return (0);
+}
+
+std::string	Request::extractInfoField(std::string& requestStr)
+{
+	size_t	pos;
+	size_t	endpos;
+
+	pos = requestStr.find("\r\n");
+	if (pos == std::string::npos)
+		return (std::string());
+	pos += 2;
+	endpos = requestStr.find("\r\n\r\n", pos);
+	if (endpos == std::string::npos)
+		return (std::string());
+
+	return requestStr.substr(pos, endpos);
+}
+
+
+void	Request::parseInfo(std::string& requestStr)
+{
+	std::string			infoStr;
+	std::string			buffer;
+
+	infoStr = extractInfoField(requestStr);
+	if (infoStr.empty())
+		return ;
+	std::istringstream	info_iss(infoStr);
+	
+	while (getline(info_iss, buffer, '\n'))
+	{
+		size_t	pos = buffer.find(":");
+		if (pos == std::string::npos)
+			continue;
+		std::string	key = buffer.substr(0, pos);
+		std::string	value = buffer.substr(pos + 2);
+		size_t	rnpos = value.find("\r");
+		if (rnpos != std::string::npos)
+			value = value.erase(rnpos);
+        _request_pair.push_back(make_pair(key, value));
+
+	}
+	set_name_port();
+}
+
+
+bool	Request::getTimeout()
 {
     return _timeout;
+}
+
+bool	Request::get_badRequest(){
+	return _badRequest;
 }
 
 std::ostream& operator<<(std::ostream& os,const Request& request)

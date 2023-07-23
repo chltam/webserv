@@ -11,7 +11,7 @@ Response* ResponseBuilder::createNewResponse(Request &request, const Config& con
 {
     Response* response = new Response();
 
-    if (request.getTimeout())
+    if (request.getTimeout() || request.get_badRequest())
     {
         response->setStatus(setResponseStatus(request,config,*response,mvars,socket));
         response->insertHeaderField("Content-Type", getTypeFromExtension(response->getPath(), config.getTypes()));
@@ -29,16 +29,18 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
 {
     const ConfigServer* server = config.getConfigServerFromRequest( request.getHeaderValueFromKey("Host") );
 
-    if (request.getTimeout() || server == NULL)
+    if (request.getTimeout())
     {
         response.insertHeaderField("Server", "localhost"); // NEEDS TO BE CHANGED ACCORDING TO PORT ETC.
         response.insertHeaderField("Content-Type", "text/html");
-        if(server == NULL){
-            response.setPath(config.m_errorPages.find(408)->second);
-        }
-        else
-            response.setPath(server->getErrorPageFromCode(408));
+        response.setPath(config.m_errorPages.find(408)->second);
         return 408;
+    }
+
+    if (request.get_badRequest())
+    {
+        response.setPath(config.m_errorPages.find(400)->second);
+        return 400;
     }
 
     string path = request.getHeaderValueFromKey( "path" );
@@ -115,11 +117,6 @@ int ResponseBuilder::setResponseStatus( Request& request, const Config& config, 
         response.setPath(server->getErrorPageFromCode(413));
         return 413;
     }
-
-	if (socket.get_permsIssue())
-	{
-
-	}
 
 	/*if cgi*/
 	if (mvars.check_extension(configRoute->getCgi(), newfullPath) == true)

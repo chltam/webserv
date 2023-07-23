@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <vector>
 #include <map>
+#include <poll.h>
 
 #include "Request.hpp"
 #include "ConfigRoute.hpp"
